@@ -60,7 +60,7 @@ OBJECTS= \
 
 genlib: $(OBJECTS)
 #Creer ou mettre a jour la programmatheque 
-	r.ar -arch $(EC_ARCH) rcv $(MYLIB) $(OBJECTS)
+	ar rcv $(MYLIB) $(OBJECTS)
 
 tarball:  *.ftn90 *.cdk90 *.h  Makefile
 	tar cfzv /data/armnraid1/www/ssm/sources/ez_interpv_$(TARRLS)_all.tgz *.ftn90 *.cdk90 *.h Makefile 
