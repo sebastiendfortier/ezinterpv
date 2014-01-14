@@ -39,7 +39,7 @@ def _init(b):
 
     print "\n\nProducing SSM package for compiler, ", compiler, "\n"
 
-    environ["BH_SVN_REVISION"]   = "2"
+    environ["BH_SVN_REVISION"]   = "4"
     environ["SVNDIR"] = "%(BH_HERE_DIR)s/ezinterpv-svn%(BH_SVN_REVISION)s" % environ
     environ["OTHER_UTILS"] = "%(BH_HERE_DIR)s/other_utils_%(BASE_ARCH)s" % environ
     environ["BH_PULL_SOURCE"] = "%(SVNDIR)s.tgz" % environ
