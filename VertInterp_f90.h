@@ -32,7 +32,7 @@
 
 interface
   integer function N_ViqkdefIfc_X(n_VertGridIndex, n_numVLevelsIn, n_gridTypeIn,&
-                                r_vLevelIn, r_pTopAvgIn, r_pRefIn, r_rCoefIn)
+                                r_vLevelIn, r_pTopAvgIn, r_pRefIn, r_rCoefIn, r_rCoefIn_2)
     implicit none
     integer, intent(out) :: n_VertGridIndex
     integer, intent(in)::n_numVLevelsIn
@@ -43,6 +43,7 @@ interface
     real, intent(in)::r_pTopAvgIn
     real, intent(in)::r_pRefIn
     real, intent(in)::r_rCoefIn
+    real, intent(in)::r_rCoefIn_2
   end function N_ViqkdefIfc_X
 
 
