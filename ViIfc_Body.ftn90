@@ -269,7 +269,8 @@ integer function N_ViqkdefIfc_X &
 #define ret_value N_ViqkdefIfc_X
 #endif
                                (n_VertGridIndex, n_numVLevelsIn, n_gridTypeIn, &
-                                r_vLevelIn, r_pTopAvgIn, r_pRefIn, r_rCoefIn)
+                                r_vLevelIn, r_pTopAvgIn, r_pRefIn, r_rCoefIn, &
+                                r_rCoef_2In)
 !
 !AUTHOR
 !     J.W. Blezius Dec 2002 
@@ -299,6 +300,7 @@ integer function N_ViqkdefIfc_X &
     real, intent(in)::r_pTopAvgIn       ! average pressure (mb) at model top
     real, intent(in)::r_pRefIn          ! reference pressure (mb)
     real, intent(in)::r_rCoefIn         ! known as 'expansion co-efficient'
+    real, intent(in)::r_rCoef_2In       ! for staggered co-ordinates
 !
 !!
     type(T_VerticalGrid), target :: o_Grid
@@ -309,7 +311,8 @@ integer function N_ViqkdefIfc_X &
 
                                         ! initialize the grid
     ret_value = N_Viqkdef(o_GridPtr, n_numVLevelsIn, n_gridTypeIn, &
-                          r_vLevelIn, r_pTopAvgIn, r_pRefIn, r_rCoefIn)
+                          r_vLevelIn, r_pTopAvgIn, r_pRefIn, r_rCoefIn, &
+                          r_rCoef_2In)
 
     if(ret_value == 0) then
                                         ! get the grid index
