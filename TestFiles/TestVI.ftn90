@@ -1592,7 +1592,8 @@ subroutine m_testOneCombo(s_title, n_gridType, s_interpType, s_extrapType, &
   ! CREATE AND SET THE INITIAL AND TARGET GRIDS
   !
   error=N_ViqkdefIfc_X(n_gridIndexInitial, n_PTS_INIT, n_gridType, &
-                       r_levelsInit, r_pTopInit, r_pRefInit, r_rCoefInit)
+                       r_levelsInit, r_pTopInit, r_pRefInit, &
+                       r_rCoefInit, 0.0)
   if(error /= 0)write(6,*)'ERROR initializing gridInitial:  ', error
 
   n_numExtArraysOut = 0
@@ -1607,7 +1608,7 @@ subroutine m_testOneCombo(s_title, n_gridType, s_interpType, s_extrapType, &
 
   error=N_ViqkdefIfc_X(n_gridIndexTarget, n_PTS_TARGET, n_gridType, &
                        r_levelsTarget, r_pTopTarget, r_pRefTarget, &
-                       r_rCoefTarget)
+                       r_rCoefTarget, 0.0)
   if(error /= 0)write(6,*)'ERROR initializing gridTarget:  ', error
 
 
@@ -1905,7 +1906,8 @@ subroutine m_testOneCombo_FunnyBounds(s_title, n_gridType, s_interpType, s_extra
   ! CREATE AND SET THE INITIAL AND TARGET GRIDS
   !
   error=N_ViqkdefIfc_X(n_gridIndexInitial, n_PTS_INIT, n_gridType, &
-                       r_levelsInit_Bd, r_pTopInit, r_pRefInit, r_rCoefInit)
+                       r_levelsInit_Bd, r_pTopInit, r_pRefInit, &
+                       r_rCoefInit, 0.0)
   if(error /= 0)write(6,*)'ERROR initializing gridInitial:  ', error
 
   n_numExtArraysOut = 0
@@ -1920,7 +1922,7 @@ subroutine m_testOneCombo_FunnyBounds(s_title, n_gridType, s_interpType, s_extra
 
   error=N_ViqkdefIfc_X(n_gridIndexTarget, n_PTS_TARGET, n_gridType, &
                        r_levelsTarget_Bd, r_pTopTarget, r_pRefTarget, &
-                       r_rCoefTarget)
+                       r_rCoefTarget, 0.0)
   if(error /= 0)write(6,*)'ERROR initializing gridTarget:  ', error
 
 

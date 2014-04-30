@@ -20,22 +20,25 @@ TEMPLIB = ../$(EC_ARCH)/lib/libezinterpv.a
 
 default: test
 
+# Explicit path, /users/dor/arma/jbl/home1/SVN_checkouts/ez_interpv/TestFiles, is
+# given here so as to over-ride the (old) include files that are still hanging
+# around in armnlib:
 .ftn90.o:
-	r.compile -includes ../$(EC_ARCH)/include -arch $(ARCH) -abi $(ABI) $(OPTIMIZ) -opt "=$(FFLAGS)" \
+	s.compile -includes /users/dor/arma/jbl/home1/SVN_checkouts/ez_interpv/TestFiles /users/dor/arma/jbl/home1/SVN_checkouts/ez_interpv/TestFiles ../$(EC_ARCH)/include -abi $(ABI) $(OPTIMIZ) -opt "=$(FFLAGS)" \
 	-src $<
 
 .cdk90.o:
-	r.compile -arch $(ARCH) -abi $(ABI) $(OPTIMIZ) -opt "=$(FFLAGS)" \
+	s.compile -abi $(ABI) $(OPTIMIZ) -opt "=$(FFLAGS)" \
 	-src $<
 
 .ftn.o:
-	r.compile -arch $(ARCH) -abi $(ABI) $(OPTIMIZ) -opt "=$(FFLAGS)" -src $<
+	s.compile -abi $(ABI) $(OPTIMIZ) -opt "=$(FFLAGS)" -src $<
 
 .c.o:
-	r.compile -arch $(ARCH) -abi $(ABI) $(OPTIMIZ) -opt "=$(CFLAGS)" -src $<
+	s.compile -abi $(ABI) $(OPTIMIZ) -opt "=$(CFLAGS)" -src $<
 
 #.f.o:
-#	r.compile -arch $(ARCH) -abi $(ABI) $(OPTIMIZ) -opt "=$(FFLAGS)" -src $<
+#	s.compile -abi $(ABI) $(OPTIMIZ) -opt "=$(FFLAGS)" -src $<
 
 TEST_OBJECTS=\
 	VertInterpConstants.o  VerticalGrid.o  VerticalInterpolation.o ViIfc.o TestVI.o
@@ -43,7 +46,7 @@ TEST_OBJECTS=\
 INTERPV_OBJECTS=\
 	Interp1D_Constants.o Extrap1D_LapseRate.o Extrap1D_Fixed.o Extrap1D_Surface.o \
 	Extrap1D_SurfaceWind.o Interp1D_CubicLagrange.o Interp1D_CubicWithDerivs.o \
-	Interp1D_FindPos.o Interp1D_Linear.o Interp1D_NearestNeighbour.o
+	Interp1D_FindPos.o Interp1D_Linear.o Interp1D_NearestNeighbour.o Extrap1D_Abort.o
 
 SPEED_OBJECTS=\
 	VertInterpConstants.o  VerticalGrid.o  VerticalInterpolation.o SpeedConvertP.o
@@ -54,27 +57,33 @@ copyHlocal:
 removeH:
 	rm `cd ..; ls *.h`
 
-testWithInterpv: copyHlocal TestVI.o removeH
+copyMODlocal:
+	cp ../*.mod .
+
+removeMOD:
+	rm `cd ..; ls *.mod`
+
+testWithInterpv: copyHlocal copyMODlocal TestVI.o removeMOD removeH
 	cp ../*.o .
 	cp ../../interpv/*.o .
-	r.build -o TestVInterp_$(BASE_ARCH).Abs -obj $(INTERPV_OBJECTS) $(TEST_OBJECTS) -arch $(ARCH) \
-	-abi$(ABI) -librmn $(LIBRMN)
+	s.compile -o TestVInterp_$(BASE_ARCH).Abs -obj $(INTERPV_OBJECTS) $(TEST_OBJECTS) \
+	-abi$(ABI) -libappl descrip -librmn $(LIBRMN)
 
 test:	copyHlocal TestVI.o removeH
 	cp ../*.o .
-	r.build -o TestVInterp_$(BASE_ARCH).Abs -obj $(TEST_OBJECTS) -arch $(ARCH) \
+	s.compile -o TestVInterp_$(BASE_ARCH).Abs -obj $(TEST_OBJECTS) \
 	-abi$(ABI) -librmn $(LIBRMN)
 
 testlib: TestVI.o
-	r.build -includes ../$(EC_ARCH)/include -libpath . ../$(EC_ARCH)/lib -libappl ezinterpv descrip -o TestVInterp_$(BASE_ARCH).Abs -obj TestVI.o -arch $(ARCH) \
-	-abi$(ABI) -librmn $(LIBRMN)
+	(. s.ssmuse.dot /ssm/net/rpn/libs/4.0; s.compile -includes ../$(EC_ARCH)/include -libpath . ../$(EC_ARCH)/lib -libappl ezinterpv descrip -o TestVInterp_$(BASE_ARCH).Abs -obj TestVI.o \
+	-abi$(ABI) -librmn $(LIBRMN))
 
 copielocale:
 	cp ../*.o . 
 	cp ../*.mod .
 
 SpeedConvert: copielocale SpeedConvertP.o
-	r.build -o SpeedConvertP_$(BASE_ARCH).Abs -obj $(SPEED_OBJECTS) -arch $(ARCH) \
+	s.compile -o SpeedConvertP_$(BASE_ARCH).Abs -obj $(SPEED_OBJECTS) \
 	-abi$(ABI) -librmn $(LIBRMN)
 
 clean:

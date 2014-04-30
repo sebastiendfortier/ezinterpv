@@ -41,8 +41,9 @@ use VerticalInterpolationConstants
 !        because it is not necessarily on the heap.
 !
 !!
-  use vGrid_Descriptors, only: vgrid_descriptor, VGD_OK, &
-                               vgd_new, vgd_get, vgd_levels
+!!$  use vGrid_Descriptors, only: vgrid_descriptor, VGD_OK, &
+!!$                               vgd_new, vgd_get, vgd_levels
+  use vGrid_Descriptors
   implicit none
   public
   save
