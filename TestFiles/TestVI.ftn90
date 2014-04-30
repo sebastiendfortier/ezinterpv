@@ -1469,6 +1469,52 @@ end do
 
 
 
+
+  !
+  ! TWENTY-FIRST TEST
+  ! TWENTY-FIRST TEST
+  !
+  s_title = "TEST 21:  generic; linear; abort; ascending"
+  write(6,*)" "
+  write(6,*)" "
+  write(6,*)s_title
+  write(6,*)"The correct result is an abortion."
+  write(6,*)"UNCOMMENT THE CODE to perform the test."
+  write(6,*)" "
+!!$  write(6,*)"BEGINNING ", s_title
+!!$  write(6,*)"The correct result is an abortion..."
+!!$
+!!$  n_gridType = N_GRID_TYPE_GENERIC
+!!$
+!!$  r_levelsInit   = r_LEVELS_INCREASING
+!!$  r_stateIn      = r_stateIncreasing
+!!$  r_derivIn      = r_derivIncreasing
+!!$  r_levelsTarget = r_LEVELS_TARGET_STD
+!!$
+!!$  s_interpType = 'linear'
+!!$  s_extrapType = 'abort'
+!!$
+!!$  r_stateAnswer(1,1,:) =(/0.8797802, 0.4842152, 0.3319850, 0.4000000,-0.5000000/)
+!!$  r_stateAnswer(2,1,:) =(/2.5639911,-0.6168757,-0.4014246, 0.4000000,-0.5000000/)
+!!$
+!!$  r_derivAnswer(1,1,:) =(/0.0000000, 0.0000000, 0.0000000, 0.0000000, 0.0000000/)
+!!$  r_derivAnswer(2,1,:) =(/0.0000000, 0.0000000, 0.0000000, 0.0000000, 0.0000000/)
+!!$
+!!$  call m_testOneCombo(s_title, n_gridType, s_interpType, s_extrapType, &
+!!$
+!!$                      r_levelsInit,   r_stateIn , r_derivIn, &
+!!$                      r_levelsTarget, r_stateAnswer, r_derivAnswer, &
+!!$
+!!$                      r_EXTRAP_GUIDE_DOWN, r_EXTRAP_GUIDE_UP, &
+!!$
+!!$                      r_PTOP_INIT, r_PREF_INIT, r_RCOEFF_INIT, &
+!!$                      r_PTOP_TARGET, r_PREF_TARGET, r_RCOEFF_TARGET, &
+!!$                      r_PSURF, r_PTOP &
+!!$                     )
+
+
+
+
   ! Report the overall test status
   if(l_pass) then
     write(6,*)'*  T E S T   P A S S E D  *'

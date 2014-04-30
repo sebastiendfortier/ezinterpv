@@ -87,7 +87,8 @@
                         n_EXTRAP_LAPSE_RATE = 102, &
                         n_SURFACE_EXTRAP    = 103, &
                         n_SURFACEWIND_EXTRAP= 104, &
-                        n_EXTRAP_FIXED      = 105
+                        n_EXTRAP_FIXED      = 105, &
+                        n_EXTRAP_ABORT      = 106
   integer :: n_extrapType=n_CLAMPED_EXTRAP   ! the extrapolation algorithm to use
 
 
@@ -793,6 +794,22 @@ contains
                                 r_ExtArraysIn, r_ExtArraysOut &
                                )
 
+    case(n_EXTRAP_ABORT)
+      call Extrap1D_Abort_X(n_ni*n_nj, o_vGridSource_p%N_numVLevels, &
+                                o_vGridDestn_p%N_numVLevels, &
+                                n_ni*n_nj, n_ni*n_nj, &
+
+                                r_lnPSource_a, r_stateIn, r_derivIn_local, &
+                                n_interpIndex_a, r_lnPDestn_a, r_stateOut, &
+                                                              r_derivOut_local, &
+
+                                .true., .true., &
+                                r_extrapGuideDown_local, r_extrapGuideUp_local, &
+
+                                m_slFluxGradient, 0, 0, &
+                                r_ExtArraysIn, r_ExtArraysOut &
+                               )
+
     case(n_SURFACE_EXTRAP)
       n_numExtArraysIn = 4
       n_numExtArraysOut = 0
@@ -1013,6 +1030,7 @@ contains
     character( len('clamped') )         :: s_Clamped = 'clamped'
     character( len('lapserate') )       :: s_LapseRate = 'lapserate'
     character( len('fixed') )           :: s_Fixed = 'fixed'
+    character( len('abort') )           :: s_Abort = 'abort'
     character( len('surface') )         :: s_Surface = 'surface'
     character( len('surfacewind') )     :: s_SurfaceWind = 'surfacewind'
 
@@ -1043,6 +1061,8 @@ contains
         n_extrapType = n_EXTRAP_LAPSE_RATE
       else if( index(s_value, s_Fixed) ==1 ) then
         n_extrapType = n_EXTRAP_FIXED
+      else if( index(s_value, s_Abort) ==1 ) then
+        n_extrapType = n_EXTRAP_ABORT
       else if( index(s_value, s_SurfaceWind) ==1 ) then
         n_extrapType = n_SURFACEWIND_EXTRAP
       else if( index(s_value, s_Surface) ==1 ) then
