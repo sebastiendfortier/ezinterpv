@@ -27,7 +27,8 @@ TARRLS = beta
 
 .PRECIOUS:
 
-include $(ARMNLIB)/include/makefile_suffix_rules.inc
+# It is assumed that the environment makes available makefile_suffix_rules.inc; e.g.
+#     . ssmuse-sh -p /ssm/net/rpn/libs/4.1b/environment-includes_4.3_all
 
 # Over-ride the default compile rules so as to pick up the *.h in the current directory
 .cdk90.o:
