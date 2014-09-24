@@ -471,6 +471,7 @@ end function N_ConstructNull
 
 
     this => that%Ptr
+    nullify(n_ip1_p, n_ip1_NoGround_p, r_vLevel_single_p, r_P_single_p)
     N_VertGridGetP = 0                  ! no error yet
     l_groundLevelChopped = .false.
     l_dummyLevelUsed = .false.
