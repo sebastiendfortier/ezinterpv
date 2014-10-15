@@ -1444,10 +1444,6 @@ goto 768
   r_levelsTarget(1) = r_levelsInit(1)
   r_levelsTarget(5) = 0.90
 
-write(6,*)"JWB:  in test jacket, stateIn="
-do i=1,n_NI
-  write(6,'((10f12.7))') ((r_stateIn(i,j,k),k=1,n_PTS_INIT),j=1,n_NJ)
-end do
 
 
 ! NOTE:  modifying the initial pref and rcoeff

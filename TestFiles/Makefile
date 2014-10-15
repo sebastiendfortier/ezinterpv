@@ -15,7 +15,7 @@ CFLAGS =
 OPTIMIZ = -O 0
 #OPTIMIZ = -O 0 -debug
 
-LIBRMN = rmn_013
+LIBRMN = rmn_015
 TEMPLIB = ../$(EC_ARCH)/lib/libezinterpv.a
 
 default: test
@@ -69,13 +69,13 @@ testWithInterpv: copyHlocal copyMODlocal TestVI.o removeMOD removeH
 	s.compile -o TestVInterp_$(BASE_ARCH).Abs -obj $(INTERPV_OBJECTS) $(TEST_OBJECTS) \
 	-abi$(ABI) -libappl descrip -librmn $(LIBRMN)
 
-test:	copyHlocal TestVI.o removeH
+test:	copyHlocal copyMODlocal TestVI.o removeMOD removeH
 	cp ../*.o .
 	s.compile -o TestVInterp_$(BASE_ARCH).Abs -obj $(TEST_OBJECTS) \
-	-abi$(ABI) -librmn $(LIBRMN)
+	-abi$(ABI) -libappl descrip -librmn $(LIBRMN)
 
 testlib: TestVI.o
-	(. s.ssmuse.dot /ssm/net/rpn/libs/4.0; s.compile -includes ../$(EC_ARCH)/include -libpath . ../$(EC_ARCH)/lib -libappl ezinterpv descrip -o TestVInterp_$(BASE_ARCH).Abs -obj TestVI.o \
+	(. s.ssmuse.dot /ssm/net/rpn/libs/15.0; s.compile -includes ../$(EC_ARCH)/include -libpath . ../$(EC_ARCH)/lib -libappl ezinterpv descrip -o TestVInterp_$(BASE_ARCH).Abs -obj TestVI.o \
 	-abi$(ABI) -librmn $(LIBRMN))
 
 copielocale:
