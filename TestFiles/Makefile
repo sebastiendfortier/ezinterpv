@@ -10,9 +10,9 @@ FFLAGS =
 
 CFLAGS =
 
-#OPTIMIZ = -O 2
+OPTIMIZ = -O 2
 #OPTIMIZ = -O 1
-OPTIMIZ = -O 0
+#OPTIMIZ = -O 0
 #OPTIMIZ = -O 0 -debug
 
 LIBRMN = rmn_015

@@ -364,9 +364,9 @@ contains
     real(real48), dimension(n_ni, n_nj, o_vGridSource_p%N_numVLevels), &
                   intent(in)  :: r_stateIn
     real(real48), dimension(n_ni, n_nj, o_vGridDestn_p%N_numVLevels), optional, &
-                  intent(out) :: r_derivOut
+                  target, intent(out) :: r_derivOut
     real(real48), dimension(n_ni, n_nj, o_vGridSource_p%N_numVLevels), optional,&
-                  intent(in)  :: r_derivIn
+                  target, intent(in)  :: r_derivIn
 
     ! values used for extrapolating below and above the values in o_vGridSource_p
     ! The meaning of these values depends on the selected extrapolation method.
@@ -450,18 +450,25 @@ contains
     ! are used in cases where only dummies are required, and for local
     ! manipulation of real derivative data.
     real(real48) :: r_extrapGuideDown_local, r_extrapGuideUp_local
-    real(real48), dimension(n_ni, n_nj, o_vGridSource_p%N_numVLevels) :: &
-                  r_derivIn_local
-    real(real48), dimension(n_ni, n_nj, o_vGridDestn_p%N_numVLevels) :: &
-                  r_derivOut_local, r_stateOutTmp
+    real(real48), dimension(:, :, :), pointer :: r_derivIn_local
+    real(real48), dimension(1, 1, 1), target  :: r_derivIn_dummy
+    real(real48), dimension(:, :, :), allocatable::r_derivIn_heap,r_derivOut_heap
+
+    real(real48), dimension(:, :, :), pointer :: r_derivOut_local
+    real(real48), dimension(1, 1, 1), target  :: r_derivOut_dummy
+
+    real(real48), dimension(:, :, :), allocatable :: r_stateOutTmp
 
                                         ! flux, gradient at top of surface layer
-    real(real48), dimension(n_ni, n_nj) :: r_ft, r_dtdz, r_y_dtdz, r_dzdlnp, &
-                                           r_dtdlnp, r_y_dtdlnp
+    real(real48), dimension(:, :), allocatable :: r_ft, r_dtdz, r_y_dtdz, &
+                                           r_dzdlnp, r_dtdlnp, r_y_dtdlnp
 
                                         ! direction of r_ft at the top of the
                                         ! surface layer, in radians
-    real(real48), dimension(n_ni, n_nj) :: r_angleTop
+    real(real48), dimension(:, :), allocatable :: r_angleTop
+!!
+                                        ! inverse of delta-x above and below pt
+    real(real48), dimension(:, :), allocatable :: r_inv_dx_above, r_inv_dx_below
 
                                         ! maximum wind direction change between
     real(real48) :: r_angleMax          ! surface and hBound (in radians) 
@@ -487,9 +494,22 @@ contains
                                                r_ExtArraysOut
 
     integer :: i, j
+    integer, dimension(9) :: err
 
 
     N_Visint=0                          ! initialize to 'no error'
+
+    if(present(r_derivIn)) then
+      r_derivIn_local => r_derivIn
+    else
+      r_derivIn_local => r_derivIn_dummy
+    end if
+
+    if(present(r_derivOut)) then
+      r_derivOut_local => r_derivOut
+    else
+      r_derivOut_local => r_derivOut_dummy
+    end if
 
     if(l_vLevelsIdentical) then
       ! No real interpolation needs to be done.
@@ -522,6 +542,22 @@ contains
     !
     if(     n_extrapType == n_SURFACE_EXTRAP &
        .or. n_extrapType == n_SURFACEWIND_EXTRAP) then
+
+      ! This branch needs the following variables
+      err = 0
+      allocate(      r_ft(n_ni, n_nj), stat=err(1))
+      allocate(    r_dtdz(n_ni, n_nj), stat=err(2))
+      allocate(  r_y_dtdz(n_ni, n_nj), stat=err(3))
+      allocate(  r_dzdlnp(n_ni, n_nj), stat=err(4))
+      allocate(  r_dtdlnp(n_ni, n_nj), stat=err(5))
+      allocate(r_y_dtdlnp(n_ni, n_nj), stat=err(6))
+      allocate(r_angleTop(n_ni, n_nj), stat=err(7))
+      allocate(r_inv_dx_above(n_ni, n_nj), stat=err(8))
+      allocate(r_inv_dx_below(n_ni, n_nj), stat=err(9))
+        if(any(err .ne. 0)) then
+          write(*,*)"ERROR in N_Visint - allocation error=", err
+          call qqexit(2)
+        end if
 
       ! First, check to see that the required optional parameters are present
       if(     .not. present(m_slStateValue) &
@@ -658,7 +694,6 @@ contains
       ! In this case, r_derivIn and r_derivOut are used.  Ensure that they are
       ! present.
       if( present(r_derivIn) .and. present(r_derivOut)) then
-        r_derivIn_local = r_derivIn
 
         if(     n_extrapType == n_SURFACE_EXTRAP &
            .or. n_extrapType == n_SURFACEWIND_EXTRAP) then
@@ -671,7 +706,7 @@ contains
 
                                         r_lnPSource_a,r_stateIn,r_derivIn_local,&
                                         n_interpIndex_a,r_lnPDestn_a,r_stateOut,&
-                                        r_derivOut, &
+                                        r_derivOut_local, &
 
                                         .false., .false., &
                                         r_extrapGuideDown_local, &
@@ -724,6 +759,23 @@ contains
     case (n_CUBIC_INTERP_LAGRANGE)
       if(     n_extrapType == n_SURFACE_EXTRAP &
          .or. n_extrapType == n_SURFACEWIND_EXTRAP) then
+
+        ! m_interpLagrange_OneComponent will use derivatives, but the context of
+        ! n_CUBIC_INTERP_LAGRANGE does not presume that the user has supplied
+        ! any.  Therefore, the derivative array is created now.  Furthermore,
+        ! r_stateOutTmp will be needed.  Create that too.
+        err = 0
+        allocate(r_derivIn_heap(n_ni, n_nj, o_vGridSource_p%N_numVLevels), &
+                 stat=err(1))
+        allocate(r_derivOut_heap(n_ni, n_nj, o_vGridSource_p%N_numVLevels), &
+                 stat=err(2))
+        allocate(r_stateOutTmp(n_ni, n_nj, o_vGridDestn_p%N_numVLevels), &
+                 stat=err(3))
+        if(any(err .ne. 0)) then
+          write(*,*)"ERROR in N_Visint - allocation error=", err(1),err(2),err(3)
+          call qqexit(2)
+        end if
+
         ! Interpolate the x-component, joining smoothly to the extrapolation
         call m_interpLagrange_OneComponent(r_stateOut, r_stateIn, r_dtdlnp)
 
@@ -731,6 +783,8 @@ contains
         ! Interpolate the y-component, joining smoothly to the extrapolation
           call m_interpLagrange_OneComponent(r_y_stateOut,r_y_stateIn,r_y_dtdlnp)
         end if ! n_SURFACEWIND_EXTRAP
+
+        deallocate(r_derivIn_heap, r_derivOut_heap, r_stateOutTmp)
 
       else ! neither n_SURFACE_EXTRAP nor n_SURFACEWIND_EXTRAP
         ! Perform a normal interpolation (without smoothing)
@@ -870,6 +924,19 @@ contains
       ! should never occur
     end select
 
+    if(     n_extrapType == n_SURFACE_EXTRAP &
+       .or. n_extrapType == n_SURFACEWIND_EXTRAP) then
+      deallocate(      r_ft)
+      deallocate(    r_dtdz)
+      deallocate(  r_y_dtdz)
+      deallocate(  r_dzdlnp)
+      deallocate(  r_dtdlnp)
+      deallocate(r_y_dtdlnp)
+      deallocate(r_angleTop)
+      deallocate(r_inv_dx_above)
+      deallocate(r_inv_dx_below)
+    end if
+
 
 
 
@@ -900,14 +967,15 @@ contains
 !NOTES
 !
 !!
+
       ! Interpolate
       call Interp1D_CubicLagrange_X(n_ni*n_nj, o_vGridSource_p%N_numVLevels, &
                                     o_vGridDestn_p%N_numVLevels, &
                                     n_ni*n_nj, n_ni*n_nj, &
 
-                                    r_lnPSource_a, r_stIn, r_derivIn_local, &
+                                    r_lnPSource_a, r_stIn, r_derivIn_heap, &
                                     n_interpIndex_a, r_lnPDestn_a, r_stOut, &
-                                                              r_derivOut_local, &
+                                                              r_derivOut_heap, &
 
                                     .false., .false., &
                                     r_extrapGuideDown_local, &
@@ -920,11 +988,11 @@ contains
       ! Smooth the transition to the extrapolation region
 
       ! Force derivative to be continuous at edge of surface extrapolation
-      r_derivIn_local(:,:,n_indexSurface_plus1) = r_dtdlnp
+      r_derivIn_heap(:,:,n_indexSurface_plus1) = r_dtdlnp
 
       ! Caluclate a derivative at n_indexSurface_plus2
       n_stride = n_indexSurface_plus1 - n_indexSurface
-      r_derivIn_local(:,:,n_indexSurface_plus2) = r_finiteDeriv( &
+      r_derivIn_heap(:,:,n_indexSurface_plus2) = r_finiteDeriv( &
                                         r_lnPSource_a(:,:,n_indexSurface_plus1: &
                                                           n_indexSurface_plus3: &
                                                           n_stride), &
@@ -948,13 +1016,13 @@ contains
                                    o_vGridDestn_p%N_numVLevels, &
                                    n_ni*n_nj, n_ni*n_nj, &
 
-                                   r_lnPSource_a  (:,:,n_lowIndex:n_highIndex), &
-                                   r_stIn         (:,:,n_lowIndex:n_highIndex), &
-                                   r_derivIn_local(:,:,n_lowIndex:n_highIndex), &
+                                   r_lnPSource_a(:,:,n_lowIndex:n_highIndex), &
+                                   r_stIn       (:,:,n_lowIndex:n_highIndex), &
+                                   r_derivIn_heap (:,:,n_lowIndex:n_highIndex), &
                                    n_interpIndexTmp, &
                                    r_lnPDestn_a, &
                                    r_stateOutTmp, &
-                                   r_derivOut_local, &
+                                   r_derivOut_heap, &
 
                                    .false., .false., &
                                    r_extrapGuideDown_local, &
@@ -988,6 +1056,39 @@ contains
       end if ! increasing levels
 
     end subroutine m_interpLagrange_OneComponent
+
+
+
+!!!func r_finiteDeriv - calculate a derivative
+    function r_finiteDeriv(r_x, r_y)
+!
+!AUTHOR
+!     J.W. Blezius OCT 2003 
+!
+!REVISION
+! v1_3    Blezius J.W. OCT 2003 - initial version
+!
+!OBJECT
+!        Using finite differences, calculate the derivative of r_y w.r.t. r_x at
+!        r_x(2) based on an average of the derivatives over r_x(1:2) and
+!        r_x(2:3), and this for every point in the first two dimensions.
+!
+!ARGUMENTS
+      real(real48), dimension(:,:,:), intent(in) :: r_x
+      real(real48), dimension(:,:,:), intent(in) :: r_y
+      real(real48), dimension(ubound(r_x,1), ubound(r_x,2)) :: r_finiteDeriv
+!
+!NOTES
+!
+
+      r_inv_dx_above = 1.d0 / (  r_x(:,:,3) - r_x(:,:,2))
+      r_inv_dx_below = 1.d0 / (  r_x(:,:,2) - r_x(:,:,1))
+
+      r_finiteDeriv = 0.5d0 * (  r_y(:,:,3) * (r_inv_dx_above) &
+                               + r_y(:,:,2) * (r_inv_dx_below - r_inv_dx_above)&
+                               - r_y(:,:,1) * (r_inv_dx_below) &
+                              )
+    end function r_finiteDeriv
 
   end function N_Visint
 
@@ -1076,43 +1177,6 @@ contains
     end if ! option
 
   end function N_Visetopt
-
-
-
-!!!func r_finiteDeriv - calculate a derivative
-  function r_finiteDeriv(r_x, r_y)
-!
-!AUTHOR
-!     J.W. Blezius OCT 2003 
-!
-!REVISION
-! v1_3    Blezius J.W. OCT 2003 - initial version
-!
-!OBJECT
-!        Using finite differences, calculate the derivative of r_y w.r.t. r_x at
-!        r_x(2) based on an average of the derivatives over r_x(1:2) and
-!        r_x(2:3), and this for every point in the first two dimensions.
-!
-!ARGUMENTS
-    real(real48), dimension(:,:,:), intent(in) :: r_x
-    real(real48), dimension(:,:,:), intent(in) :: r_y
-    real(real48), dimension(ubound(r_x,1), ubound(r_x,2)) :: r_finiteDeriv
-!
-!NOTES
-!
-!!
-                                        ! inverse of delta-x above and below pt
-    real(real48), dimension(ubound(r_x,1), ubound(r_x,2)) :: r_inv_dx_above, &
-                                                     r_inv_dx_below
-    
-    r_inv_dx_above = 1.d0 / (  r_x(:,:,3) - r_x(:,:,2))
-    r_inv_dx_below = 1.d0 / (  r_x(:,:,2) - r_x(:,:,1))
-
-    r_finiteDeriv = 0.5d0 * (  r_y(:,:,3) * (r_inv_dx_above) &
-                           + r_y(:,:,2) * (r_inv_dx_below - r_inv_dx_above)&
-                           - r_y(:,:,1) * (r_inv_dx_below) &
-                          )
-  end function r_finiteDeriv
 
 
 

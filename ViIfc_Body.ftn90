@@ -405,8 +405,6 @@ integer function N_VidefsetIfc_X &
                           n_LATITUDE=4
     integer :: n_error
 
-    real(real48), dimension(n_niIn, n_njIn) :: r_z0, r_ilmo, r_hBound, r_lat
-
     type(T_VerticalGridPtr) :: o_vGridDestnPtr, &
                                o_vGridSourcePtr
 
@@ -437,15 +435,13 @@ integer function N_VidefsetIfc_X &
       return
     end if
 
-    ! Create array sections for the required extension arrays
-    r_z0    = r_ExtArraysIn(:,:,n_Z0)      ! roughness length
-    r_ilmo  = r_ExtArraysIn(:,:,n_ILMO)    ! inverse of Monin-Obukhov length
-    r_hBound= r_ExtArraysIn(:,:,n_H_BOUND) ! height of the boundary layer
-    r_lat   = r_ExtArraysIn(:,:,n_LATITUDE)! latitude of the horizontal loc'n
-
     ret_value = N_Videfset(n_niIn, n_njIn, o_vGridDestnPtr, &
-                                 o_vGridSourcePtr, r_pSurf, r_pTopIn, &
-                                 r_z0, r_ilmo, r_hBound, r_lat)
+                    o_vGridSourcePtr, r_pSurf, r_pTopIn, &
+                    r_ExtArraysIn(:,:,n_Z0),&      ! roughness length
+                    r_ExtArraysIn(:,:,n_ILMO),& ! inverse of Monin-Obukhov length
+                    r_ExtArraysIn(:,:,n_H_BOUND),& ! height of the boundary layer
+                    r_ExtArraysIn(:,:,n_LATITUDE)& ! latitude of horizontal loc'n
+                          )
 #if real48==double
 end function N_VidefsetIfc_X8
 #else
@@ -565,13 +561,6 @@ integer function N_VisintIfc_X &
 !!
     external flush
 
-    real(real48), dimension(ubound(r_ExtArraysIn,1), \
-                    ubound(r_ExtArraysIn,2), \
-                    N_kDestDim)            :: r_zDest, r_y_stateOut, r_y_derivOut
-    real(real48), dimension(ubound(r_ExtArraysIn,1), \
-                    ubound(r_ExtArraysIn,2), \
-                    N_kSrcDim)             :: r_zSrc, r_y_stateIn, r_y_derivIn
-
 
                                         ! Check n_numExtArraysIn
     if(      n_numExtArraysIn /= 0 &
@@ -588,9 +577,6 @@ integer function N_VisintIfc_X &
     end if
 
     if(n_numExtArraysIn > 0) then
-      ! Create array sections required for surface extrapolation
-      r_zDest = r_ExtArraysIn(:, :, 1            : N_kDestDim)
-      r_zSrc  = r_ExtArraysIn(:, :, N_kDestDim+1 : N_kDestDim+N_kSrcDim)
 
       if(n_numExtArraysIn >  N_kDestDim + N_kSrcDim)then
                                         ! Check n_numExtArraysOut: surface wind
@@ -604,25 +590,20 @@ integer function N_VisintIfc_X &
           return
         end if
 
-        ! Create array sections required for wind extrapolation
-        r_y_stateIn = r_ExtArraysIn(:, :, N_kDestDim+  N_kSrcDim+1 : &
-                                             N_kDestDim+2*N_kSrcDim)
-        r_y_derivIn = r_ExtArraysIn(:, :, N_kDestDim+2*N_kSrcDim+1 : &
-                                             N_kDestDim+3*N_kSrcDim)
-        r_y_stateOut = r_ExtArraysOut(:, :, 1            :   N_kDestDim)
-        r_y_derivOut = r_ExtArraysOut(:, :, N_kDestDim+1 : 2*N_kDestDim)
-
         ! Interpolate with surface-wind extrapolation
-        ret_value     = N_Visint(r_stateOut, r_stateIn, &
-                                 r_derivOut, r_derivIn, &
-                                 r_extrapGuideDown, r_extrapGuideUp, &
-                                 m_slStateValue, m_slFluxGradient, &
-                                 r_zDest, r_zSrc, &
-                                 r_y_stateOut, r_y_stateIn, &
-                                 r_y_derivOut, r_y_derivIn)
-                                        ! Copy results to output argument
-        r_ExtArraysOut(:, :, 1            :   N_kDestDim) = r_y_stateOut
-        r_ExtArraysOut(:, :, N_kDestDim+1 : 2*N_kDestDim) = r_y_derivOut
+        ret_value=N_Visint(r_stateOut, r_stateIn, &
+                           r_derivOut, r_derivIn, &
+                           r_extrapGuideDown, r_extrapGuideUp, &
+                           m_slStateValue, m_slFluxGradient, &
+                           r_ExtArraysIn (:,:,1            : N_kDestDim),  & ! zDest
+                           r_ExtArraysIn (:,:,N_kDestDim+1 : N_kDestDim+N_kSrcDim),& ! zSrc
+                           r_ExtArraysOut(:,:,1            : N_kDestDim),  & ! y_stateOut
+                           r_ExtArraysIn (:,:,N_kDestDim+  N_kSrcDim+1 :   &
+                                              N_kDestDim+2*N_kSrcDim),     & ! y_stateIn
+                           r_ExtArraysOut(:,:,N_kDestDim+1 : 2*N_kDestDim),& ! y_derivOut
+                           r_ExtArraysIn (:,:,N_kDestDim+2*N_kSrcDim+1 :   &
+                                              N_kDestDim+3*N_kSrcDim)      & ! y_derivIn
+                          )
       else
                                         ! Check n_numExtArraysOut: surface
         if(n_numExtArraysOut /= 0) then
@@ -639,7 +620,9 @@ integer function N_VisintIfc_X &
                                  r_derivOut, r_derivIn, &
                                  r_extrapGuideDown, r_extrapGuideUp, &
                                  m_slStateValue, m_slFluxGradient, &
-                                 r_zDest, r_zSrc)
+                                 r_ExtArraysIn(:, :, 1            : N_kDestDim), & ! r_zDest
+                                 r_ExtArraysIn(:, :, N_kDestDim+1 : N_kDestDim+N_kSrcDim) & ! r_zSrc
+                                )
       end if
     else
                                         ! Check n_numExtArraysOut: non-extended

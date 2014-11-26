@@ -98,11 +98,11 @@ clean:
 
 help:
 	@echo "Before building, select the revision of the compiler and vgrid; e.g.:"
-	@echo "    . ssmuse-sh -d hpcs/13b/03/base
-	@echo "    . s.ssmuse.dot pgi9xx rmnlib-dev"
-	@echo "    . s.ssmuse.dot CMDN/vgrid/3.2.0"
+	@echo "    . ssmuse-sh -d hpcs/201402/01/base"
+	@echo "    . ssmuse-sh -d hpcs/201402/01/intel13sp1u2"
+	@echo "    . s.ssmuse.dot /ssm/net/cmdn/vgrid/5.0.3/${COMP_ARCH}"
 	@echo "  or"
-	@echo "    . ssmuse-sh -d hpcs/13b/03/base
-	@echo "    . s.ssmuse.dot Xlf13.107 rmnlib-dev"
-	@echo "    . s.ssmuse.dot CMDN/vgrid/3.2.0"
+	@echo "    . ssmuse-sh -d hpcs/201402/00/base"
+	@echo "    . ssmuse-sh -d hpcs/ext/xlf_13.1.0.10"
+	@echo "    . s.ssmuse.dot /ssm/net/cmdn/vgrid/5.0.3/${COMP_ARCH}"
 	@echo " "
