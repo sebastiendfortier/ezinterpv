@@ -64,4 +64,5 @@
                         N_GRID_TYPE_ETA      = 7, & !(Pt-P)/(Pt-Ps) -not in convip
                                                     ! UNnormalized hybrid (i.e. hybrid type 5, version 1)
                         N_GRID_TYPE_HYBRID_NOTNORM = 8, &
-                        N_GRID_TYPE_STAGGERED = 9   ! Staggered (i.e. hybrid type 5, version 2)
+                        N_GRID_TYPE_STAGGERED = 9, &! Staggered (i.e. hybrid type 5, version 2)
+                        N_GRID_TYPE_STAG5005  = 10  ! Vcode=5005 (i.e. hybrid type 5, version 5)
