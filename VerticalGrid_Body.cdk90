@@ -58,11 +58,12 @@ use VerticalInterpolationConstants
                                         ! in units that are implied by gridType
                                         ! (IP1 values, decoded from FSTD format)
     real(real48), pointer, dimension(:) :: R_vLevel_p
-                                        ! N_ip1_p is made available for users of
-                                        ! this library.  Aside from allocation
-                                        ! and initialization, it is not set by
-                                        ! this library.
-    integer, pointer, dimension(:) :: N_ip1_p ! 
+                                        ! The ip1's of the field levels that are
+                                        ! present in the associated field
+    integer, pointer, dimension(:) :: N_ip1_p
+                                        ! The vgd that describes this grid
+    type(vgrid_descriptor), pointer::O_vGridDesc_p
+    integer:: N_fileUnit                ! File unit associated with O_vGridDesc_p
 
     ! Other parameters that may be necessary, depending on gridType
     ! (surface pressure is not explicitly a part of the vertical grid)
@@ -130,6 +131,7 @@ contains
 
   if(     o_gridA_p%N_gridType   /= o_gridB_p%N_gridType &
      .or. o_gridA_p%N_numVLevels /= o_gridB_p%N_numVLevels &
+     .or. o_gridA_p%N_fileUnit   /= o_gridB_p%N_fileUnit &
     ) then
     M_NotEqualVerticalGridPtr = .true.
   else if((     o_gridA_p%N_gridType == N_GRID_TYPE_HYBRID &
@@ -153,9 +155,13 @@ contains
                   ) &
          ) then
       M_NotEqualVerticalGridPtr = .true.
+  else if(.not. (o_gridA_p%O_vGridDesc_p == o_gridB_p%O_vGridDesc_p)) then
+      M_NotEqualVerticalGridPtr = .true.
   else
     do k=1, o_gridA_p%N_numVLevels
-      if( r_ZERO < abs(o_gridA_p%R_vLevel_p(k) - o_gridB_p%R_vLevel_p(k)) )then
+      if(r_ZERO < abs(o_gridA_p%R_vLevel_p(k) - o_gridB_p%R_vLevel_p(k)) &
+         .or. o_gridA_p%N_ip1_p(k) /= o_gridB_p%N_ip1_p(k) &
+        ) then
         M_NotEqualVerticalGridPtr = .true.
         exit                            ! no need to check any further
       end if
@@ -246,7 +252,9 @@ contains
     end if
 
     o_gridOut%R_vLevel_p      = o_gridIn%R_vLevel_p 
-    o_gridOut%N_ip1_p         = o_gridIn%N_ip1_p 
+    o_gridOut%N_ip1_p         = o_gridIn%N_ip1_p
+    o_gridOut%O_vGridDesc_p  => o_gridIn%O_vGridDesc_p
+    o_gridOut%N_fileUnit      = o_gridIn%N_fileUnit
     o_gridOut%R_pTopAvg       = o_gridIn%R_pTopAvg
     o_gridOut%R_pRef          = o_gridIn%R_pRef
     o_gridOut%R_rCoef         = o_gridIn%R_rCoef
@@ -288,9 +296,10 @@ contains
 
     this => that%Ptr
     N_ConstructNull = 0                 ! no error yet
+    nullify(this%O_vGridDesc_p)
 
     if(n_numVLevelsIn == 0) then
-        ! The size is not known yet; just nullify the pointer
+        ! The size is not known yet; just nullify the pointers
         nullify(this%R_vLevel_p)
         nullify(this%N_ip1_p)
     else
@@ -321,6 +330,7 @@ contains
     this%N_numVLevels = n_numVLevelsIn
     ! Initialize all other values to zero
     this%N_gridType = 0
+    this%N_fileUnit = 0
     this%R_pTopAvg = 0.
     this%R_pRef = 0.
     this%R_rCoef = 0.
@@ -336,7 +346,8 @@ end function N_ConstructNull
 !                                 integration
   integer function N_Viqkdef(that, n_numVLevelsIn, n_gridTypeIn, r_vLevelIn, &
                              r_pTopAvgIn, r_pRefIn, r_rCoefIn, r_rCoef_2In, &
-                             n_kind_vgridIn, n_version_vgridIn)
+                             n_kind_vgridIn, n_version_vgridIn, &
+                             n_ip1In, o_vGridDescIn_p)
                                         ! returns error indication:  0='no error'
 !
 !AUTHOR
@@ -367,6 +378,10 @@ end function N_ConstructNull
                                         ! vgrid's definition of the grid type
     integer, optional, intent(in) :: n_kind_vgridIn
     integer, optional, intent(in) :: n_version_vgridIn
+                                        ! The ip1's of field levels present
+    integer, optional, dimension(n_numVLevelsIn), intent(in) :: n_ip1In
+                                        ! The vgd that describes this grid
+    type(vgrid_descriptor), optional, pointer, intent(in)::o_vGridDescIn_p
 !
 !!
     external flush
@@ -429,6 +444,10 @@ end function N_ConstructNull
       else
         this%R_rCoef_2 = 0.
       end if
+
+      this%N_ip1_p = n_ip1In
+      this%O_vGridDesc_p => o_vGridDescIn_p
+
 !   else if(n_gridTypeIn == N_GRID_TYPE_ETA) then
 !     ! One parameter must be supplied LATER (in ConvertToLnP)
 !     this%R_pTopAvg = 0.
@@ -525,31 +544,28 @@ end function N_ConstructNull
     external flush
     integer, external :: hyb_to_pres
 
-    type(vgrid_descriptor) :: o_vGridDesc
+    type(vgrid_descriptor), pointer :: o_vGridDesc_p
 
     integer i, j                        ! indices of the horizontal locations
     integer k                           ! index of the vertical levels
     integer ikind                       ! kind of grid (convip's kind, extended)
-    integer, dimension(:), pointer :: n_ip1_p, &
-                                      n_ip1_NoGround_p
     integer :: n_error
     type(T_VerticalGrid), pointer :: this
 
     real(single), dimension(Ubound(that%Ptr%R_vLevel_p,1)), target :: r_vLevel_single
-    real(single), dimension(:), pointer :: r_vLevel_single_p
     real(double) :: r_pTopAvg_8, r_pRef_8, dummy_8
     real(single), dimension(:,:,:), pointer :: r_P_single_p
     real(single), dimension(n_ni,n_nj,that%Ptr%N_numVLevels) :: r_P_single
     real(single), dimension(n_ni,n_nj) :: r_pSurf_single
     logical, parameter :: l_IN_LOG = .false.
-    logical :: l_groundLevelChopped, l_dummyLevelUsed
+    real, parameter :: r_MBAR_PER_PASCAL = 0.01
+
+    nullify(o_vGridDesc_p)
 
 
     this => that%Ptr
-    nullify(n_ip1_p, n_ip1_NoGround_p, r_vLevel_single_p, r_P_single_p)
+    nullify(r_P_single_p)
     N_VertGridGetP = 0                  ! no error yet
-    l_groundLevelChopped = .false.
-    l_dummyLevelUsed = .false.
 
     !
     ! Create the 'cube' of source vertical levels
@@ -593,81 +609,29 @@ end function N_ConstructNull
     case(N_GRID_TYPE_STAGGERED, N_GRID_TYPE_STAG5005)
       ! For a staggered grid, only the grid descriptor knows how to calculate the
       ! pressure.  Therefore, create a grid descriptor.
-      r_vLevel_single = this%R_vLevel_p
       r_pTopAvg_8 = this%R_pTopAvg
       r_pRef_8 = this%R_pRef
       r_pSurf_single = r_pSurf
 
-      if(r_vLevel_single(Ubound(r_vLevel_single,1)) >= 1.0) then
-        ! vgd_new does not allow explicitly defining a level hyb=1.  It does this
-        ! implicitly by itself.  Therefore, remove hyb=1 from the list.
-        r_vLevel_single_p => r_vLevel_single(1: Ubound(r_vLevel_single,1)-1)
-        l_groundLevelChopped = .true.
-      else
-        r_vLevel_single_p => r_vLevel_single
-      end if
+      o_vGridDesc_p => this%O_vGridDesc_p
 
-      if(size(r_vLevel_single_p) == 0) then
-        ! vgd_new does not accept an empty list of levels.  Therefore, generate
-        ! a dummy level.
-        r_vLevel_single(1) = 7.6E-05
-        r_vLevel_single_p => r_vLevel_single
-        l_dummyLevelUsed = .true.
-      end if
-      if (this%n_kind_vgrid == 5 .and. this%n_version_vgrid == 5) then
-        n_error = vgd_new (o_vGridDesc, kind=this%n_kind_vgrid, &
-                           version=this%n_version_vgrid, hyb=r_vLevel_single_p, &
-                           rcoef1=this%R_rCoef, rcoef2=this%R_rCoef_2, &
-                           ptop_out_8=dummy_8, pref_8=r_pRef_8, &
-                           stdout_unit=6, dhm=10.0, dht=1.5 )
-      else
-                                        ! Whether or not the r_vLevel_single are
-                                        ! momementum or thermodynamic levels, the
-                                        ! initializer calls them momentum levels
-        n_error = vgd_new(o_vGridDesc, this%n_kind_vgrid, &
-                          this%n_version_vgrid, &
-                          r_vLevel_single_p, this%R_rCoef, this%R_rCoef_2, &
-                          r_pTopAvg_8, r_pRef_8)
-      end if
+      ! Pass N_ip1_p to vgd_levels in order to know the pressures of my levels
 
-      if(n_error .ne. VGD_OK)then
-        write(6,*)'ERROR in VerticalGrid_class%N_VertGridGetP, from vgd_new:',&
-                   n_error
-      end if
-                                        ! Convert r_vLevel_single to n_ip1_p
-                                        ! vgd_get allocates n_ip1_p
-      n_error = vgd_get(o_vGridDesc, 'VIPM', n_ip1_p)
-      if(n_error .ne. VGD_OK)then
-        write(6,*)'ERROR in VerticalGrid_class%N_VertGridGetP, from vgd_get:',&
-                   n_error
-      end if
-                                        ! vgd has automatically added
-                                        ! hyb=1 (ground) to the list.
-      if(l_groundLevelChopped .eqv. .true.) then
-        n_ip1_NoGround_p => n_ip1_p
-      else
-                                        ! Remove it
-        n_ip1_NoGround_p => n_ip1_p(:size(n_ip1_p)-1)
-      end if
-
-      if(l_dummyLevelUsed .eqv. .true.) then
-                                        ! Remove the dummy level
-        n_ip1_NoGround_p => n_ip1_NoGround_p(2:2)
-      end if
-
-                                        ! Obtain, finally, the cube of P.
+                                        ! vgd_levels is expecting Pa
+                                        ! pSurf was in hPa (i.e. mb)
+      r_pSurf_single = r_pSurf_single / r_MBAR_PER_PASCAL
+                                        ! Obtain, the cube of P.
                                         ! vgd_levels allocates r_P_single_p
-      n_error = vgd_levels(o_vGridDesc, n_ip1_NoGround_p, r_P_single_p, &
-                           r_pSurf_single, l_IN_LOG)
+      n_error = vgd_levels(o_vGridDesc_p, this%N_ip1_p(:this%N_numVLevels), &
+                           r_P_single_p, r_pSurf_single, l_IN_LOG)
       if(n_error .ne. VGD_OK)then
         write(6,*)'ERROR in VerticalGrid_class%N_VertGridGetP, ', &
                   'from vgd_levels:', n_error
       end if
-      r_P = r_P_single_p
+      r_P = r_P_single_p * r_MBAR_PER_PASCAL
 
       deallocate(r_P_single_p)
-      deallocate(n_ip1_p)
-    ! destructor (o_vGridDesc)  -- MEMORY LEAK !
+    ! destructor (o_vGridDesc_p)  -- MEMORY LEAK !
 
     case(N_GRID_TYPE_ETA)
       if(.not. present(r_pTop)) then

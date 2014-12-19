@@ -6,7 +6,8 @@ SHELL = /bin/sh
 
 COMPILE = compile
 
-FFLAGS =
+!!!FFLAGS =
+FFLAGS="'-C '"
 
 CFLAGS =
 
