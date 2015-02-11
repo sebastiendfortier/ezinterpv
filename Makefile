@@ -13,10 +13,10 @@ CFLAGS =
 
 SUPP_OPT = -openmp
 
-OPTIMIZ = 2
+#OPTIMIZ = 2
 #OPTIMIZ =  1
 #OPTIMIZ =  0
-#OPTIMIZ =  0 -debug
+OPTIMIZ =  0 -debug
 
 MYLIB = libezinterpv.a
 
@@ -52,7 +52,7 @@ VertInterpConstants.o: VertInterpConstants.cdk90 ViConstants_f90.h
 
 ViIfc.o: ViIfc.ftn90 ViIfc_Body.ftn90 VertInterpConstants.o VerticalGrid.o VerticalInterpolation.o
 
-VerticalGrid.o: VerticalGrid.cdk90 VerticalGrid_Body.cdk90 VertInterpConstants.o
+VerticalGrid.o: VerticalGrid.ftn90 VerticalGrid_Body.cdk90 VertInterpConstants.o
 
 VerticalInterpolation.o: VerticalInterpolation.ftn90 VerticalInterpolation_Body.ftn90 \
 	VertInterpConstants.o VerticalGrid.o

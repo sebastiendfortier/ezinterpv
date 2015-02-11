@@ -10,21 +10,21 @@ FFLAGS =
 
 CFLAGS =
 
-OPTIMIZ = -O 2
+#OPTIMIZ = -O 2
 #OPTIMIZ = -O 1
 #OPTIMIZ = -O 0
-#OPTIMIZ = -O 0 -debug
+OPTIMIZ = -O 0 -debug
 
-LIBRMN = rmn_015
+LIBRMN = rmn_015.1
 TEMPLIB = ../$(EC_ARCH)/lib/libezinterpv.a
 
 default: test
 
 # Explicit path, /users/dor/arma/jbl/home1/SVN_checkouts/ez_interpv/TestFiles, is
 # given here so as to over-ride the (old) include files that are still hanging
-# around in armnlib:
+# around in armnlib: -- OLD NEWS NOW
 .ftn90.o:
-	s.compile -includes /users/dor/arma/jbl/home1/SVN_checkouts/ez_interpv/TestFiles /users/dor/arma/jbl/home1/SVN_checkouts/ez_interpv/TestFiles ../$(EC_ARCH)/include -abi $(ABI) $(OPTIMIZ) -opt "=$(FFLAGS)" \
+	s.compile -includes ../$(EC_ARCH)/include -abi $(ABI) $(OPTIMIZ) -opt "=$(FFLAGS)" \
 	-src $<
 
 .cdk90.o:

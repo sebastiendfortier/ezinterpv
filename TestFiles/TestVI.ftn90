@@ -1038,7 +1038,6 @@ program Test_Vertical_Interpolation
 
 
 
-goto 768
 ! This test is sensitive to round-off error.  There are often a few bits that
 ! differ and cause a failure of the test, even though all is well
 
@@ -1254,7 +1253,6 @@ goto 768
 
 
 
- 768 continue
 
 
   !
@@ -1423,8 +1421,8 @@ goto 768
   s_interpType = 'linear'
   s_extrapType = 'clamped'
 
-  r_stateAnswer(1,1,:) =(/0.9473432, 0.8168903, 0.3669596, 0.2841619, 0.1708000/)
-  r_stateAnswer(2,1,:) =(/2.9887292, 1.3323874,-0.4509242,-0.3337408,-0.1733000/)
+  r_stateAnswer(1,1,:) =(/0.9189990, 0.7963848, 0.3385447, 0.2617664, 0.1708000/)
+  r_stateAnswer(2,1,:) =(/2.6288471, 1.0720317,-0.4107087,-0.3020445,-0.1733000/)
 
   r_derivAnswer(1,1,:) =(/0.0000000, 0.0000000, 0.0000000, 0.0000000, 0.0000000/)
   r_derivAnswer(2,1,:) =(/0.0000000, 0.0000000, 0.0000000, 0.0000000, 0.0000000/)
