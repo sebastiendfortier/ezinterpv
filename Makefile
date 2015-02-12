@@ -13,10 +13,10 @@ CFLAGS =
 
 SUPP_OPT = -openmp
 
-#OPTIMIZ = 2
+OPTIMIZ = 2
 #OPTIMIZ =  1
 #OPTIMIZ =  0
-OPTIMIZ =  0 -debug
+#OPTIMIZ =  0 -debug
 
 MYLIB = libezinterpv.a
 
