@@ -1571,6 +1571,192 @@ program Test_Vertical_Interpolation
 
 
 
+
+  !
+  ! TWENTY-THIRD TEST
+  ! TWENTY-THIRD TEST
+  !
+  s_title = "TEST 23:  sigma; linear; clamped; ascending"
+
+  n_gridType = N_GRID_TYPE_SIGMA
+!  n_gridType = N_GRID_TYPE_PRESSURE
+!  n_gridType = N_GRID_TYPE_GENERIC
+!  n_gridType = N_GRID_TYPE_HYBRID
+!  n_gridType = N_GRID_TYPE_ETA
+!  n_gridType = N_GRID_TYPE_HYBRID_NOTNORM
+!  n_gridType = N_GRID_TYPE_STAGGERED
+!  n_gridType = N_GRID_TYPE_STAG5005
+
+  r_levelsInit   = r_LEVELS_INCREASING
+  r_stateIn      = r_stateIncreasing
+  r_derivIn      = r_derivIncreasing
+  r_levelsTarget = r_LEVELS_TARGET_STD
+
+  s_interpType = 'linear'
+  s_extrapType = 'clamped'
+
+  r_stateAnswer(1,1,:) =(/0.5971954, 0.8959478, 0.4735454, 0.3217536, 0.5971954/)
+  r_stateAnswer(2,1,:) =(/0.7445440, 2.6680875,-0.6017747,-0.3869442, 0.7445440/)
+
+  r_derivAnswer(1,1,:) =(/0.0000000, 0.0000000, 0.0000000, 0.0000000, 0.0000000/)
+  r_derivAnswer(2,1,:) =(/0.0000000, 0.0000000, 0.0000000, 0.0000000, 0.0000000/)
+
+  !
+  ! MAKE THE DATA REASONABLE FOR THE HYBRID GRID TYPE
+  !
+  ! convert the levels to reasonable hybrid values
+  do i=1,n_PTS_INIT
+    r_levelsInit(i) = r_levelsInit(i) / 3.2
+  end do
+
+  ! convert the levels to reasonable hybrid values
+  do i=n_PTS_TARGET,2,-1
+    r_levelsTarget(i) = r_levelsTarget(i-1) / 3.2
+  end do
+  r_levelsTarget(1) = r_levelsInit(1)
+  r_levelsTarget(5) = r_levelsTarget(1) ! ensure that nothing is below 'ground'
+
+
+! NOTE:  modifying the initial pref and rcoeff
+  call m_testOneCombo(s_title, n_gridType, s_interpType, s_extrapType, &
+
+                      r_levelsInit,   r_stateIn , r_derivIn, &
+                      r_levelsTarget, r_stateAnswer, r_derivAnswer, &
+
+                      r_EXTRAP_GUIDE_DOWN, r_EXTRAP_GUIDE_UP, &
+
+                      r_PTOP_INIT, r_PREF_INIT/2., r_RCOEFF_INIT*2., &
+                      r_PTOP_TARGET, r_PREF_TARGET, r_RCOEFF_TARGET, &
+                      r_PSURF, r_PTOP &
+                     )
+
+
+
+
+
+  !
+  ! TWENTY-FOURTH TEST
+  ! TWENTY-FOURTH TEST
+  !
+  s_title = "TEST 24:  pressure; linear; clamped; ascending"
+
+!  n_gridType = N_GRID_TYPE_SIGMA
+  n_gridType = N_GRID_TYPE_PRESSURE
+!  n_gridType = N_GRID_TYPE_GENERIC
+!  n_gridType = N_GRID_TYPE_HYBRID
+!  n_gridType = N_GRID_TYPE_ETA
+!  n_gridType = N_GRID_TYPE_HYBRID_NOTNORM
+!  n_gridType = N_GRID_TYPE_STAGGERED
+!  n_gridType = N_GRID_TYPE_STAG5005
+
+  r_levelsInit   = r_LEVELS_INCREASING
+  r_stateIn      = r_stateIncreasing
+  r_derivIn      = r_derivIncreasing
+  r_levelsTarget = r_LEVELS_TARGET_STD
+
+  s_interpType = 'linear'
+  s_extrapType = 'clamped'
+
+  r_stateAnswer(1,1,:) =(/0.5971954, 0.8959478, 0.4735454, 0.3217536, 0.5971954/)
+  r_stateAnswer(2,1,:) =(/0.7445440, 2.6680875,-0.6017747,-0.3869442, 0.7445440/)
+
+  r_derivAnswer(1,1,:) =(/0.0000000, 0.0000000, 0.0000000, 0.0000000, 0.0000000/)
+  r_derivAnswer(2,1,:) =(/0.0000000, 0.0000000, 0.0000000, 0.0000000, 0.0000000/)
+
+  !
+  ! MAKE THE DATA REASONABLE FOR THE HYBRID GRID TYPE
+  !
+  ! convert the levels to reasonable hybrid values
+  do i=1,n_PTS_INIT
+    r_levelsInit(i) = r_levelsInit(i) / 3.2
+  end do
+
+  ! convert the levels to reasonable hybrid values
+  do i=n_PTS_TARGET,2,-1
+    r_levelsTarget(i) = r_levelsTarget(i-1) / 3.2
+  end do
+  r_levelsTarget(1) = r_levelsInit(1)
+  r_levelsTarget(5) = r_levelsTarget(1) ! ensure that nothing is below 'ground'
+
+
+! NOTE:  modifying the initial pref and rcoeff
+  call m_testOneCombo(s_title, n_gridType, s_interpType, s_extrapType, &
+
+                      r_levelsInit,   r_stateIn , r_derivIn, &
+                      r_levelsTarget, r_stateAnswer, r_derivAnswer, &
+
+                      r_EXTRAP_GUIDE_DOWN, r_EXTRAP_GUIDE_UP, &
+
+                      r_PTOP_INIT, r_PREF_INIT/2., r_RCOEFF_INIT*2., &
+                      r_PTOP_TARGET, r_PREF_TARGET, r_RCOEFF_TARGET, &
+                      r_PSURF, r_PTOP &
+                     )
+
+
+
+
+
+  !
+  ! TWENTY-FIFTH TEST
+  ! TWENTY-FIFTH TEST
+  !
+  s_title = "TEST 25:  eta; linear; clamped; ascending"
+
+!  n_gridType = N_GRID_TYPE_SIGMA
+!  n_gridType = N_GRID_TYPE_PRESSURE
+!  n_gridType = N_GRID_TYPE_GENERIC
+!  n_gridType = N_GRID_TYPE_HYBRID
+  n_gridType = N_GRID_TYPE_ETA
+!  n_gridType = N_GRID_TYPE_HYBRID_NOTNORM
+!  n_gridType = N_GRID_TYPE_STAGGERED
+!  n_gridType = N_GRID_TYPE_STAG5005
+
+  r_levelsInit   = r_LEVELS_INCREASING
+  r_stateIn      = r_stateIncreasing
+  r_derivIn      = r_derivIncreasing
+  r_levelsTarget = r_LEVELS_TARGET_STD
+
+  s_interpType = 'linear'
+  s_extrapType = 'clamped'
+
+  r_stateAnswer(1,1,:) =(/0.5971954, 0.8959424, 0.4735476, 0.3217558, 0.5971954/)
+  r_stateAnswer(2,1,:) =(/0.7445440, 2.6680534,-0.6017778,-0.3869473, 0.7445440/)
+
+  r_derivAnswer(1,1,:) =(/0.0000000, 0.0000000, 0.0000000, 0.0000000, 0.0000000/)
+  r_derivAnswer(2,1,:) =(/0.0000000, 0.0000000, 0.0000000, 0.0000000, 0.0000000/)
+
+  !
+  ! MAKE THE DATA REASONABLE FOR THE HYBRID GRID TYPE
+  !
+  ! convert the levels to reasonable hybrid values
+  do i=1,n_PTS_INIT
+    r_levelsInit(i) = r_levelsInit(i) / 3.2
+  end do
+
+  ! convert the levels to reasonable hybrid values
+  do i=n_PTS_TARGET,2,-1
+    r_levelsTarget(i) = r_levelsTarget(i-1) / 3.2
+  end do
+  r_levelsTarget(1) = r_levelsInit(1)
+  r_levelsTarget(5) = r_levelsTarget(1) ! ensure that nothing is below 'ground'
+
+
+! NOTE:  modifying the initial pref and rcoeff
+  call m_testOneCombo(s_title, n_gridType, s_interpType, s_extrapType, &
+
+                      r_levelsInit,   r_stateIn , r_derivIn, &
+                      r_levelsTarget, r_stateAnswer, r_derivAnswer, &
+
+                      r_EXTRAP_GUIDE_DOWN, r_EXTRAP_GUIDE_UP, &
+
+                      r_PTOP_INIT, r_PREF_INIT/2., r_RCOEFF_INIT*2., &
+                      r_PTOP_TARGET, r_PREF_TARGET, r_RCOEFF_TARGET, &
+                      r_PSURF, r_PTOP &
+                     )
+
+
+
+
   ! Report the overall test status
   if(l_pass) then
     write(6,*)'*  T E S T   P A S S E D  *'
