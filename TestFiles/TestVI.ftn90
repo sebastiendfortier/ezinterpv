@@ -1602,7 +1602,7 @@ program Test_Vertical_Interpolation
   r_derivAnswer(2,1,:) =(/0.0000000, 0.0000000, 0.0000000, 0.0000000, 0.0000000/)
 
   !
-  ! MAKE THE DATA REASONABLE FOR THE HYBRID GRID TYPE
+  ! MAKE THE LEVELS MONOTONICALLY INCREASING
   !
   ! convert the levels to reasonable hybrid values
   do i=1,n_PTS_INIT
@@ -1657,26 +1657,14 @@ program Test_Vertical_Interpolation
   s_interpType = 'linear'
   s_extrapType = 'clamped'
 
-  r_stateAnswer(1,1,:) =(/0.5971954, 0.8959478, 0.4735454, 0.3217536, 0.5971954/)
-  r_stateAnswer(2,1,:) =(/0.7445440, 2.6680875,-0.6017747,-0.3869442, 0.7445440/)
+  r_stateAnswer(1,1,:) =(/ 0.8959476, 0.4735463, 0.3217543, 0.1708000, 0.1708000/)
+  r_stateAnswer(2,1,:) =(/ 2.6680861,-0.6017760,-0.3869452,-0.1733000,-0.1733000/)
 
   r_derivAnswer(1,1,:) =(/0.0000000, 0.0000000, 0.0000000, 0.0000000, 0.0000000/)
   r_derivAnswer(2,1,:) =(/0.0000000, 0.0000000, 0.0000000, 0.0000000, 0.0000000/)
 
-  !
-  ! MAKE THE DATA REASONABLE FOR THE HYBRID GRID TYPE
-  !
-  ! convert the levels to reasonable hybrid values
-  do i=1,n_PTS_INIT
-    r_levelsInit(i) = r_levelsInit(i) / 3.2
-  end do
-
-  ! convert the levels to reasonable hybrid values
-  do i=n_PTS_TARGET,2,-1
-    r_levelsTarget(i) = r_levelsTarget(i-1) / 3.2
-  end do
-  r_levelsTarget(1) = r_levelsInit(1)
-  r_levelsTarget(5) = r_levelsTarget(1) ! ensure that nothing is below 'ground'
+  ! MAKE THE LEVELS MONOTONICALLY INCREASING
+  r_levelsTarget(4) = 2.99
 
 
 ! NOTE:  modifying the initial pref and rcoeff
