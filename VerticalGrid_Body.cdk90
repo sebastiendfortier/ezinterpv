@@ -77,6 +77,7 @@ use VerticalInterpolationConstants
                                         ! vgrid's definition of the grid type
     integer :: n_kind_vgrid
     integer :: n_version_vgrid
+    integer :: n_vcode
   end type T_VerticalGrid
 
   type T_VerticalGridPtr
@@ -385,10 +386,9 @@ end function N_ConstructNull
 !
 !!
     external flush
-    integer :: n_error
+    integer :: n_error, n_kind, n_version
     type(T_VerticalGrid), pointer :: this
     integer, dimension(:), pointer :: n_ip1_p
-    integer :: vcode
     real(8) :: ptop_out_dummy
 
     this => that%Ptr
@@ -418,100 +418,162 @@ end function N_ConstructNull
     this%N_gridType = n_gridTypeIn
     this%N_numVLevels = n_numVLevelsIn
 
+    if(n_gridTypeIn == N_GRID_TYPE_STAG5005) then
+      this%R_pTopAvg = 0.
+    else if(present(r_pTopAvgIn))then
+      this%R_pTopAvg = r_pTopAvgIn
+    else
+      this%R_pTopAvg = 0.
+    end if
+
+    if(present(r_pRefIn))then
+      this%R_pRef = r_pRefIn
+    else
+      this%R_pRef = 0.
+    end if
+
+    if(present(r_rCoefIn))then
+      this%R_rCoef = r_rCoefIn
+    else
+      this%R_rCoef = 0.
+    end if
+
+    if(present(r_rCoef_2In))then
+      this%R_rCoef_2 = r_rCoef_2In
+    else
+      this%R_rCoef_2 = 0.
+    end if
+
+    if(present(n_ip1In))then
+      this%N_ip1_p = n_ip1In
+    else
+      this%N_ip1_p = 0
+    end if
+
+    if(present(n_kind_vgridIn) .and. present(n_version_vgridIn)) then
+      this%n_vcode = n_kind_vgridIn * 1000 + n_version_vgridIn
+
+    else
+      select case (n_gridTypeIn)
+      case (N_GRID_TYPE_SIGMA)
+        this%n_vcode = 1001
+
+      case (N_GRID_TYPE_ETA)
+        this%n_vcode = 1002
+
+      case (N_GRID_TYPE_HYBRID)
+        this%n_vcode = 1003
+
+      case (N_GRID_TYPE_PRESSURE)
+        this%n_vcode = 2001
+
+      case (N_GRID_TYPE_HYBRID_NOTNORM)
+        this%n_vcode = 5001
+
+      case (N_GRID_TYPE_STAGGERED)
+        this%n_vcode = 5002
+
+      case (N_GRID_TYPE_STAG5005)
+        this%n_vcode = 5005
+
+      case (N_GRID_TYPE_GENERIC)
+        this%n_vcode = N_GRID_TYPE_GENERIC
+
+      case default
+        this%n_vcode = 0
+      end select
+    end if
+
     if(     n_gridTypeIn == N_GRID_TYPE_HYBRID &
        .or. n_gridTypeIn == N_GRID_TYPE_HYBRID_NOTNORM &
        .or. n_gridTypeIn == N_GRID_TYPE_STAGGERED &
        .or. n_gridTypeIn == N_GRID_TYPE_STAG5005) then
-      ! The hybrid parameters must be supplied
-      if(n_gridTypeIn == N_GRID_TYPE_STAG5005) then
-        this%R_pTopAvg = 0.
-      else
-        this%R_pTopAvg = r_pTopAvgIn
-      end if
-      this%R_pRef    = r_pRefIn
-      this%R_rCoef   = r_rCoefIn
-      if(     n_gridTypeIn == N_GRID_TYPE_STAGGERED &
-         .or. n_gridTypeIn == N_GRID_TYPE_STAG5005) then
-        this%R_rCoef_2 = r_rCoef_2In
-        if(present(n_kind_vgridIn)) then
-          this%n_kind_vgrid = n_kind_vgridIn
-        else
-          this%n_kind_vgrid = 5
-        end if
-
-        if(present(n_version_vgridIn)) then
-          this%n_version_vgrid = n_version_vgridIn
-        else
-          this%n_version_vgrid = 2
-        end if
-      else
-        this%R_rCoef_2 = 0.
-      end if
-
-      if(present(n_ip1In)) then
-        this%N_ip1_p = n_ip1In
-      else
-        this%N_ip1_p = 0
-      end if
 
       if(present(o_vGridDescIn_p)) then
         this%O_vGridDesc_p => o_vGridDescIn_p
       else
-        if(present(r_rCoef_2In) .and. r_rCoef_2In /= 0.0)then
-          ! This must be a grid type, N_GRID_TYPE_STAGGERED (kind=5, version=2)
-          ! or N_GRID_TYPE_STAG5005 (kind=5, version=5)
+        allocate(this%O_vGridDesc_p)
 
-          ! Create O_vGridDesc_p right now
-          ! (Although the documentation doesn't say it, vgd_new accepts only
-          !  momentum levels as input.  The relationship to thermodynamic levels
-          !  being defined mathematically, this is sufficient to determine also
-          !  the thermodynamic levels.):
-          allocate(this%O_vGridDesc_p)
-          vcode=this%n_kind_vgrid * 1000 + this%n_version_vgrid
-          select case (vcode)
-          case(N_GRID_TYPE_STAG5005)
-            n_error = vgd_new(this%O_vGridDesc_p, this%n_kind_vgrid, &
-                              this%n_version_vgrid, real(r_vLevelIn), &
-                              this%R_rCoef, this%R_rCoef_2, &
-                              pref_8=real(r_pRefIn, kind=8), &
-                              ptop_out_8=ptop_out_dummy, &
-                              dhm=10.0, dht=1.5)
+        ! Create O_vGridDesc_p right now
+        ! (Although the vgrid documentation doesn't say it, vgd_new accepts only
+        !  momentum levels as input.  The relationship to thermodynamic levels
+        !  being defined mathematically, this is sufficient to determine also
+        !  the thermodynamic levels.):
+        n_kind    = this%n_vcode / 1000
+        n_version = this%n_vcode - (n_kind * 1000)
+write(*,*)"JWB:  this%n_vcode=", this%n_vcode
+        select case(this%n_vcode)
 
-          case default
-            n_error = vgd_new(this%O_vGridDesc_p, this%n_kind_vgrid, &
-                              this%n_version_vgrid, real(r_vLevelIn), &
-                              this%R_rCoef, this%R_rCoef_2, &
-                              real(r_pTopAvgIn, kind=8), real(r_pRefIn, kind=8))
-          end select
+        case (1001)
+          n_error = vgd_new(this%O_vGridDesc_p, n_kind, n_version, &
+                            real(this%R_vLevel_p), this%R_rCoef, this%R_rCoef_2,&
+                            real(this%R_pTopAvg, kind=8), &
+                            real(this%R_pRef, kind=8))
 
-          if(n_error /= 0) then
-            write(6,*)'Error from vgd_new in N_Viqkdef:  error=', n_error
-            call flush(6)
-            return
-          endif
+        case (1002)
+          n_error = vgd_new(this%O_vGridDesc_p, n_kind, n_version, &
+                            real(this%R_vLevel_p), this%R_rCoef, this%R_rCoef_2,&
+                            real(this%R_pTopAvg, kind=8), &
+                            real(this%R_pRef, kind=8))
 
-          ! In order to be useful, this%O_vGridDesc_p will require this%N_ip1_p
-          ! (Ask for VIPM, because vgd_new assumed the r_vLevelIn to be VIPM.)
-          n_error = vgd_get(this%O_vGridDesc_p, 'VIPM', n_ip1_p)
-          if(n_error .ne. VGD_OK)then
-            write(6,*)'ERROR in VerticalGrid_class%N_VertiGridGetP, from vgd_get:', n_error
-          end if
-          ! vgd has added hyb=1 (the last entry) to the list.  Remove it.
-          this%N_ip1_p = n_ip1_p(:size(n_ip1_p)-1)
-          deallocate(n_ip1_p) ! vgd_get allocated it
+        case (1003)
+          n_error = vgd_new(this%O_vGridDesc_p, n_kind, n_version, &
+                            real(this%R_vLevel_p), this%R_rCoef, &
+                            ptop_8=real(this%R_pTopAvg, kind=8), &
+                            pref_8=real(this%R_pRef, kind=8))
 
-        else
-          ! Just make O_vGridDesc_p.  It should not be used in this case, anyway.
-          write(0,*)"Warning: in N_Viqkdef, a vgrid descriptor was not supplied."
-          write(0,*)"         Using a null vgrid descriptor."
-          allocate(this%O_vGridDesc_p, STAT=n_error)
-          if(n_error /= 0) then
-            write(6,*)'Error allocating this%O_vGridDesc_p in N_Viqkdef:error=',&
-                       n_error
-            call flush(6)
-            return
-          endif
+        case (2001)
+          n_error = vgd_new(this%O_vGridDesc_p, n_kind, n_version, &
+                            real(this%R_vLevel_p), this%R_rCoef, this%R_rCoef_2,&
+                            real(this%R_pTopAvg, kind=8), &
+                            real(this%R_pRef, kind=8))
+
+        case (5001)
+          n_error = vgd_new(this%O_vGridDesc_p, n_kind, n_version, &
+                            real(this%R_vLevel_p), this%R_rCoef, &
+                            ptop_8=real(this%R_pTopAvg, kind=8), &
+                            pref_8=real(this%R_pRef, kind=8))
+
+        case (5002)
+          n_error = vgd_new(this%O_vGridDesc_p, n_kind, n_version, &
+                            real(this%R_vLevel_p), this%R_rCoef, this%R_rCoef_2,&
+                            real(this%R_pTopAvg, kind=8), &
+                            real(this%R_pRef, kind=8))
+
+        case (5005)
+          n_error = vgd_new(this%O_vGridDesc_p, n_kind, n_version, &
+                            real(this%R_vLevel_p), this%R_rCoef, this%R_rCoef_2,&
+                            pref_8=real(this%R_pRef, kind=8), &
+                            ptop_out_8=ptop_out_dummy, &
+                            dhm=10.0, dht=1.5)
+
+        case (N_GRID_TYPE_GENERIC)
+          n_error = 0
+
+        case default
+          n_error = 0
+
+!!          n_error = vgd_new(this%O_vGridDesc_p, n_kind, n_version, levels???, this%R_rCoef, this%R_rCoef_2, real(this%R_pTopAvg, kind=8), real(this%R_pRef, kind=8))
+
+        end select
+
+        ! Test the return value from vgd_new
+        if(n_error /= 0) then
+          write(6,*)'Error from vgd_new in N_Viqkdef:  error=', n_error
+          call flush(6)
+          return
+        endif
+
+        ! In order to be useful, this%O_vGridDesc_p will require this%N_ip1_p
+        ! (Ask for VIPM, because vgd_new assumed the r_vLevelIn to be VIPM.)
+        n_error = vgd_get(this%O_vGridDesc_p, 'VIPM', n_ip1_p)
+        if(n_error .ne. VGD_OK)then
+          write(6,*)'ERROR in VerticalGrid_class%N_VertiGridGetP, from vgd_get:', n_error
         end if
+        ! vgd has added hyb=1 (the last entry) to the list.  Remove it.
+        this%N_ip1_p = n_ip1_p(:size(n_ip1_p)-1)
+        deallocate(n_ip1_p) ! vgd_get allocated it
+
       end if
 
 !   else if(n_gridTypeIn == N_GRID_TYPE_ETA) then
