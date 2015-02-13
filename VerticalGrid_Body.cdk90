@@ -484,10 +484,11 @@ end function N_ConstructNull
       end select
     end if
 
-    if(     n_gridTypeIn == N_GRID_TYPE_HYBRID &
-       .or. n_gridTypeIn == N_GRID_TYPE_HYBRID_NOTNORM &
-       .or. n_gridTypeIn == N_GRID_TYPE_STAGGERED &
-       .or. n_gridTypeIn == N_GRID_TYPE_STAG5005) then
+!    if(     n_gridTypeIn == N_GRID_TYPE_HYBRID &
+!       .or. n_gridTypeIn == N_GRID_TYPE_HYBRID_NOTNORM &
+!       .or. n_gridTypeIn == N_GRID_TYPE_STAGGERED &
+!       .or. n_gridTypeIn == N_GRID_TYPE_STAG5005) then
+    if(.true.) then
 
       if(present(o_vGridDescIn_p)) then
         this%O_vGridDesc_p => o_vGridDescIn_p
@@ -524,9 +525,7 @@ write(*,*)"JWB:  this%n_vcode=", this%n_vcode
 
         case (2001)
           n_error = vgd_new(this%O_vGridDesc_p, n_kind, n_version, &
-                            real(this%R_vLevel_p), this%R_rCoef, this%R_rCoef_2,&
-                            real(this%R_pTopAvg, kind=8), &
-                            real(this%R_pRef, kind=8))
+                            real(this%R_vLevel_p))
 
         case (5001)
           n_error = vgd_new(this%O_vGridDesc_p, n_kind, n_version, &
