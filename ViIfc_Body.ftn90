@@ -303,9 +303,9 @@ integer function N_ViqkdefIfc_X &
     real, intent(in)::r_rCoef_2In       ! for staggered co-ordinates
 !
 !!
-    type(T_VerticalGrid), target :: o_Grid
     type(T_VerticalGridPtr):: o_GridPtr
-    o_GridPtr%Ptr => o_Grid
+
+    allocate(o_GridPtr%Ptr)
 
     n_VertGridIndex = 0
 

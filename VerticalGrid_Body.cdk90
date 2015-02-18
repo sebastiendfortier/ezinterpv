@@ -394,6 +394,8 @@ end function N_ConstructNull
     this => that%Ptr
     N_Viqkdef = 0                       ! no error yet
 
+    nullify(n_ip1_p)
+
     ! Allocate the array of vertical levels
     allocate(this%R_vLevel_p(n_numVLevelsIn), STAT=n_error)
     if(n_error /= 0) then
