@@ -242,18 +242,26 @@ contains
         endif
     end if
 
-    if(.not. associated(o_gridOut%N_ip1_p)) then
-        allocate(o_gridOut%N_ip1_p(o_gridIn%N_numVLevels), STAT=n_error)
-        if(n_error /= 0) then
-          write(6, *)'Error allocating ip1 in M_AssignVerticalGrid:  error=',&
-                     n_error
-          call flush(6)
-          return
-        endif
+    if(associated(o_gridIn%N_ip1_p))then
+      if(.not. associated(o_gridOut%N_ip1_p)) then
+          allocate(o_gridOut%N_ip1_p(o_gridIn%N_numVLevels), STAT=n_error)
+          if(n_error /= 0) then
+            write(6, *)'Error allocating ip1 in M_AssignVerticalGrid:  error=',&
+                       n_error
+            call flush(6)
+            return
+          endif
+      end if
+    else
+      if(associated(o_gridOut%N_ip1_p)) then
+        deallocate(o_gridOut%N_ip1_p)
+      end if
     end if
 
-    o_gridOut%R_vLevel_p      = o_gridIn%R_vLevel_p 
-    o_gridOut%N_ip1_p         = o_gridIn%N_ip1_p
+    o_gridOut%R_vLevel_p      = o_gridIn%R_vLevel_p
+    if(associated(o_gridIn%N_ip1_p))then
+      o_gridOut%N_ip1_p         = o_gridIn%N_ip1_p
+    end if
     o_gridOut%O_vGridDesc_p  => o_gridIn%O_vGridDesc_p
     o_gridOut%N_fileUnit      = o_gridIn%N_fileUnit
     o_gridOut%R_pTopAvg       = o_gridIn%R_pTopAvg
@@ -545,12 +553,16 @@ end function N_ConstructNull
                             dhm=10.0, dht=1.5)
 
         case (N_GRID_TYPE_GENERIC)
+          deallocate(this%O_vGridDesc_p)
+          nullify(this%O_vGridDesc_p)
+
+          ! N_ip1_p is used only in association with O_vGridDesc_p
+          deallocate(this%N_ip1_p)
+          nullify(this%N_ip1_p)
           n_error = 0
 
         case default
           n_error = 0
-
-!!          n_error = vgd_new(this%O_vGridDesc_p, n_kind, n_version, levels???, this%R_rCoef, this%R_rCoef_2, real(this%R_pTopAvg, kind=8), real(this%R_pRef, kind=8))
 
         end select
 
@@ -561,15 +573,17 @@ end function N_ConstructNull
           return
         endif
 
-        ! In order to be useful, this%O_vGridDesc_p will require this%N_ip1_p
-        ! (Ask for VIPM, because vgd_new assumed the r_vLevelIn to be VIPM.)
-        n_error = vgd_get(this%O_vGridDesc_p, 'VIPM', n_ip1_p)
-        if(n_error .ne. VGD_OK)then
-          write(6,*)'ERROR in VerticalGrid_class%N_VertiGridGetP, from vgd_get:', n_error
-        end if
-        ! vgd has added hyb=1 (the last entry) to the list.  Remove it.
-        this%N_ip1_p = n_ip1_p(:size(n_ip1_p)-1)
-        deallocate(n_ip1_p) ! vgd_get allocated it
+        if(associated(this%O_vGridDesc_p)) then
+          ! In order to be useful, this%O_vGridDesc_p will require this%N_ip1_p
+          ! (Ask for VIPM, because vgd_new assumed the r_vLevelIn to be VIPM.)
+          n_error = vgd_get(this%O_vGridDesc_p, 'VIPM', n_ip1_p)
+          if(n_error .ne. VGD_OK)then
+            write(6,*)'ERROR in VerticalGrid_class%N_VertiGridGetP, from vgd_get:', n_error
+          end if
+          ! vgd has added hyb=1 (the last entry) to the list.  Remove it.
+          this%N_ip1_p = n_ip1_p(:size(n_ip1_p)-1)
+          deallocate(n_ip1_p) ! vgd_get allocated it
+        end if ! associated
 
       end if
 

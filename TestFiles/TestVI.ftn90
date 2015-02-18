@@ -207,40 +207,40 @@ program Test_Vertical_Interpolation
 !!$
 !!$
 !!$
-!!$  !
-!!$  ! SECOND TEST
-!!$  ! SECOND TEST
-!!$  !
-!!$  s_title = "TEST 2:  generic; cubic derivs; clamped; ascending"
-!!$
-!!$  n_gridType = N_GRID_TYPE_GENERIC
-!!$
-!!$  r_levelsInit   = r_LEVELS_INCREASING
-!!$  r_stateIn      = r_stateIncreasing
-!!$  r_derivIn      = r_derivIncreasing
-!!$  r_levelsTarget = r_LEVELS_TARGET_STD
-!!$
-!!$  s_interpType = 'cubicwithderivs'
-!!$  s_extrapType = 'clamped'
-!!$
-!!$  r_stateAnswer(1,1,:) =(/0.9042932, 0.4981775, 0.3443519, 0.5971954, 0.1708000/)
-!!$  r_stateAnswer(2,1,:) =(/2.0318060,-0.5722344,-0.3647639, 0.7445440,-0.1733000/)
-!!$
-!!$  r_derivAnswer(1,1,:) =(/0.4281423,-0.8671802,-0.9382274, 0.8020958,-0.9853000/)
-!!$  r_derivAnswer(2,1,:) =(/6.4005327, 1.3408751, 1.1214883, 1.5543460, 1.0300300/)
-!!$
-!!$  call m_testOneCombo(s_title, n_gridType, s_interpType, s_extrapType, &
-!!$
-!!$                      r_levelsInit,   r_stateIn , r_derivIn, &
-!!$                      r_levelsTarget, r_stateAnswer, r_derivAnswer, &
-!!$
-!!$                      r_EXTRAP_GUIDE_DOWN, r_EXTRAP_GUIDE_UP, &
-!!$
-!!$                      r_PTOP_INIT, r_PREF_INIT, r_RCOEFF_INIT, &
-!!$                      r_PTOP_TARGET, r_PREF_TARGET, r_RCOEFF_TARGET, &
-!!$                      r_PSURF, r_PTOP &
-!!$                     )
-!!$
+  !
+  ! SECOND TEST
+  ! SECOND TEST
+  !
+  s_title = "TEST 2:  generic; cubic derivs; clamped; ascending"
+
+  n_gridType = N_GRID_TYPE_GENERIC
+
+  r_levelsInit   = r_LEVELS_INCREASING
+  r_stateIn      = r_stateIncreasing
+  r_derivIn      = r_derivIncreasing
+  r_levelsTarget = r_LEVELS_TARGET_STD
+
+  s_interpType = 'cubicwithderivs'
+  s_extrapType = 'clamped'
+
+  r_stateAnswer(1,1,:) =(/0.9042932, 0.4981775, 0.3443519, 0.5971954, 0.1708000/)
+  r_stateAnswer(2,1,:) =(/2.0318060,-0.5722344,-0.3647639, 0.7445440,-0.1733000/)
+
+  r_derivAnswer(1,1,:) =(/0.4281423,-0.8671802,-0.9382274, 0.8020958,-0.9853000/)
+  r_derivAnswer(2,1,:) =(/6.4005327, 1.3408751, 1.1214883, 1.5543460, 1.0300300/)
+
+  call m_testOneCombo(s_title, n_gridType, s_interpType, s_extrapType, &
+
+                      r_levelsInit,   r_stateIn , r_derivIn, &
+                      r_levelsTarget, r_stateAnswer, r_derivAnswer, &
+
+                      r_EXTRAP_GUIDE_DOWN, r_EXTRAP_GUIDE_UP, &
+
+                      r_PTOP_INIT, r_PREF_INIT, r_RCOEFF_INIT, &
+                      r_PTOP_TARGET, r_PREF_TARGET, r_RCOEFF_TARGET, &
+                      r_PSURF, r_PTOP &
+                     )
+
 !!$
 !!$
 !!$
