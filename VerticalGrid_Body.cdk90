@@ -504,20 +504,16 @@ end function N_ConstructNull
         !  the thermodynamic levels.):
         n_kind    = this%n_vcode / 1000
         n_version = this%n_vcode - (n_kind * 1000)
-write(*,*)"JWB:  this%n_vcode=", this%n_vcode
         select case(this%n_vcode)
 
         case (1001)
           n_error = vgd_new(this%O_vGridDesc_p, n_kind, n_version, &
-                            real(this%R_vLevel_p), this%R_rCoef, this%R_rCoef_2,&
-                            real(this%R_pTopAvg, kind=8), &
-                            real(this%R_pRef, kind=8))
+                            real(this%R_vLevel_p))
 
         case (1002)
           n_error = vgd_new(this%O_vGridDesc_p, n_kind, n_version, &
-                            real(this%R_vLevel_p), this%R_rCoef, this%R_rCoef_2,&
-                            real(this%R_pTopAvg, kind=8), &
-                            real(this%R_pRef, kind=8))
+                            real(this%R_vLevel_p),&
+                            ptop_8=real(this%R_pTopAvg, kind=8))
 
         case (1003)
           n_error = vgd_new(this%O_vGridDesc_p, n_kind, n_version, &
