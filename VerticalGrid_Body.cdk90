@@ -569,8 +569,9 @@ end function N_ConstructNull
         ! Test the return value from vgd_new
         if(n_error /= 0) then
           write(6,*)'Error from vgd_new in N_Viqkdef:  error=', n_error
+          write(6,*)'Ezinterpv exiting.'
           call flush(6)
-          return
+          call exit(2)
         endif
 
         if(associated(this%O_vGridDesc_p)) then
@@ -854,7 +855,9 @@ end function N_ConstructNull
 
     if(this%N_gridType /= N_GRID_TYPE_GENERIC .and. l_firstTime .eqv. .true.) then
          l_firstTime=.false.
-         write(6,"(1x,'\n', A92, '\n' )")'In ez_interpv, converting the vertical levels to ln P (1 mb ref level) before interpolating.'
+         write(6,*)' '
+         write(6,*)'In ez_interpv, converting the vertical levels to ln P (1 mb ref level) before interpolating.'
+         write(6,*)' '
     endif
 
                                         ! Obtain the cube of pressures

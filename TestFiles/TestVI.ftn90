@@ -144,12 +144,24 @@ program Test_Vertical_Interpolation
 
 
 
-!!$
-!!$  !
-!!$  ! FIRST TEST
-!!$  ! FIRST TEST
-!!$  !
-!!$  s_title = "TEST 1:  normalized hybrid; cubic derivs; clamped; ascending"
+
+  !
+  ! FIRST TEST
+  ! FIRST TEST
+  !
+  s_title = "TEST 1:  normalized hybrid; cubic derivs; clamped; ascending"
+  write(6,*)" "
+  write(6,*)" "
+  write(6,*)s_title
+  write(6,*)"Because vgrid descriptor does not support this case,"
+  write(6,*)"the correct result is an abortion."
+  write(6,*)"UNCOMMENT THE CODE to perform the test."
+  write(6,*)"UNCOMMENT THE CODE to perform the test."
+  write(6,*)"UNCOMMENT THE CODE to perform the test."
+  write(6,*)" "
+
+!!$  write(6,*)"BEGINNING ", s_title
+!!$  write(6,*)"The correct result is an abortion..."
 !!$
 !!$!  n_gridType = N_GRID_TYPE_SIGMA
 !!$!  n_gridType = N_GRID_TYPE_PRESSURE
@@ -202,11 +214,11 @@ program Test_Vertical_Interpolation
 !!$                      r_PTOP_TARGET, r_PREF_TARGET, r_RCOEFF_TARGET, &
 !!$                      r_PSURF, r_PTOP &
 !!$                     )
-!!$
-!!$
-!!$
-!!$
-!!$
+
+
+
+
+
   !
   ! SECOND TEST
   ! SECOND TEST
@@ -1477,7 +1489,10 @@ program Test_Vertical_Interpolation
   write(6,*)s_title
   write(6,*)"The correct result is an abortion."
   write(6,*)"UNCOMMENT THE CODE to perform the test."
+  write(6,*)"UNCOMMENT THE CODE to perform the test."
+  write(6,*)"UNCOMMENT THE CODE to perform the test."
   write(6,*)" "
+
 !!$  write(6,*)"BEGINNING ", s_title
 !!$  write(6,*)"The correct result is an abortion..."
 !!$
@@ -1854,7 +1869,8 @@ subroutine m_testOneCombo(s_title, n_gridType, s_interpType, s_extrapType, &
                        s_fail     = '  **** F A I L ****', &
                        s_passFail = '  **** T E M P ****'
 
-  write(6,*) '\n', s_title
+  write(6,*)
+  write(6,*) s_title
 
   n_ni = ubound(r_stateAnswer,1)
   n_nj = ubound(r_stateAnswer,2)
@@ -2156,7 +2172,8 @@ subroutine m_testOneCombo_FunnyBounds(s_title, n_gridType, s_interpType, s_extra
                        s_fail     = '  **** F A I L ****', &
                        s_passFail = '  **** T E M P ****'
 
-  write(6,*) '\n', s_title
+  write(6,*)
+  write(6,*) s_title
 
   n_ni = ubound(r_stateAnswer,1)
   n_nj = ubound(r_stateAnswer,2)
@@ -2438,7 +2455,8 @@ subroutine m_testOneCombo_staggered &
   o_gridInitial_p%Ptr => o_gridInitial
   o_gridTarget_p%Ptr  => o_gridTarget
 
-  write(6,*) '\n', s_title
+  write(6,*)
+  write(6,*) s_title
 
   n_ni = ubound(r_stateAnswer,1)
   n_nj = ubound(r_stateAnswer,2)
@@ -2608,7 +2626,8 @@ subroutine m_testOneCombo_F90ifc &
   o_gridInitial_p%Ptr => o_gridInitial
   o_gridTarget_p%Ptr  => o_gridTarget
 
-  write(6,*) '\n', s_title
+  write(6,*)
+  write(6,*) s_title
 
   n_ni = ubound(r_stateAnswer,1)
   n_nj = ubound(r_stateAnswer,2)
