@@ -1338,11 +1338,11 @@ program Test_Vertical_Interpolation
   s_interpType = 'cubicwithderivs'
   s_extrapType = 'clamped'
 
-  r_stateAnswer(1,1,:) =(/0.5971954, 0.9305420, 0.3586313, 0.3019232, 0.1708000/)
-  r_stateAnswer(2,1,:) =(/0.7445440, 1.1360878,-0.3795336,-0.3138815,-0.1733000/)
+  r_stateAnswer(1,1,:) =(/1.2849764, 0.9315544, 0.3601077, 0.3026085, 0.1708000/)
+  r_stateAnswer(2,1,:) =(/-2.4446764,1.2305623,-0.3820439,-0.3150665,-0.1733000/)
 
-  r_derivAnswer(1,1,:) =(/0.8020958,-0.3624431,-0.8734112,-0.9047615,-0.9853000/)
-  r_derivAnswer(2,1,:) =(/1.5543460,-7.2491136, 1.0482591, 1.0140415, 1.0300300/)
+  r_derivAnswer(1,1,:)=(/-0.0703302,-0.3575073,-0.8898256,-0.9181176,-0.9853000/)
+  r_derivAnswer(2,1,:)=(/-2.9176900,-7.4034305, 1.0748973, 1.0347385, 1.0300300/)
 
   !
   ! MAKE THE DATA REASONABLE FOR THE HYBRID GRID TYPE
@@ -1363,16 +1363,19 @@ program Test_Vertical_Interpolation
 
 
 ! NOTE:  modifying the initial pref and rcoeff
-  call m_testOneCombo(s_title, n_gridType, s_interpType, s_extrapType, &
+  call m_testOneCombo_F90ifc(s_title, n_gridType, n_gridType, &
+                      s_interpType, s_extrapType, &
 
                       r_levelsInit,   r_stateIn , r_derivIn, &
                       r_levelsTarget, r_stateAnswer, r_derivAnswer, &
 
                       r_EXTRAP_GUIDE_DOWN, r_EXTRAP_GUIDE_UP, &
 
-                      r_PTOP_INIT, r_PREF_INIT/2., r_RCOEFF_INIT*2, &
-                      r_PTOP_TARGET, r_PREF_TARGET, r_RCOEFF_TARGET, &
-                      r_PSURF, r_PTOP &
+                      r_PTOP_INIT/2., r_PREF_INIT/2., r_RCOEFF_INIT*2, &
+                      r_PTOP_TARGET/2.5, r_PREF_TARGET/2., r_RCOEFF_TARGET, &
+                      r_PSURF, r_PTOP, &
+
+                      0.0, 0.0 &
                      )
 
 
@@ -2647,21 +2650,34 @@ subroutine m_testOneCombo_F90ifc &
   if(n_gridTypeIn == N_GRID_TYPE_STAG5005) then
     vgd_kind=5
     vgd_version=5
-  else
+  else if (n_gridTypeIn == N_GRID_TYPE_STAGGERED) then
     vgd_kind=5
     vgd_version=2
+  else if (n_gridTypeIn == N_GRID_TYPE_HYBRID_NOTNORM) then
+    vgd_kind=5
+    vgd_version=1
+  else
+    write(*,*)"ERROR in m_testOneCombo_F90ifc:  n_gridTypeIn not recognized:  ",&
+              n_gridTypeIn
   end if
   error=N_Viqkdef     (o_gridInitial_p, n_PTS_INIT, n_gridTypeIn, &
                        r_levelsInit, r_pTopInit, r_pRefInit, &
                        r_rCoefInit, r_rCoef_2_Init, vgd_kind, vgd_version)
   if(error /= 0)write(6,*)'ERROR initializing gridInitial:  ', error
 
+
   if(n_gridTypeOut == N_GRID_TYPE_STAG5005) then
     vgd_kind=5
     vgd_version=5
-  else
+  else if (n_gridTypeIn == N_GRID_TYPE_STAGGERED) then
     vgd_kind=5
     vgd_version=2
+  else if (n_gridTypeOut == N_GRID_TYPE_HYBRID_NOTNORM) then
+    vgd_kind=5
+    vgd_version=1
+  else
+    write(*,*)"ERROR in m_testOneCombo_F90ifc:  n_gridTypeOut not recognized: ",&
+              n_gridTypeOut
   end if
   error=N_Viqkdef     (o_gridTarget_p, n_PTS_TARGET, n_gridTypeOut, &
                        r_levelsTarget, r_pTopTarget, r_pRefTarget, &
