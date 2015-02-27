@@ -48,6 +48,8 @@ use VerticalInterpolationConstants
   public
   save
 
+  real, parameter :: r_MBAR_PER_PASCAL = 0.01
+
   type T_VerticalGrid
     ! information capable of specifying particular grid types is placed in
     !  variables here:
@@ -536,13 +538,13 @@ end function N_ConstructNull
         case (5002)
           n_error = vgd_new(this%O_vGridDesc_p, n_kind, n_version, &
                             real(this%R_vLevel_p), this%R_rCoef, this%R_rCoef_2,&
-                            real(this%R_pTopAvg, kind=8), &
-                            real(this%R_pRef, kind=8))
+                            real(this%R_pTopAvg/r_MBAR_PER_PASCAL, kind=8), &
+                            real(this%R_pRef/r_MBAR_PER_PASCAL, kind=8))
 
         case (5005)
           n_error = vgd_new(this%O_vGridDesc_p, n_kind, n_version, &
                             real(this%R_vLevel_p), this%R_rCoef, this%R_rCoef_2,&
-                            pref_8=real(this%R_pRef, kind=8), &
+                            pref_8=real(this%R_pRef/r_MBAR_PER_PASCAL, kind=8), &
                             ptop_out_8=ptop_out_dummy, &
                             dhm=10.0, dht=1.5)
 
@@ -694,7 +696,6 @@ end function N_ConstructNull
     real(single), dimension(n_ni,n_nj,that%Ptr%N_numVLevels) :: r_P_single
     real(single), dimension(n_ni,n_nj) :: r_pSurf_single
     logical, parameter :: l_IN_LOG = .false.
-    real, parameter :: r_MBAR_PER_PASCAL = 0.01
 
     nullify(o_vGridDesc_p)
 
