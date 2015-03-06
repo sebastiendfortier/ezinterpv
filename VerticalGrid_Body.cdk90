@@ -49,6 +49,7 @@ use VerticalInterpolationConstants
   save
 
   real, parameter :: r_MBAR_PER_PASCAL = 0.01
+  real, parameter :: r_LOG_MBAR_PER_PASCAL = log(0.01)
 
   type T_VerticalGrid
     ! information capable of specifying particular grid types is placed in
@@ -688,7 +689,7 @@ end function N_ConstructNull
 
     real(single), dimension(:,:,:), pointer :: r_P_single_p
 ! real(single), dimension(n_ni,n_nj,that%Ptr%N_numVLevels) :: r_P_single
-    logical, parameter :: l_IN_LOG = .false.
+    logical, parameter :: l_IN_LOG = .true.
 
 
     this => that%Ptr
@@ -712,7 +713,7 @@ end function N_ConstructNull
         write(6,*)'ERROR in VerticalGrid_class%N_VertGridGetP, ', &
                   'from vgd_levels:', n_error
       end if
-      r_P = r_P_single_p * r_MBAR_PER_PASCAL
+      r_P = r_P_single_p + r_LOG_MBAR_PER_PASCAL
 
       deallocate(r_P_single_p)
 
@@ -820,20 +821,15 @@ end function N_ConstructNull
     N_VertGridGetLnP = N_VertGridGetP(that, r_lnP, n_ni, n_nj, r_pSurf, r_pTop)
 
     select case (this%N_gridType)
-    case(N_GRID_TYPE_SIGMA, N_GRID_TYPE_PRESSURE, N_GRID_TYPE_HYBRID, &
-         N_GRID_TYPE_ETA, N_GRID_TYPE_HYBRID_NOTNORM, N_GRID_TYPE_STAGGERED, &
-         N_GRID_TYPE_STAG5005)
+!   case(N_GRID_TYPE_SIGMA, N_GRID_TYPE_PRESSURE, N_GRID_TYPE_HYBRID, &
+!        N_GRID_TYPE_ETA, N_GRID_TYPE_HYBRID_NOTNORM, N_GRID_TYPE_STAGGERED, &
+!        N_GRID_TYPE_STAG5005)
+    case default
                                         ! Convert the 'cube' of source vertical
                                         ! levels from P to ln P
-      r_lnP = log(r_lnP)
+!!$      r_lnP = log(r_lnP)
 
     case(N_GRID_TYPE_GENERIC)
-      ! Do nothing
-
-    case default
-      ! If execution leads here, it is because a new gridType has been added.
-      write(6,*)'WARNING:  in N_VertGridGetLnP, grid type not recognized.'
-      write(6,*)'          Copying P directly to ln P.'
       ! Do nothing
     end select
 
