@@ -75,11 +75,7 @@ use VerticalInterpolationConstants
     real :: R_pRef                      ! reference pressure (mb)
     real :: R_rCoef                     ! known as 'expansion co-efficient'
     real :: R_rCoef_2                   ! for staggered co-ordinates
-
-                                        ! vgrid's definition of the grid type
-    integer :: n_kind_vgrid
-    integer :: n_version_vgrid
-    integer :: n_vcode
+    integer :: n_vcode                  ! vgrid's definition of the grid type
   end type T_VerticalGrid
 
   type T_VerticalGridPtr
@@ -144,8 +140,7 @@ contains
                    .or. r_ZERO < abs(o_gridA_p%R_pRef    - o_gridB_p%R_pRef) &
                    .or. r_ZERO < abs(o_gridA_p%R_rCoef   - o_gridB_p%R_rCoef) &
                    .or. r_ZERO < abs(o_gridA_p%R_rCoef_2 - o_gridB_p%R_rCoef_2) &
-                   .or. o_gridA_p%n_kind_vgrid    /= o_gridB_p%n_kind_vgrid &
-                   .or. o_gridA_p%n_version_vgrid /= o_gridB_p%n_version_vgrid &
+                   .or. o_gridA_p%n_vcode    /= o_gridB_p%n_vcode &
                   ) &
          ) then
       M_NotEqualVerticalGridPtr = .true.
@@ -153,8 +148,7 @@ contains
           )  .and.(     r_ZERO < abs(o_gridA_p%R_pRef    - o_gridB_p%R_pRef) &
                    .or. r_ZERO < abs(o_gridA_p%R_rCoef   - o_gridB_p%R_rCoef) &
                    .or. r_ZERO < abs(o_gridA_p%R_rCoef_2 - o_gridB_p%R_rCoef_2) &
-                   .or. o_gridA_p%n_kind_vgrid    /= o_gridB_p%n_kind_vgrid &
-                   .or. o_gridA_p%n_version_vgrid /= o_gridB_p%n_version_vgrid &
+                   .or. o_gridA_p%n_vcode    /= o_gridB_p%n_vcode &
                   ) &
          ) then
       M_NotEqualVerticalGridPtr = .true.
@@ -270,8 +264,7 @@ contains
     o_gridOut%R_pRef          = o_gridIn%R_pRef
     o_gridOut%R_rCoef         = o_gridIn%R_rCoef
     o_gridOut%R_rCoef_2       = o_gridIn%R_rCoef_2
-    o_gridOut%n_kind_vgrid    = o_gridIn%n_kind_vgrid
-    o_gridOut%n_version_vgrid = o_gridIn%n_version_vgrid
+    o_gridOut%n_vcode    = o_gridIn%n_vcode
   end subroutine M_AssignVerticalGrid
 
 
@@ -346,8 +339,7 @@ contains
     this%R_pRef = 0.
     this%R_rCoef = 0.
     this%R_rCoef_2 = 0.
-    this%n_kind_vgrid = 0
-    this%n_version_vgrid = 0
+    this%n_vcode = 0
 
 end function N_ConstructNull
 
