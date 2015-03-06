@@ -632,8 +632,8 @@ end function N_ConstructNull
 
 
 
-!!!func N_VertGridGetP - Create 'cube' of vertical levels in units of P (mb)
-  integer function N_VertGridGetP(that, r_P, n_ni, n_nj, r_pSurf, r_pTop)
+!!!func N_VertGridGetLnP - Create 'cube' of vertical levels in units of ln P
+  integer function N_VertGridGetLnP(that, r_P, n_ni, n_nj, r_pSurf, r_pTop)
                                         ! returns error indication:  0='no error'
 !
 !AUTHOR
@@ -690,11 +690,21 @@ end function N_ConstructNull
     real(single), dimension(:,:,:), pointer :: r_P_single_p
 ! real(single), dimension(n_ni,n_nj,that%Ptr%N_numVLevels) :: r_P_single
     logical, parameter :: l_IN_LOG = .true.
+    logical :: l_firstTime=.true.
 
 
     this => that%Ptr
     nullify(r_P_single_p)
-    N_VertGridGetP = 0                  ! no error yet
+    N_VertGridGetLnP = 0                  ! no error yet
+    
+
+    if(this%N_gridType /= N_GRID_TYPE_GENERIC .and. l_firstTime .eqv. .true.) then
+         l_firstTime=.false.
+         write(6,*)' '
+         write(6,*)'In ez_interpv, converting the vertical levels to ln P (1 mb ref level) before interpolating.'
+         write(6,*)'(This message will not be repeated.)'
+         write(6,*)' '
+    endif
 
     !
     ! Create the 'cube' of source vertical levels
@@ -710,7 +720,7 @@ end function N_ConstructNull
                            r_P_single_p, &
                            real(r_pSurf, kind=4) / r_MBAR_PER_PASCAL, l_IN_LOG)
       if(n_error .ne. VGD_OK)then
-        write(6,*)'ERROR in VerticalGrid_class%N_VertGridGetP, ', &
+        write(6,*)'ERROR in VerticalGrid_class%N_VertGridGetLnP, ', &
                   'from vgd_levels:', n_error
       end if
       r_P = r_P_single_p + r_LOG_MBAR_PER_PASCAL
@@ -731,17 +741,17 @@ end function N_ConstructNull
 !                          real(r_pSurf, kind=4), n_ni, n_nj, &
 !                          this%N_numVLevels) &
 !                         ) then
-!        write(6,*)'In N_VertGridGetP:  hyb_to_pres FAILED'
+!        write(6,*)'In N_VertGridGetLnP:  hyb_to_pres FAILED'
 !        call flush(6)
-!        N_VertGridGetP = N_VI_VGERR_HYBRID_TO_PRES_CONVN
+!        N_VertGridGetLnP = N_VI_VGERR_HYBRID_TO_PRES_CONVN
 !      end if
 !      r_P = r_P_single
 
 !    case(N_GRID_TYPE_ETA) ! vgrid gives a different result from this:
 !      if(.not. present(r_pTop)) then
-!        write(6,*)'ERROR in N_VertGridGetP:  pTop required for eta units'
+!        write(6,*)'ERROR in N_VertGridGetLnP:  pTop required for eta units'
 !        call flush(6)
-!        N_VertGridGetP = N_VI_VGERR_PTOP_MISSING
+!        N_VertGridGetLnP = N_VI_VGERR_PTOP_MISSING
 !      else
 !        do k=1,this%N_numVLevels
 !          do j=1,n_nj
@@ -753,85 +763,6 @@ end function N_ConstructNull
 !        end do
 !      end if
       end select
-
-  end function N_VertGridGetP
-
-
-
-!!!func N_VertGridGetLnP - Create 'cube' of vertical levels in units of ln P
-  integer function N_VertGridGetLnP(that, r_lnP, n_ni, n_nj, r_pSurf, r_pTop)
-                                        ! returns error indication:  0='no error'
-!
-!AUTHOR
-!     J.W. Blezius JULY 2002 helper on top of the Interp1D library
-!
-!REVISION
-! v1_0    Blezius J.W.          - initial version
-!
-!OBJECT
-!        Converts each pressure in the cube of vertical levels to ln P.
-!
-!        The exception is the 'generic' grid type.  In this case, the 'pressure'
-!        is copied directly as 'ln P', and no conversion is performed.
-!
-!NOTES
-!        The conversion from P to ln P cannot be left up to the user and must be
-!        performed here because there is one case (generic) where the conversion
-!        has no sense.  This routine automatically does no conversion in this
-!        case.
-!
-!ARGUMENTS
-
-                                        ! parameter cannot be a pointer to a
-                                        ! user type:  replace 'this' with 'that'
-    type(T_VerticalGridPtr), intent(inout) :: that
-
-    integer, intent(in) :: n_ni, n_nj   ! horizontal dimensions
-
-                                        ! ln pressure, referenced to 1 mb
-    real(real48), dimension(:,:,:), intent(out) :: r_lnP
-
-                                        ! surface pressure for each horiz point,
-                                        ! in units of mb
-    real(real48), dimension(:,:), intent(in) :: r_pSurf
-
-                                        ! ceiling pressure for each horiz point
-                                        ! required only for eta units,
-                                        ! in units of mb
-    real(real48), dimension(:,:), optional, intent(in) :: r_pTop
-!
-!!
-    type(T_VerticalGrid), pointer :: this
-    logical :: l_firstTime=.true.
-
-
-    this => that%Ptr
-    
-
-    if(this%N_gridType /= N_GRID_TYPE_GENERIC .and. l_firstTime .eqv. .true.) then
-         l_firstTime=.false.
-         write(6,*)' '
-         write(6,*)'In ez_interpv, converting the vertical levels to ln P (1 mb ref level) before interpolating.'
-         write(6,*)'(This message will not be repeated.)'
-         write(6,*)' '
-    endif
-
-                                        ! Obtain the cube of pressures
-                                        ! After this call, lnP is really just P
-    N_VertGridGetLnP = N_VertGridGetP(that, r_lnP, n_ni, n_nj, r_pSurf, r_pTop)
-
-    select case (this%N_gridType)
-!   case(N_GRID_TYPE_SIGMA, N_GRID_TYPE_PRESSURE, N_GRID_TYPE_HYBRID, &
-!        N_GRID_TYPE_ETA, N_GRID_TYPE_HYBRID_NOTNORM, N_GRID_TYPE_STAGGERED, &
-!        N_GRID_TYPE_STAG5005)
-    case default
-                                        ! Convert the 'cube' of source vertical
-                                        ! levels from P to ln P
-!!$      r_lnP = log(r_lnP)
-
-    case(N_GRID_TYPE_GENERIC)
-      ! Do nothing
-    end select
 
   end function N_VertGridGetLnP
 
