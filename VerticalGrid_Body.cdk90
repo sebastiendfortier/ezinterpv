@@ -688,22 +688,15 @@ end function N_ConstructNull
     external flush
     integer, external :: hyb_to_pres
 
-    type(vgrid_descriptor), pointer :: o_vGridDesc_p
-
     integer i, j                        ! indices of the horizontal locations
     integer k                           ! index of the vertical levels
-    integer ikind                       ! kind of grid (convip's kind, extended)
+! integer ikind                       ! kind of grid (convip's kind, extended)
     integer :: n_error
     type(T_VerticalGrid), pointer :: this
 
-    real(single), dimension(Ubound(that%Ptr%R_vLevel_p,1)), target :: r_vLevel_single
-    real(double) :: r_pTopAvg_8, r_pRef_8, dummy_8
     real(single), dimension(:,:,:), pointer :: r_P_single_p
-    real(single), dimension(n_ni,n_nj,that%Ptr%N_numVLevels) :: r_P_single
-    real(single), dimension(n_ni,n_nj) :: r_pSurf_single
+! real(single), dimension(n_ni,n_nj,that%Ptr%N_numVLevels) :: r_P_single
     logical, parameter :: l_IN_LOG = .false.
-
-    nullify(o_vGridDesc_p)
 
 
     this => that%Ptr
@@ -714,7 +707,10 @@ end function N_ConstructNull
     ! Create the 'cube' of source vertical levels
     !
     select case (this%N_gridType)
-    case(N_GRID_TYPE_SIGMA)
+!   case(N_GRID_TYPE_SIGMA, N_GRID_TYPE_ETA, N_GRID_TYPE_HYBRID, &
+!        N_GRID_TYPE_PRESSURE, N_GRID_TYPE_HYBRID_NOTNORM, &
+!        N_GRID_TYPE_STAGGERED, N_GRID_TYPE_STAG5005)
+    case default
                                         ! Obtain, the cube of P.
                                         ! vgd_levels allocates r_P_single_p
       n_error = vgd_levels(this%O_vGridDesc_p, this%N_ip1_p(:this%N_numVLevels),&
@@ -725,6 +721,8 @@ end function N_ConstructNull
                   'from vgd_levels:', n_error
       end if
       r_P = r_P_single_p * r_MBAR_PER_PASCAL
+
+      deallocate(r_P_single_p)
 
     case(N_GRID_TYPE_GENERIC)
       do k=1,this%N_numVLevels
@@ -732,118 +730,36 @@ end function N_ConstructNull
         r_P(:,:,k) = this%R_vLevel_p(k)
       end do
 
-    case(N_GRID_TYPE_PRESSURE)
-                                        ! Obtain, the cube of P.
-                                        ! vgd_levels allocates r_P_single_p
-      n_error = vgd_levels(this%O_vGridDesc_p, this%N_ip1_p(:this%N_numVLevels),&
-                           r_P_single_p, &
-                           real(r_pSurf, kind=4) / r_MBAR_PER_PASCAL, l_IN_LOG)
-      if(n_error .ne. VGD_OK)then
-        write(6,*)'ERROR in VerticalGrid_class%N_VertGridGetP, ', &
-                  'from vgd_levels:', n_error
-      end if
-      r_P = r_P_single_p * r_MBAR_PER_PASCAL
+!    case(N_GRID_TYPE_HYBRID) ! not supported by vgrid - could do it like this:
+!      ikind = 1
+!
+!      if(0 /= hyb_to_pres(r_P_single, real(this%R_vLevel_p), this%R_pTopAvg, &
+!                          this%R_rCoef, this%R_pRef, ikind, &
+!                          real(r_pSurf, kind=4), n_ni, n_nj, &
+!                          this%N_numVLevels) &
+!                         ) then
+!        write(6,*)'In N_VertGridGetP:  hyb_to_pres FAILED'
+!        call flush(6)
+!        N_VertGridGetP = N_VI_VGERR_HYBRID_TO_PRES_CONVN
+!      end if
+!      r_P = r_P_single
 
-    case(N_GRID_TYPE_HYBRID)
-!!$      ikind = 1
-!!$
-!!$      r_vLevel_single = this%R_vLevel_p
-!!$      r_pSurf_single = r_pSurf
-!!$      if(0 /= hyb_to_pres(r_P_single, r_vLevel_single, this%R_pTopAvg, &
-!!$                          this%R_rCoef, this%R_pRef, ikind, r_pSurf_single, &
-!!$                          n_ni, n_nj, this%N_numVLevels) &
-!!$                         ) then
-!!$        write(6,*)'In N_VertGridGetP:  hyb_to_pres FAILED'
-!!$        call flush(6)
-!!$        N_VertGridGetP = N_VI_VGERR_HYBRID_TO_PRES_CONVN
-!!$      end if
-!!$      r_P = r_P_single
-                                        ! Obtain, the cube of P.
-                                        ! vgd_levels allocates r_P_single_p
-      n_error = vgd_levels(this%O_vGridDesc_p, this%N_ip1_p(:this%N_numVLevels),&
-                           r_P_single_p, &
-                           real(r_pSurf, kind=4) / r_MBAR_PER_PASCAL, l_IN_LOG)
-      if(n_error .ne. VGD_OK)then
-        write(6,*)'ERROR in VerticalGrid_class%N_VertGridGetP, ', &
-                  'from vgd_levels:', n_error
-      end if
-      r_P = r_P_single_p * r_MBAR_PER_PASCAL
-
-    case(N_GRID_TYPE_HYBRID_NOTNORM)
-                                        ! Obtain, the cube of P.
-                                        ! vgd_levels allocates r_P_single_p
-      n_error = vgd_levels(this%O_vGridDesc_p, this%N_ip1_p(:this%N_numVLevels),&
-                           r_P_single_p, &
-                           real(r_pSurf, kind=4) / r_MBAR_PER_PASCAL, l_IN_LOG)
-      if(n_error .ne. VGD_OK)then
-        write(6,*)'ERROR in VerticalGrid_class%N_VertGridGetP, ', &
-                  'from vgd_levels:', n_error
-      end if
-      r_P = r_P_single_p * r_MBAR_PER_PASCAL
-
-    case(N_GRID_TYPE_STAGGERED, N_GRID_TYPE_STAG5005)
-      ! For a staggered grid, only the grid descriptor knows how to calculate the
-      ! pressure.  Therefore, create a grid descriptor.
-      r_pTopAvg_8 = this%R_pTopAvg
-      r_pRef_8 = this%R_pRef
-      r_pSurf_single = r_pSurf
-
-      o_vGridDesc_p => this%O_vGridDesc_p
-                                        ! Obtain, the cube of P.
-                                        ! vgd_levels allocates r_P_single_p
-      n_error = vgd_levels(o_vGridDesc_p, this%N_ip1_p(:this%N_numVLevels), &
-                           r_P_single_p, r_pSurf_single/r_MBAR_PER_PASCAL, l_IN_LOG)
-      if(n_error .ne. VGD_OK)then
-        write(6,*)'ERROR in VerticalGrid_class%N_VertGridGetP, ', &
-                  'from vgd_levels:', n_error
-      end if
-      r_P = r_P_single_p * r_MBAR_PER_PASCAL
-
-      deallocate(r_P_single_p)
-    ! destructor (o_vGridDesc_p)  -- MEMORY LEAK !
-
-    case(N_GRID_TYPE_ETA)
-!!$      if(.not. present(r_pTop)) then
-!!$        write(6,*)'ERROR in N_VertGridGetP:  pTop required for eta units'
-!!$        call flush(6)
-!!$        N_VertGridGetP = N_VI_VGERR_PTOP_MISSING
-!!$      else
-!!$        do k=1,this%N_numVLevels
-!!$          do j=1,n_nj
-!!$            do i=1,n_ni
-!!$              r_P(i,j,k) =   r_pTop(i,j) &
-!!$                           + (r_pSurf(i,j) - r_pTop(i,j)) * this%R_vLevel_p(k)
-!!$            end do
-!!$          end do
-!!$        end do
-!!$      end if
-
-      r_pSurf_single = r_pSurf
-
-      o_vGridDesc_p => this%O_vGridDesc_p
-                                        ! Obtain, the cube of P.
-                                        ! vgd_levels allocates r_P_single_p
-      n_error = vgd_levels(o_vGridDesc_p, this%N_ip1_p(:this%N_numVLevels), &
-                           r_P_single_p, r_pSurf_single/r_MBAR_PER_PASCAL, &\
-                           l_IN_LOG)
-      if(n_error .ne. VGD_OK)then
-        write(6,*)'ERROR in VerticalGrid_class%N_VertGridGetP, ', &
-                  'from vgd_levels:', n_error
-      end if
-      r_P = r_P_single_p * r_MBAR_PER_PASCAL
-
-      deallocate(r_P_single_p)
-    ! destructor (o_vGridDesc_p)  -- MEMORY LEAK !
-
-    case default
-      ! If execution leads here, it is because a new gridType has been added.
-      write(6,*)'WARNING:  in N_VertGridGetP, grid type not recognized.'
-      write(6,*)'          Copying vLevel directly to P.'
-      do k=1,this%N_numVLevels
-        r_P(:,:,k) = this%R_vLevel_p(k)
-      end do
-
-    end select
+!    case(N_GRID_TYPE_ETA) ! vgrid gives a different result from this:
+!      if(.not. present(r_pTop)) then
+!        write(6,*)'ERROR in N_VertGridGetP:  pTop required for eta units'
+!        call flush(6)
+!        N_VertGridGetP = N_VI_VGERR_PTOP_MISSING
+!      else
+!        do k=1,this%N_numVLevels
+!          do j=1,n_nj
+!            do i=1,n_ni
+!              r_P(i,j,k) =   r_pTop(i,j) &
+!                           + (r_pSurf(i,j) - r_pTop(i,j)) * this%R_vLevel_p(k)
+!            end do
+!          end do
+!        end do
+!      end if
+      end select
 
   end function N_VertGridGetP
 
