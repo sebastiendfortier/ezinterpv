@@ -12,5 +12,5 @@ Before building:
     . s.ssmuse.dot /ssm/net/cmdn/vgrid/5.3.1/${COMP_ARCH}
 
 - make librmn available:
-    . s.ssmuse.dot /ssm/net/rpn/libs/15.1
+    . s.ssmuse.dot /ssm/net/rpn/libs/15.2
 

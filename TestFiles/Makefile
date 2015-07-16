@@ -15,7 +15,7 @@ OPTIMIZ = -O 2
 #OPTIMIZ = -O 0
 #OPTIMIZ = -O 0 -debug
 
-LIBRMN = rmn_015.1
+LIBRMN = rmn_015.2
 TEMPLIB = ../$(EC_ARCH)/lib/libezinterpv.a
 
 default: test

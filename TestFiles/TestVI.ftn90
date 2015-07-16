@@ -1713,6 +1713,10 @@ program Test_Vertical_Interpolation
 !!$  ! TWENTY-FIFTH TEST
 !!$  ! TWENTY-FIFTH TEST
 !!$  !
+!!$  ! Vgrid gives different results from those that are otherwise expected.
+!!$  ! This question has not been resolved definitively.  In the meantime,
+!!$  ! vgrid is to be mistrusted in this case.  The test has been disabled
+!!$  ! because it always fails as a result.
 !!$  s_title = "TEST 25:  eta; linear; clamped; ascending"
 !!$
 !!$!  n_gridType = N_GRID_TYPE_SIGMA

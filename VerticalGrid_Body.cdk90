@@ -72,10 +72,6 @@ use VerticalInterpolationConstants
     ! (surface pressure is not explicitly a part of the vertical grid)
 
     ! hybrid parameters
-    real :: R_pTopAvg                   ! pressure (mb) at the model top(ceiling)
-    real :: R_pRef                      ! reference pressure (mb)
-    real :: R_rCoef                     ! known as 'expansion co-efficient'
-    real :: R_rCoef_2                   ! for staggered co-ordinates
     integer :: n_vcode                  ! vgrid's definition of the grid type
   end type T_VerticalGrid
 
@@ -134,25 +130,6 @@ contains
      .or. o_gridA_p%N_fileUnit   /= o_gridB_p%N_fileUnit &
     ) then
     M_NotEqualVerticalGridPtr = .true.
-  else if((     o_gridA_p%N_gridType == N_GRID_TYPE_HYBRID &
-           .or. o_gridA_p%N_gridType == N_GRID_TYPE_HYBRID_NOTNORM &
-           .or. o_gridA_p%N_gridType == N_GRID_TYPE_STAGGERED &
-          )  .and.(     r_ZERO < abs(o_gridA_p%R_pTopAvg - o_gridB_p%R_pTopAvg) &
-                   .or. r_ZERO < abs(o_gridA_p%R_pRef    - o_gridB_p%R_pRef) &
-                   .or. r_ZERO < abs(o_gridA_p%R_rCoef   - o_gridB_p%R_rCoef) &
-                   .or. r_ZERO < abs(o_gridA_p%R_rCoef_2 - o_gridB_p%R_rCoef_2) &
-                   .or. o_gridA_p%n_vcode    /= o_gridB_p%n_vcode &
-                  ) &
-         ) then
-      M_NotEqualVerticalGridPtr = .true.
-  else if((o_gridA_p%N_gridType == N_GRID_TYPE_STAG5005 &
-          )  .and.(     r_ZERO < abs(o_gridA_p%R_pRef    - o_gridB_p%R_pRef) &
-                   .or. r_ZERO < abs(o_gridA_p%R_rCoef   - o_gridB_p%R_rCoef) &
-                   .or. r_ZERO < abs(o_gridA_p%R_rCoef_2 - o_gridB_p%R_rCoef_2) &
-                   .or. o_gridA_p%n_vcode    /= o_gridB_p%n_vcode &
-                  ) &
-         ) then
-      M_NotEqualVerticalGridPtr = .true.
   else if(.not. (o_gridA_p%O_vGridDesc_p == o_gridB_p%O_vGridDesc_p)) then
       M_NotEqualVerticalGridPtr = .true.
   else
@@ -261,10 +238,6 @@ contains
     end if
     o_gridOut%O_vGridDesc_p  => o_gridIn%O_vGridDesc_p
     o_gridOut%N_fileUnit      = o_gridIn%N_fileUnit
-    o_gridOut%R_pTopAvg       = o_gridIn%R_pTopAvg
-    o_gridOut%R_pRef          = o_gridIn%R_pRef
-    o_gridOut%R_rCoef         = o_gridIn%R_rCoef
-    o_gridOut%R_rCoef_2       = o_gridIn%R_rCoef_2
     o_gridOut%n_vcode    = o_gridIn%n_vcode
   end subroutine M_AssignVerticalGrid
 
@@ -336,10 +309,6 @@ contains
     ! Initialize all other values to zero
     this%N_gridType = 0
     this%N_fileUnit = 0
-    this%R_pTopAvg = 0.
-    this%R_pRef = 0.
-    this%R_rCoef = 0.
-    this%R_rCoef_2 = 0.
     this%n_vcode = 0
 
 end function N_ConstructNull
@@ -394,6 +363,12 @@ end function N_ConstructNull
     integer, dimension(:), pointer :: n_ip1_p
     real(8) :: ptop_out_dummy
 
+    ! hybrid parameters
+    real :: r_pTopAvg                   ! pressure (mb) at the model top(ceiling)
+    real :: r_pRef                      ! reference pressure (mb)
+    real :: r_rCoef                     ! known as 'expansion co-efficient'
+    real :: r_rCoef_2                   ! for staggered co-ordinates
+
     this => that%Ptr
     N_Viqkdef = 0                       ! no error yet
 
@@ -424,29 +399,29 @@ end function N_ConstructNull
     this%N_numVLevels = n_numVLevelsIn
 
     if(n_gridTypeIn == N_GRID_TYPE_STAG5005) then
-      this%R_pTopAvg = 0.
+      r_pTopAvg = 0.
     else if(present(r_pTopAvgIn))then
-      this%R_pTopAvg = r_pTopAvgIn
+      r_pTopAvg = r_pTopAvgIn
     else
-      this%R_pTopAvg = 0.
+      r_pTopAvg = 0.
     end if
 
     if(present(r_pRefIn))then
-      this%R_pRef = r_pRefIn
+      r_pRef = r_pRefIn
     else
-      this%R_pRef = 0.
+      r_pRef = 0.
     end if
 
     if(present(r_rCoefIn))then
-      this%R_rCoef = r_rCoefIn
+      r_rCoef = r_rCoefIn
     else
-      this%R_rCoef = 0.
+      r_rCoef = 0.
     end if
 
     if(present(r_rCoef_2In))then
-      this%R_rCoef_2 = r_rCoef_2In
+      r_rCoef_2 = r_rCoef_2In
     else
-      this%R_rCoef_2 = 0.
+      r_rCoef_2 = 0.
     end if
 
     if(present(n_ip1In))then
@@ -489,114 +464,95 @@ end function N_ConstructNull
       end select
     end if
 
-!    if(     n_gridTypeIn == N_GRID_TYPE_HYBRID &
-!       .or. n_gridTypeIn == N_GRID_TYPE_HYBRID_NOTNORM &
-!       .or. n_gridTypeIn == N_GRID_TYPE_STAGGERED &
-!       .or. n_gridTypeIn == N_GRID_TYPE_STAG5005) then
-    if(.true.) then
-
-      if(present(o_vGridDescIn_p)) then
-        this%O_vGridDesc_p => o_vGridDescIn_p
-      else
-        allocate(this%O_vGridDesc_p)
-
-        ! Create O_vGridDesc_p right now
-        ! (Although the vgrid documentation doesn't say it, vgd_new accepts only
-        !  momentum levels as input.  The relationship to thermodynamic levels
-        !  being defined mathematically, this is sufficient to determine also
-        !  the thermodynamic levels.):
-        n_kind    = this%n_vcode / 1000
-        n_version = this%n_vcode - (n_kind * 1000)
-        select case(this%n_vcode)
-
-        case (1001)
-          n_error = vgd_new(this%O_vGridDesc_p, n_kind, n_version, &
-                            real(this%R_vLevel_p))
-
-        case (1002)
-          n_error = vgd_new(this%O_vGridDesc_p, n_kind, n_version, &
-                            real(this%R_vLevel_p),&
-                            ptop_8=real(this%R_pTopAvg/r_MBAR_PER_PASCAL, kind=8))
-
-        case (1003)
-          n_error = vgd_new(this%O_vGridDesc_p, n_kind, n_version, &
-                            real(this%R_vLevel_p), this%R_rCoef, &
-                            ptop_8=real(this%R_pTopAvg/r_MBAR_PER_PASCAL, kind=8),&
-                            pref_8=real(this%R_pRef/r_MBAR_PER_PASCAL, kind=8))
-
-        case (2001)
-          n_error = vgd_new(this%O_vGridDesc_p, n_kind, n_version, &
-                            real(this%R_vLevel_p))
-
-        case (5001)
-          n_error = vgd_new(this%O_vGridDesc_p, n_kind, n_version, &
-                            real(this%R_vLevel_p), this%R_rCoef, &
-                            ptop_8=real(this%R_pTopAvg/r_MBAR_PER_PASCAL, kind=8),&
-                            pref_8=real(this%R_pRef/r_MBAR_PER_PASCAL, kind=8))
-
-        case (5002)
-          n_error = vgd_new(this%O_vGridDesc_p, n_kind, n_version, &
-                            real(this%R_vLevel_p), this%R_rCoef, this%R_rCoef_2,&
-                            real(this%R_pTopAvg/r_MBAR_PER_PASCAL, kind=8), &
-                            real(this%R_pRef/r_MBAR_PER_PASCAL, kind=8))
-
-        case (5005)
-          n_error = vgd_new(this%O_vGridDesc_p, n_kind, n_version, &
-                            real(this%R_vLevel_p), this%R_rCoef, this%R_rCoef_2,&
-                            pref_8=real(this%R_pRef/r_MBAR_PER_PASCAL, kind=8), &
-                            ptop_out_8=ptop_out_dummy, &
-                            dhm=10.0, dht=1.5)
-
-        case (N_GRID_TYPE_GENERIC)
-          ! These cases are not supported by the vertical-grid descriptor
-          deallocate(this%O_vGridDesc_p)
-          nullify(this%O_vGridDesc_p)
-
-          ! N_ip1_p is used only in association with O_vGridDesc_p
-          deallocate(this%N_ip1_p)
-          nullify(this%N_ip1_p)
-          n_error = 0
-
-        case default
-          n_error = 0
-
-        end select
-
-        ! Test the return value from vgd_new
-        if(n_error /= 0) then
-          write(6,*)'Error from vgd_new in N_Viqkdef:  error=', n_error
-          write(6,*)'Ezinterpv exiting.'
-          call flush(6)
-          call exit(2)
-        endif
-
-        if(associated(this%O_vGridDesc_p)) then
-          ! In order to be useful, this%O_vGridDesc_p will require this%N_ip1_p
-          ! (Ask for VIPM, because vgd_new assumed the r_vLevelIn to be VIPM.)
-          n_error = vgd_get(this%O_vGridDesc_p, 'VIPM', n_ip1_p)
-          if(n_error .ne. VGD_OK)then
-            write(6,*)'ERROR in VerticalGrid_class%N_VertiGridGetP, from vgd_get:', n_error
-          end if
-          ! vgd might have (depending on the grid type) added hyb=1 (the last
-          ! entry) and the 10m level (after hyb=1) to the list.  Remove them.
-          this%N_ip1_p(:) = n_ip1_p(:size(this%N_ip1_p))
-          deallocate(n_ip1_p) ! vgd_get allocated it
-        end if ! associated
-
-      end if
-
-!   else if(n_gridTypeIn == N_GRID_TYPE_ETA) then
-!     ! One parameter must be supplied LATER (in ConvertToLnP)
-!     this%R_pTopAvg = 0.
-!     this%R_pRef = 0.
-!     this%R_rCoef = 0.
+    if(present(o_vGridDescIn_p)) then
+      this%O_vGridDesc_p => o_vGridDescIn_p
     else
-      ! Set the hybrid parameters to 0
-      this%R_pTopAvg = 0.
-      this%R_pRef = 0.
-      this%R_rCoef = 0.
-      this%R_rCoef_2 = 0.
-    endif
+      allocate(this%O_vGridDesc_p)
+
+      ! Create O_vGridDesc_p right now
+      ! (Although the vgrid documentation doesn't say it, vgd_new accepts only
+      !  momentum levels as input.  The relationship to thermodynamic levels
+      !  being defined mathematically, this is sufficient to determine also
+      !  the thermodynamic levels.):
+      n_kind    = this%n_vcode / 1000
+      n_version = this%n_vcode - (n_kind * 1000)
+      select case(this%n_vcode)
+
+      case (1001)
+        n_error = vgd_new(this%O_vGridDesc_p, n_kind, n_version, &
+             real(this%R_vLevel_p))
+
+      case (1002)
+        n_error = vgd_new(this%O_vGridDesc_p, n_kind, n_version, &
+                          real(this%R_vLevel_p),&
+                          ptop_8=real(r_pTopAvg/r_MBAR_PER_PASCAL, kind=8))
+
+      case (1003)
+        n_error = vgd_new(this%O_vGridDesc_p, n_kind, n_version, &
+                          real(this%R_vLevel_p), r_rCoef, &
+                          ptop_8=real(r_pTopAvg/r_MBAR_PER_PASCAL, kind=8),&
+                          pref_8=real(r_pRef/r_MBAR_PER_PASCAL, kind=8))
+
+      case (2001)
+        n_error = vgd_new(this%O_vGridDesc_p, n_kind, n_version, &
+                          real(this%R_vLevel_p))
+
+      case (5001)
+        n_error = vgd_new(this%O_vGridDesc_p, n_kind, n_version, &
+                          real(this%R_vLevel_p), r_rCoef, &
+                          ptop_8=real(r_pTopAvg/r_MBAR_PER_PASCAL, kind=8),&
+                          pref_8=real(r_pRef/r_MBAR_PER_PASCAL, kind=8))
+
+      case (5002)
+        n_error = vgd_new(this%O_vGridDesc_p, n_kind, n_version, &
+                          real(this%R_vLevel_p), r_rCoef, r_rCoef_2,&
+                          real(r_pTopAvg/r_MBAR_PER_PASCAL, kind=8), &
+                          real(r_pRef/r_MBAR_PER_PASCAL, kind=8))
+
+      case (5005)
+        n_error = vgd_new(this%O_vGridDesc_p, n_kind, n_version, &
+                          real(this%R_vLevel_p), r_rCoef, r_rCoef_2,&
+                          pref_8=real(r_pRef/r_MBAR_PER_PASCAL, kind=8), &
+                          ptop_out_8=ptop_out_dummy, &
+                          dhm=10.0, dht=1.5)
+
+      case (N_GRID_TYPE_GENERIC)
+        ! These cases are not supported by the vertical-grid descriptor
+        deallocate(this%O_vGridDesc_p)
+        nullify(this%O_vGridDesc_p)
+
+        ! N_ip1_p is used only in association with O_vGridDesc_p
+        deallocate(this%N_ip1_p)
+        nullify(this%N_ip1_p)
+        n_error = 0
+
+      case default
+        n_error = 0
+
+      end select
+
+      ! Test the return value from vgd_new
+      if(n_error /= 0) then
+        write(6,*)'Error from vgd_new in N_Viqkdef:  error=', n_error
+        write(6,*)'Ezinterpv exiting.'
+        call flush(6)
+        call exit(2)
+      endif
+
+      if(associated(this%O_vGridDesc_p)) then
+        ! In order to be useful, this%O_vGridDesc_p will require this%N_ip1_p
+        ! (Ask for VIPM, because vgd_new assumed the r_vLevelIn to be VIPM.)
+        n_error = vgd_get(this%O_vGridDesc_p, 'VIPM', n_ip1_p)
+        if(n_error .ne. VGD_OK)then
+          write(6,*)'ERROR in VerticalGrid_class%N_VertiGridGetP, from vgd_get:', n_error
+        end if
+        ! vgd might have (depending on the grid type) added hyb=1 (the last
+        ! entry) and the 10m level (after hyb=1) to the list.  Remove them.
+        this%N_ip1_p(:) = n_ip1_p(:size(this%N_ip1_p))
+        deallocate(n_ip1_p) ! vgd_get allocated it
+      end if ! associated
+
+    end if
 
   end function N_Viqkdef
 
@@ -737,7 +693,7 @@ end function N_ConstructNull
 !      ikind = 1
 !
 !      if(0 /= hyb_to_pres(r_P_single, real(this%R_vLevel_p), this%R_pTopAvg, &
-!                          this%R_rCoef, this%R_pRef, ikind, &
+!                          r_rCoef, r_pRef, ikind, &
 !                          real(r_pSurf, kind=4), n_ni, n_nj, &
 !                          this%N_numVLevels) &
 !                         ) then
