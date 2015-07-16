@@ -539,7 +539,9 @@ end function N_ConstructNull
         call exit(2)
       endif
 
-      if(associated(this%O_vGridDesc_p)) then
+      ! If the user has not specified which levels are present,
+      ! assume that all levels in the vgrid descriptor are present
+      if(.not.(present(n_ip1In)) .and. associated(this%O_vGridDesc_p)) then
         ! In order to be useful, this%O_vGridDesc_p will require this%N_ip1_p
         ! (Ask for VIPM, because vgd_new assumed the r_vLevelIn to be VIPM.)
         n_error = vgd_get(this%O_vGridDesc_p, 'VIPM', n_ip1_p)
