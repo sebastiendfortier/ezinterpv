@@ -41,7 +41,7 @@ default: test
 #	s.compile -abi $(ABI) $(OPTIMIZ) -opt "=$(FFLAGS)" -src $<
 
 TEST_OBJECTS=\
-	VertInterpConstants.o  VerticalGrid.o  VerticalInterpolation.o ViIfc.o TestVI.o
+	VertInterpConstants.o  VerticalGrid.o  VerticalInterpolation.o TestVI.o
 
 INTERPV_OBJECTS=\
 	Interp1D_Constants.o Extrap1D_LapseRate.o Extrap1D_Fixed.o Extrap1D_Surface.o \

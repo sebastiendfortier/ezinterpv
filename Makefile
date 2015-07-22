@@ -48,9 +48,7 @@ TARRLS = beta
 
 
 
-VertInterpConstants.o: VertInterpConstants.cdk90 ViConstants_f90.h
-
-ViIfc.o: ViIfc.ftn90 ViIfc_Body.ftn90 VertInterpConstants.o VerticalGrid.o VerticalInterpolation.o
+VertInterpConstants.o: VertInterpConstants.cdk90
 
 VerticalGrid.o: VerticalGrid.ftn90 VerticalGrid_Body.cdk90 VertInterpConstants.o
 
@@ -58,7 +56,7 @@ VerticalInterpolation.o: VerticalInterpolation.ftn90 VerticalInterpolation_Body.
 	VertInterpConstants.o VerticalGrid.o
 
 OBJECTS= \
-	VertInterpConstants.o VerticalGrid.o VerticalInterpolation.o ViIfc.o
+	VertInterpConstants.o VerticalGrid.o VerticalInterpolation.o
 
 genlib: $(OBJECTS)
 #Creer ou mettre a jour la programmatheque 
@@ -75,7 +73,7 @@ gen_ec_arch_dir:
 
 locallib: gen_ec_arch_dir \
         $(TEMPLIB)(VertInterpConstants.o)   $(TEMPLIB)(VerticalGrid.o) \
-        $(TEMPLIB)(VerticalInterpolation.o)  $(TEMPLIB)(ViIfc.o)
+        $(TEMPLIB)(VerticalInterpolation.o)
 
 updlib: 
 #mettre a jour la programmatheque 
