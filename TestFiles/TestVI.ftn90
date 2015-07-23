@@ -1583,7 +1583,8 @@ program Test_Vertical_Interpolation
 
 
 ! NOTE:  modifying the initial pref and rcoeff
-  call m_testOneCombo(s_title, n_gridType, s_interpType, s_extrapType, &
+!        r_rCoef_2_Init and r_rCoef_2_Target are unused for N_GRID_TYPE_SIGMA
+  call m_testOneCombo_2GridTypes(s_title, n_gridType, n_gridType, s_interpType, s_extrapType, &
 
                       r_levelsInit,   r_stateIn , r_derivIn, &
                       r_levelsTarget, r_stateAnswer, r_derivAnswer, &
@@ -1592,7 +1593,7 @@ program Test_Vertical_Interpolation
 
                       r_PTOP_INIT, r_PREF_INIT/2., r_RCOEFF_INIT*2., &
                       r_PTOP_TARGET, r_PREF_TARGET, r_RCOEFF_TARGET, &
-                      r_PSURF, r_PTOP &
+                      r_PSURF, r_PTOP, 0.0, 0.0 &
                      )
 
 
@@ -1633,7 +1634,9 @@ program Test_Vertical_Interpolation
 
 
 ! NOTE:  modifying the initial pref and rcoeff
-  call m_testOneCombo(s_title, n_gridType, s_interpType, s_extrapType, &
+!        r_rCoef_2_Init and r_rCoef_2_Target are unused for N_GRID_TYPE_PRESSURE
+  call m_testOneCombo_2GridTypes(s_title, n_gridType, n_gridType, &
+                      s_interpType, s_extrapType, &
 
                       r_levelsInit,   r_stateIn , r_derivIn, &
                       r_levelsTarget, r_stateAnswer, r_derivAnswer, &
@@ -1642,7 +1645,7 @@ program Test_Vertical_Interpolation
 
                       r_PTOP_INIT, r_PREF_INIT/2., r_RCOEFF_INIT*2., &
                       r_PTOP_TARGET, r_PREF_TARGET, r_RCOEFF_TARGET, &
-                      r_PSURF, r_PTOP &
+                      r_PSURF, r_PTOP, 0.0, 0.0 &
                      )
 
 
@@ -1701,7 +1704,9 @@ program Test_Vertical_Interpolation
 !!$
 !!$
 !!$! NOTE:  modifying the initial pref and rcoeff
-!!$  call m_testOneCombo(s_title, n_gridType, s_interpType, s_extrapType, &
+!!$!        r_rCoef_2_Init and r_rCoef_2_Target are unused for N_GRID_TYPE_ETA
+!!$  call m_testOneCombo_2GridTypes(s_title, n_gridType, n_gridType, &
+!!$                      s_interpType, s_extrapType, &
 !!$
 !!$                      r_levelsInit,   r_stateIn , r_derivIn, &
 !!$                      r_levelsTarget, r_stateAnswer, r_derivAnswer, &
@@ -1710,7 +1715,7 @@ program Test_Vertical_Interpolation
 !!$
 !!$                      r_PTOP_INIT, r_PREF_INIT, r_RCOEFF_INIT, &
 !!$                      r_PTOP_TARGET, r_PREF_TARGET, r_RCOEFF_TARGET, &
-!!$                      r_PSURF, r_PTOP &
+!!$                      r_PSURF, r_PTOP, 0.0, 0.0 &
 !!$                     )
 
 
@@ -2382,6 +2387,25 @@ subroutine m_testOneCombo_2GridTypes &
   call m_setVcode(n_gridTypeIn, n_vcode, n_vgd_kind, n_vgd_version)
 
   select case(n_vcode)
+  case (1001)  ! N_GRID_TYPE_SIGMA
+    n_error = vgd_new(o_vGridDescInit, n_vgd_kind, n_vgd_version, &
+                      real(r_levelsInit))
+
+  case (1002)  ! N_GRID_TYPE_ETA
+    n_error = vgd_new(o_vGridDescInit, n_vgd_kind, n_vgd_version, &
+                      real(r_levelsInit),&
+                      ptop_8=real(r_pTopInit/r_MBAR_PER_PASCAL, kind=8))
+
+  case (1003)  ! N_GRID_TYPE_HYBRID
+    n_error = vgd_new(o_vGridDescInit, n_vgd_kind, n_vgd_version, &
+                      real(r_levelsInit), r_rCoefInit, &
+                      ptop_8=real(r_pTopInit/r_MBAR_PER_PASCAL, kind=8),&
+                      pref_8=real(r_pRefInit/r_MBAR_PER_PASCAL, kind=8))
+
+  case (2001)  ! N_GRID_TYPE_PRESSURE
+    n_error = vgd_new(o_vGridDescInit, n_vgd_kind, n_vgd_version, &
+                      real(r_levelsInit))
+
   case (5001)  ! N_GRID_TYPE_HYBRID_NOTNORM
     n_error = vgd_new(o_vGridDescInit, n_vgd_kind, n_vgd_version, &
                       real(r_levelsInit), r_rCoefInit, &
@@ -2408,6 +2432,7 @@ subroutine m_testOneCombo_2GridTypes &
 
   ! In order to be useful, o_vGridDescInit will require n_ip1_p
   ! (Ask for VIPM, because vgd_new assumed the r_vLevelIn to be VIPM.)
+  nullify(n_ip1_temp_p)
   n_error = vgd_get(o_vGridDescInit, 'VIPM', n_ip1_temp_p)
   if(n_error .ne. VGD_OK)write(6,*)'ERROR in TestVI, from vgd_get:', n_error
 
@@ -2432,6 +2457,25 @@ subroutine m_testOneCombo_2GridTypes &
   call m_setVcode(n_gridTypeOut, n_vcode, n_vgd_kind, n_vgd_version)
 
   select case(n_vcode)
+  case (1001)  ! N_GRID_TYPE_SIGMA
+        n_error = vgd_new(o_vGridDescTarget, n_vgd_kind, n_vgd_version, &
+                          real(r_levelsTarget))
+
+  case (1002)  ! N_GRID_TYPE_ETA
+    n_error = vgd_new(o_vGridDescTarget, n_vgd_kind, n_vgd_version, &
+                      real(r_levelsTarget),&
+                      ptop_8=real(r_pTopTarget/r_MBAR_PER_PASCAL, kind=8))
+
+  case (1003)  ! N_GRID_TYPE_HYBRID
+    n_error = vgd_new(o_vGridDescTarget, n_vgd_kind, n_vgd_version, &
+                      real(r_levelsTarget), r_rCoefTarget, &
+                      ptop_8=real(r_pTopTarget/r_MBAR_PER_PASCAL, kind=8),&
+                      pref_8=real(r_pRefTarget/r_MBAR_PER_PASCAL, kind=8))
+
+  case (2001)  ! N_GRID_TYPE_PRESSURE
+    n_error = vgd_new(o_vGridDescTarget, n_vgd_kind, n_vgd_version, &
+                      real(r_levelsTarget))
+
   case (5001)  ! N_GRID_TYPE_HYBRID_NOTNORM
     n_error = vgd_new(o_vGridDescTarget, n_vgd_kind, n_vgd_version, &
                       real(r_levelsTarget), r_rCoefTarget, &
