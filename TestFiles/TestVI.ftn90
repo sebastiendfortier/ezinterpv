@@ -2221,7 +2221,7 @@ end subroutine m_testOneCombo_FunnyBounds
 
 
 
-!!!s/r m_testOneCombo - routine that tests a single combination of parameters,
+!!!s/r m_testOneCombo_staggered - routine that tests a single combination of parameters,
 !                       but with straggered-grid parameters
 subroutine m_testOneCombo_staggered &
                          (s_title, n_gridType, s_interpType, s_extrapType, &
@@ -2283,10 +2283,17 @@ subroutine m_testOneCombo_staggered &
                   ubound(r_stateAnswer,3)) :: r_stateOut   , r_derivOut, &
                                               r_y_stateOut , r_y_derivOut
 
-  integer :: i, j, k, n_ni, n_nj, n_nk
+  integer :: i, j, k, n_ni, n_nj, n_nk, n_error, n_vcode, n_kind, n_version
 
   type(T_VerticalGrid), target:: o_gridInitial, o_gridTarget
   type(T_VerticalGridPtr):: o_gridInitial_p, o_gridTarget_p
+
+  type(vgrid_descriptor), target  ::o_vGridDescInit,   o_vGridDescTarget
+  type(vgrid_descriptor), pointer ::o_vGridDescInit_p, o_vGridDescTarget_p
+
+                                        ! The ip1's of the field levels that are
+                                        ! present in the associated field
+  integer, pointer, dimension(:) :: n_ip1_p, n_ip1_temp_p
 
   character(len=19) :: s_pass     = '  PASS', &
                        s_fail     = '  **** F A I L ****', &
@@ -2310,18 +2317,95 @@ subroutine m_testOneCombo_staggered &
   r_y_stateOut=0.
   r_y_derivOut=0.
 
-  !
-  ! CREATE AND SET THE INITIAL AND TARGET GRIDS
-  !
-  error=N_Viqkdef     (o_gridInitial_p, n_PTS_INIT, n_gridType, &
-                       r_levelsInit, r_pTopInit, r_pRefInit, r_rCoefInit, &
-                       r_rCoef_2_Init)
-  if(error /= 0)write(6,*)'ERROR initializing gridInitial:  ', error
+  select case (n_gridType)
+!!$  case (N_GRID_TYPE_SIGMA)
+!!$    n_vcode = 1001
+!!$
+!!$  case (N_GRID_TYPE_ETA)
+!!$    n_vcode = 1002
+!!$
+!!$  case (N_GRID_TYPE_HYBRID)
+!!$    n_vcode = 1003
+!!$
+!!$  case (N_GRID_TYPE_PRESSURE)
+!!$    n_vcode = 2001
+!!$
+!!$  case (N_GRID_TYPE_HYBRID_NOTNORM)
+!!$    n_vcode = 5001
 
-  error=N_Viqkdef     (o_gridTarget_p, n_PTS_TARGET, n_gridType, &
-                       r_levelsTarget, r_pTopTarget, r_pRefTarget, &
-                       r_rCoefTarget, r_rCoef_2_Target)
+  case (N_GRID_TYPE_STAGGERED)
+    n_vcode = 5002
+
+!!$  case (N_GRID_TYPE_STAG5005)
+!!$    n_vcode = 5005
+!!$
+!!$  case (N_GRID_TYPE_GENERIC)
+!!$    n_vcode = N_GRID_TYPE_GENERIC
+
+  case default
+    n_vcode = 0
+  end select
+
+  n_kind    = n_vcode / 1000
+  n_version = n_vcode - (n_kind * 1000)
+
+  !
+  ! CREATE AND SET THE INITIAL GRID
+  !
+  n_error = vgd_new(o_vGridDescInit, n_kind, n_version, &
+                    real(r_levelsInit), r_rCoefInit, r_rCoef_2_Init,&
+                    real(r_pTopInit/r_MBAR_PER_PASCAL, kind=8), &
+                    real(r_pRefInit/r_MBAR_PER_PASCAL, kind=8))
+  if(n_error /= VGD_OK)write(6,*)'Error from vgd_new in TestVI:  error=', n_error
+
+  ! In order to be useful, o_vGridDescInit will require n_ip1_p
+  ! (Ask for VIPM, because vgd_new assumed the r_vLevelIn to be VIPM.)
+  n_error = vgd_get(o_vGridDescInit, 'VIPM', n_ip1_temp_p)
+  if(n_error .ne. VGD_OK)write(6,*)'ERROR in TestVI, from vgd_get:', n_error
+
+  ! vgd might have (depending on the grid type) added hyb=1 (the last
+  ! entry) and the 10m level (after hyb=1) to the list.  Remove them.
+  allocate(n_ip1_p(n_PTS_INIT), STAT=n_error)
+  if(n_error /= 0)write(6, *) 'Error allocating n_ip1_p in TestVI:  error=', &
+                              n_error
+  n_ip1_p(:) = n_ip1_temp_p(:n_PTS_INIT)
+  deallocate(n_ip1_temp_p) ! vgd_get allocated it
+
+  o_vGridDescInit_p => o_vGridDescInit
+  error=N_Viqkdef(o_gridInitial_p, n_PTS_INIT, N_GRID_TYPE_STAGGERED, &
+                  r_levelsInit, n_ip1In=n_ip1_p, &
+                  o_vGridDescIn_p=o_vGridDescInit_p)
+  if(error /= 0)write(6,*)'ERROR initializing gridInitial:  ', error
+  deallocate(n_ip1_p)
+
+  !
+  ! CREATE AND SET THE TARGET GRID
+  !
+  n_error = vgd_new(o_vGridDescTarget, n_kind, n_version, &
+                    real(r_levelsTarget), r_rCoefTarget, r_rCoef_2_Target,&
+                    real(r_pTopTarget/r_MBAR_PER_PASCAL, kind=8), &
+                    real(r_pRefTarget/r_MBAR_PER_PASCAL, kind=8))
+  if(n_error /= VGD_OK)write(6,*)'Error from vgd_new in TestVI:  error=', n_error
+
+  ! In order to be useful, o_vGridDescTarget will require n_ip1_p
+  ! (Ask for VIPM, because vgd_new assumed the r_vLevelIn to be VIPM.)
+  n_error = vgd_get(o_vGridDescTarget, 'VIPM', n_ip1_temp_p)
+  if(n_error .ne. VGD_OK)write(6,*)'ERROR in TestVI, from vgd_get:', n_error
+
+  ! vgd might have (depending on the grid type) added hyb=1 (the last
+  ! entry) and the 10m level (after hyb=1) to the list.  Remove them.
+  allocate(n_ip1_p(n_PTS_TARGET), STAT=n_error)
+  if(n_error /= 0)write(6, *) 'Error allocating n_ip1_p in TestVI:  error=', &
+                              n_error
+  n_ip1_p(:) = n_ip1_temp_p(:n_PTS_TARGET)
+  deallocate(n_ip1_temp_p) ! vgd_get allocated it
+
+  o_vGridDescTarget_p => o_vGridDescTarget
+  error=N_Viqkdef(o_gridTarget_p, n_PTS_TARGET, N_GRID_TYPE_STAGGERED, &
+                  r_levelsTarget, n_ip1In=n_ip1_p, &
+                  o_vGridDescIn_p=o_vGridDescTarget_p)
   if(error /= 0)write(6,*)'ERROR initializing gridTarget:  ', error
+  deallocate(n_ip1_p)
 
 
   error=N_Videfset     (n_NI, n_NJ, o_gridTarget_p, o_gridInitial_p, &

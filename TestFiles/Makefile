@@ -72,7 +72,7 @@ testWithInterpv: copyHlocal copyMODlocal TestVI.o removeMOD removeH
 test:	copyHlocal copyMODlocal TestVI.o removeMOD removeH
 	cp ../*.o .
 	s.compile -o TestVInterp_$(BASE_ARCH).Abs -obj $(TEST_OBJECTS) \
-	-abi$(ABI) -libappl descrip -librmn $(LIBRMN)
+	-abi $(ABI) $(OPTIMIZ) -libappl descrip -librmn $(LIBRMN)
 
 testlib: TestVI.o
 	(. s.ssmuse.dot /ssm/net/rpn/libs/15.0; s.compile -includes ../$(EC_ARCH)/include -libpath . ../$(EC_ARCH)/lib -libappl ezinterpv descrip -o TestVInterp_$(BASE_ARCH).Abs -obj TestVI.o \

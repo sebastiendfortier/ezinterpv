@@ -539,22 +539,22 @@ end function N_ConstructNull
         call exit(2)
       endif
 
-      ! If the user has not specified which levels are present,
-      ! assume that all levels in the vgrid descriptor are present
-      if(.not.(present(n_ip1In)) .and. associated(this%O_vGridDesc_p)) then
-        ! In order to be useful, this%O_vGridDesc_p will require this%N_ip1_p
-        ! (Ask for VIPM, because vgd_new assumed the r_vLevelIn to be VIPM.)
-        n_error = vgd_get(this%O_vGridDesc_p, 'VIPM', n_ip1_p)
-        if(n_error .ne. VGD_OK)then
-          write(6,*)'ERROR in VerticalGrid_class%N_VertiGridGetP, from vgd_get:', n_error
-        end if
-        ! vgd might have (depending on the grid type) added hyb=1 (the last
-        ! entry) and the 10m level (after hyb=1) to the list.  Remove them.
-        this%N_ip1_p(:) = n_ip1_p(:size(this%N_ip1_p))
-        deallocate(n_ip1_p) ! vgd_get allocated it
-      end if ! associated
-
     end if
+
+    ! If the user has not specified which levels are present,
+    ! assume that all levels in the vgrid descriptor are present
+    if(.not.(present(n_ip1In)) .and. associated(this%O_vGridDesc_p)) then
+      ! In order to be useful, this%O_vGridDesc_p will require this%N_ip1_p
+      ! (Ask for VIPM, because vgd_new assumed the r_vLevelIn to be VIPM.)
+      n_error = vgd_get(this%O_vGridDesc_p, 'VIPM', n_ip1_p)
+      if(n_error .ne. VGD_OK)then
+        write(6,*)'ERROR in VerticalGrid_class%N_VertiGridGetP, from vgd_get:', n_error
+      end if
+      ! vgd might have (depending on the grid type) added hyb=1 (the last
+      ! entry) and the 10m level (after hyb=1) to the list.  Remove them.
+      this%N_ip1_p(:) = n_ip1_p(:size(this%N_ip1_p))
+      deallocate(n_ip1_p) ! vgd_get allocated it
+    end if ! associated
 
   end function N_Viqkdef
 
@@ -673,7 +673,13 @@ end function N_ConstructNull
 !        N_GRID_TYPE_STAGGERED, N_GRID_TYPE_STAG5005)
     case default
                                         ! Obtain, the cube of P.
-                                        ! vgd_levels allocates r_P_single_p
+      allocate (r_P_single_p(ubound(r_pSurf,1),ubound(r_pSurf,2),this%N_numVLevels), STAT=n_error)
+      if(n_error /= 0) then
+        write(6, *)'Error allocating r_P_single_p in N_VertGridGetLnP:  error=',&
+                   n_error
+        call flush(6)
+        return
+      endif
       n_error = vgd_levels(this%O_vGridDesc_p, this%N_ip1_p(:this%N_numVLevels),&
                            r_P_single_p, &
                            real(r_pSurf, kind=4) / r_MBAR_PER_PASCAL, l_IN_LOG)

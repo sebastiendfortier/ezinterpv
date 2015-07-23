@@ -47,6 +47,10 @@ TARRLS = beta
 	ar rv $@ $*.o
 
 
+OBJECTS= \
+	VertInterpConstants.o VerticalGrid.o VerticalInterpolation.o 
+
+obj:	$(OBJECTS)
 
 VertInterpConstants.o: VertInterpConstants.cdk90
 
@@ -55,17 +59,13 @@ VerticalGrid.o: VerticalGrid.ftn90 VerticalGrid_Body.cdk90 VertInterpConstants.o
 VerticalInterpolation.o: VerticalInterpolation.ftn90 VerticalInterpolation_Body.ftn90 \
 	VertInterpConstants.o VerticalGrid.o
 
-OBJECTS= \
-	VertInterpConstants.o VerticalGrid.o VerticalInterpolation.o
 
 genlib: $(OBJECTS)
 #Creer ou mettre a jour la programmatheque 
 	ar rcv $(MYLIB) $(OBJECTS)
 
 tarball:  *.ftn90 *.cdk90 *.h  Makefile
-	tar cfzv /data/armnraid1/www/ssm/sources/ez_interpv_$(TARRLS)_all.tgz *.ftn90 *.cdk90 *.h Makefile 
-
-obj:	$(OBJECTS)
+	tar cfzv /data/armnraid1/www/ssm/sources/ez_interpv_$(TARRLS)_all.tgz *.ftn90 *.cdk90 *.h Makefile
 
 gen_ec_arch_dir:
 #Creer le repertoire $EC_ARCH 
