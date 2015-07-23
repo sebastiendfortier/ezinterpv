@@ -41,7 +41,8 @@
 !!
   
   use VerticalInterpolationConstants
-  use VerticalGrid_class 
+  use VerticalGrid_class
+  use vGrid_Descriptors, only: vgd_levels
   implicit none
 
   public N_Videfset, N_Visint, N_Visetopt
@@ -493,7 +494,9 @@ contains
     real(real48), dimension(n_ni, n_nj, 2*o_vGridDestn_p%N_numVLevels) :: &
                                                r_ExtArraysOut
 
-    integer :: i, j
+    real, dimension(2), target :: r_levels_sample
+    real, dimension(:), pointer :: r_levels_sample_p
+    integer :: i, j, n_error
     integer, dimension(9) :: err
 
 
@@ -595,7 +598,11 @@ contains
       end if
 
       ! Are the vertical levels increasing with index?
-      if( o_vGridSource_p%R_vLevel_p(2) > o_vGridSource_p%R_vLevel_p(1) ) then
+      r_levels_sample_p => r_levels_sample
+      n_error=vgd_levels(o_vGridSource_p%O_vGridDesc_p, &
+                         o_vGridSource_p%N_ip1_p(1:2), &
+                         r_levels_sample_p)
+      if( r_levels_sample(2) > r_levels_sample(1) ) then
         ! The vertical level values INcrease with the index.
         n_indexSurface       = 1
         n_indexSurface_plus1 = 2

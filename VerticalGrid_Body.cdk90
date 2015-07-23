@@ -54,25 +54,13 @@ use VerticalInterpolationConstants
   type T_VerticalGrid
     ! information capable of specifying particular grid types is placed in
     !  variables here:
-    integer N_gridType                  ! representation used for vertical levels
     integer N_numVLevels                ! number of vertical points in this grid
 
-                                        ! vertical levels defined for this grid,
-                                        ! in units that are implied by gridType
-                                        ! (IP1 values, decoded from FSTD format)
-    real(real48), pointer, dimension(:) :: R_vLevel_p
                                         ! The ip1's of the field levels that are
                                         ! present in the associated field
     integer, pointer, dimension(:) :: N_ip1_p
                                         ! The vgd that describes this grid
     type(vgrid_descriptor), pointer::O_vGridDesc_p
-    integer:: N_fileUnit                ! File unit associated with O_vGridDesc_p
-
-    ! Other parameters that may be necessary, depending on gridType
-    ! (surface pressure is not explicitly a part of the vertical grid)
-
-    ! hybrid parameters
-    integer :: n_vcode                  ! vgrid's definition of the grid type
   end type T_VerticalGrid
 
   type T_VerticalGridPtr
@@ -125,17 +113,14 @@ contains
 
   M_NotEqualVerticalGridPtr = .false.   ! assume equal until proven otherwise
 
-  if(     o_gridA_p%N_gridType   /= o_gridB_p%N_gridType &
-     .or. o_gridA_p%N_numVLevels /= o_gridB_p%N_numVLevels &
-     .or. o_gridA_p%N_fileUnit   /= o_gridB_p%N_fileUnit &
+  if(o_gridA_p%N_numVLevels /= o_gridB_p%N_numVLevels &
     ) then
     M_NotEqualVerticalGridPtr = .true.
   else if(.not. (o_gridA_p%O_vGridDesc_p == o_gridB_p%O_vGridDesc_p)) then
       M_NotEqualVerticalGridPtr = .true.
   else
     do k=1, o_gridA_p%N_numVLevels
-      if(r_ZERO < abs(o_gridA_p%R_vLevel_p(k) - o_gridB_p%R_vLevel_p(k)) &
-         .or. o_gridA_p%N_ip1_p(k) /= o_gridB_p%N_ip1_p(k) &
+      if(o_gridA_p%N_ip1_p(k) /= o_gridB_p%N_ip1_p(k) &
         ) then
         M_NotEqualVerticalGridPtr = .true.
         exit                            ! no need to check any further
@@ -203,19 +188,8 @@ contains
     external flush
     integer :: n_error
 
-    o_gridOut%N_gridType   = o_gridIn%N_gridType
     o_gridOut%N_numVLevels = o_gridIn%N_numVLevels
                                                       ! deep copy
-    if(.not. associated(o_gridOut%R_vLevel_p)) then
-        allocate(o_gridOut%R_vLevel_p(o_gridIn%N_numVLevels), STAT=n_error)
-        if(n_error /= 0) then
-          write(6, *)'Error allocating vLevel in M_AssignVerticalGrid:  error=',&
-                     n_error
-          call flush(6)
-          return
-        endif
-    end if
-
     if(associated(o_gridIn%N_ip1_p))then
       if(.not. associated(o_gridOut%N_ip1_p)) then
           allocate(o_gridOut%N_ip1_p(o_gridIn%N_numVLevels), STAT=n_error)
@@ -232,13 +206,10 @@ contains
       end if
     end if
 
-    o_gridOut%R_vLevel_p      = o_gridIn%R_vLevel_p
     if(associated(o_gridIn%N_ip1_p))then
       o_gridOut%N_ip1_p         = o_gridIn%N_ip1_p
     end if
     o_gridOut%O_vGridDesc_p  => o_gridIn%O_vGridDesc_p
-    o_gridOut%N_fileUnit      = o_gridIn%N_fileUnit
-    o_gridOut%n_vcode    = o_gridIn%n_vcode
   end subroutine M_AssignVerticalGrid
 
 
@@ -255,17 +226,13 @@ contains
 !
 !OBJECT
 !        The null VerticalGrid constructor.  This constructor simply puts the
-!        object in a valid state, but containing no data.  In particular, the
-!        pointer, R_vLevel_p, contained by the object is made to actually point
-!        to some memory.
+!        object in a valid state, but containing no data.
 !
 !ARGUMENTS
     type(T_VerticalGridPtr), intent(inout) :: that
     integer, intent(in)::n_numVLevelsIn ! number of vertical levels in the object
 !
 !NOTES
-!        The array to which R_vLevel_p points will be the right size only if the
-!        user uses a consistent number of vertical levels.
 !
 !!
     external flush
@@ -277,21 +244,9 @@ contains
     nullify(this%O_vGridDesc_p)
 
     if(n_numVLevelsIn == 0) then
-        ! The size is not known yet; just nullify the pointers
-        nullify(this%R_vLevel_p)
+        ! The size is not known yet; just nullify the pointer
         nullify(this%N_ip1_p)
     else
-        ! Allocate the array of vertical levels
-        allocate(this%R_vLevel_p(n_numVLevelsIn), STAT=n_error)
-        if(n_error /= 0) then
-          write(6, *) 'Error allocating vLevel in N_ConstructNull:  error=', &
-                      n_error
-          call flush(6)
-          N_ConstructNull = N_VI_VIERR_FAILED_ALLOCATION
-          return
-        endif ! n_error /= 0
-        this%R_vLevel_p = 0.
-
         allocate(this%N_ip1_p(n_numVLevelsIn), STAT=n_error)
         if(n_error /= 0) then
           write(6, *) 'Error allocating vLevel in N_ConstructNull:  error=', &
@@ -306,10 +261,6 @@ contains
     
     ! Array of vertical levels was successfully allocated.
     this%N_numVLevels = n_numVLevelsIn
-    ! Initialize all other values to zero
-    this%N_gridType = 0
-    this%N_fileUnit = 0
-    this%n_vcode = 0
 
 end function N_ConstructNull
 
@@ -319,7 +270,6 @@ end function N_ConstructNull
 !                                 integration
   integer function N_Viqkdef(that, n_numVLevelsIn, n_gridTypeIn, r_vLevelIn, &
                              r_pTopAvgIn, r_pRefIn, r_rCoefIn, r_rCoef_2In, &
-                             n_kind_vgridIn, n_version_vgridIn, &
                              n_ip1In, o_vGridDescIn_p)
                                         ! returns error indication:  0='no error'
 !
@@ -348,9 +298,6 @@ end function N_ConstructNull
     real, optional,intent(in)::r_rCoefIn! known as 'expansion co-efficient'
                                         ! for staggered co-ordinates
     real, optional, intent(in) :: r_rCoef_2In
-                                        ! vgrid's definition of the grid type
-    integer, optional, intent(in) :: n_kind_vgridIn
-    integer, optional, intent(in) :: n_version_vgridIn
                                         ! The ip1's of field levels present
     integer, optional, dimension(n_numVLevelsIn), intent(in) :: n_ip1In
                                         ! The vgd that describes this grid
@@ -358,7 +305,7 @@ end function N_ConstructNull
 !
 !!
     external flush
-    integer :: n_error, n_kind, n_version
+    integer :: n_error
     type(T_VerticalGrid), pointer :: this
     integer, dimension(:), pointer :: n_ip1_p
     real(8) :: ptop_out_dummy
@@ -374,15 +321,6 @@ end function N_ConstructNull
 
     nullify(n_ip1_p)
 
-    ! Allocate the array of vertical levels
-    allocate(this%R_vLevel_p(n_numVLevelsIn), STAT=n_error)
-    if(n_error /= 0) then
-      write(6, *) 'Error allocating vLevel in N_Viqkdef:  error=', n_error
-      call flush(6)
-      N_Viqkdef = N_VI_VIERR_FAILED_ALLOCATION
-      return
-    endif
-
     allocate(this%N_ip1_p(n_numVLevelsIn), STAT=n_error)
     if(n_error /= 0) then
       write(6, *) 'Error allocating vLevel in N_Viqkdef:  error=', n_error
@@ -391,11 +329,7 @@ end function N_ConstructNull
       return
     endif
     this%N_ip1_p = 0
-    
-    ! Array of vertical levels was successfully allocated.
-    ! Assign these and other values
-    this%R_vLevel_p = r_vLevelIn
-    this%N_gridType = n_gridTypeIn
+
     this%N_numVLevels = n_numVLevelsIn
 
     if(n_gridTypeIn == N_GRID_TYPE_STAG5005) then
@@ -430,115 +364,8 @@ end function N_ConstructNull
       this%N_ip1_p = 0
     end if
 
-    if(present(n_kind_vgridIn) .and. present(n_version_vgridIn)) then
-      this%n_vcode = n_kind_vgridIn * 1000 + n_version_vgridIn
-
-    else
-      select case (n_gridTypeIn)
-      case (N_GRID_TYPE_SIGMA)
-        this%n_vcode = 1001
-
-      case (N_GRID_TYPE_ETA)
-        this%n_vcode = 1002
-
-      case (N_GRID_TYPE_HYBRID)
-        this%n_vcode = 1003
-
-      case (N_GRID_TYPE_PRESSURE)
-        this%n_vcode = 2001
-
-      case (N_GRID_TYPE_HYBRID_NOTNORM)
-        this%n_vcode = 5001
-
-      case (N_GRID_TYPE_STAGGERED)
-        this%n_vcode = 5002
-
-      case (N_GRID_TYPE_STAG5005)
-        this%n_vcode = 5005
-
-      case (N_GRID_TYPE_GENERIC)
-        this%n_vcode = N_GRID_TYPE_GENERIC
-
-      case default
-        this%n_vcode = 0
-      end select
-    end if
-
     if(present(o_vGridDescIn_p)) then
       this%O_vGridDesc_p => o_vGridDescIn_p
-    else
-      allocate(this%O_vGridDesc_p)
-
-      ! Create O_vGridDesc_p right now
-      ! (Although the vgrid documentation doesn't say it, vgd_new accepts only
-      !  momentum levels as input.  The relationship to thermodynamic levels
-      !  being defined mathematically, this is sufficient to determine also
-      !  the thermodynamic levels.):
-      n_kind    = this%n_vcode / 1000
-      n_version = this%n_vcode - (n_kind * 1000)
-      select case(this%n_vcode)
-
-      case (1001)
-        n_error = vgd_new(this%O_vGridDesc_p, n_kind, n_version, &
-             real(this%R_vLevel_p))
-
-      case (1002)
-        n_error = vgd_new(this%O_vGridDesc_p, n_kind, n_version, &
-                          real(this%R_vLevel_p),&
-                          ptop_8=real(r_pTopAvg/r_MBAR_PER_PASCAL, kind=8))
-
-      case (1003)
-        n_error = vgd_new(this%O_vGridDesc_p, n_kind, n_version, &
-                          real(this%R_vLevel_p), r_rCoef, &
-                          ptop_8=real(r_pTopAvg/r_MBAR_PER_PASCAL, kind=8),&
-                          pref_8=real(r_pRef/r_MBAR_PER_PASCAL, kind=8))
-
-      case (2001)
-        n_error = vgd_new(this%O_vGridDesc_p, n_kind, n_version, &
-                          real(this%R_vLevel_p))
-
-      case (5001)
-        n_error = vgd_new(this%O_vGridDesc_p, n_kind, n_version, &
-                          real(this%R_vLevel_p), r_rCoef, &
-                          ptop_8=real(r_pTopAvg/r_MBAR_PER_PASCAL, kind=8),&
-                          pref_8=real(r_pRef/r_MBAR_PER_PASCAL, kind=8))
-
-      case (5002)
-        n_error = vgd_new(this%O_vGridDesc_p, n_kind, n_version, &
-                          real(this%R_vLevel_p), r_rCoef, r_rCoef_2,&
-                          real(r_pTopAvg/r_MBAR_PER_PASCAL, kind=8), &
-                          real(r_pRef/r_MBAR_PER_PASCAL, kind=8))
-
-      case (5005)
-        n_error = vgd_new(this%O_vGridDesc_p, n_kind, n_version, &
-                          real(this%R_vLevel_p), r_rCoef, r_rCoef_2,&
-                          pref_8=real(r_pRef/r_MBAR_PER_PASCAL, kind=8), &
-                          ptop_out_8=ptop_out_dummy, &
-                          dhm=10.0, dht=1.5)
-
-      case (N_GRID_TYPE_GENERIC)
-        ! These cases are not supported by the vertical-grid descriptor
-        deallocate(this%O_vGridDesc_p)
-        nullify(this%O_vGridDesc_p)
-
-        ! N_ip1_p is used only in association with O_vGridDesc_p
-        deallocate(this%N_ip1_p)
-        nullify(this%N_ip1_p)
-        n_error = 0
-
-      case default
-        n_error = 0
-
-      end select
-
-      ! Test the return value from vgd_new
-      if(n_error /= 0) then
-        write(6,*)'Error from vgd_new in N_Viqkdef:  error=', n_error
-        write(6,*)'Ezinterpv exiting.'
-        call flush(6)
-        call exit(2)
-      endif
-
     end if
 
     ! If the user has not specified which levels are present,
@@ -656,7 +483,7 @@ end function N_ConstructNull
     N_VertGridGetLnP = 0                  ! no error yet
     
 
-    if(this%N_gridType /= N_GRID_TYPE_GENERIC .and. l_firstTime .eqv. .true.) then
+    if(l_firstTime .eqv. .true.) then
          l_firstTime=.false.
          write(6,*)' '
          write(6,*)'In ez_interpv, converting the vertical levels to ln P (1 mb ref level) before interpolating.'
@@ -667,66 +494,24 @@ end function N_ConstructNull
     !
     ! Create the 'cube' of source vertical levels
     !
-    select case (this%N_gridType)
-!   case(N_GRID_TYPE_SIGMA, N_GRID_TYPE_ETA, N_GRID_TYPE_HYBRID, &
-!        N_GRID_TYPE_PRESSURE, N_GRID_TYPE_HYBRID_NOTNORM, &
-!        N_GRID_TYPE_STAGGERED, N_GRID_TYPE_STAG5005)
-    case default
                                         ! Obtain, the cube of P.
-      allocate (r_P_single_p(ubound(r_pSurf,1),ubound(r_pSurf,2),this%N_numVLevels), STAT=n_error)
-      if(n_error /= 0) then
-        write(6, *)'Error allocating r_P_single_p in N_VertGridGetLnP:  error=',&
-                   n_error
-        call flush(6)
-        return
-      endif
-      n_error = vgd_levels(this%O_vGridDesc_p, this%N_ip1_p(:this%N_numVLevels),&
-                           r_P_single_p, &
-                           real(r_pSurf, kind=4) / r_MBAR_PER_PASCAL, l_IN_LOG)
-      if(n_error .ne. VGD_OK)then
-        write(6,*)'ERROR in VerticalGrid_class%N_VertGridGetLnP, ', &
-                  'from vgd_levels:', n_error
-      end if
-      r_P = r_P_single_p + r_LOG_MBAR_PER_PASCAL
+    allocate (r_P_single_p(ubound(r_pSurf,1),ubound(r_pSurf,2),this%N_numVLevels), STAT=n_error)
+    if(n_error /= 0) then
+      write(6, *)'Error allocating r_P_single_p in N_VertGridGetLnP:  error=',&
+                 n_error
+      call flush(6)
+      return
+    endif
+    n_error = vgd_levels(this%O_vGridDesc_p, this%N_ip1_p(:this%N_numVLevels),&
+                         r_P_single_p, &
+                         real(r_pSurf, kind=4) / r_MBAR_PER_PASCAL, l_IN_LOG)
+    if(n_error .ne. VGD_OK)then
+      write(6,*)'ERROR in VerticalGrid_class%N_VertGridGetLnP, ', &
+                'from vgd_levels:', n_error
+    end if
+    r_P = r_P_single_p + r_LOG_MBAR_PER_PASCAL
 
-      deallocate(r_P_single_p)
-
-    case(N_GRID_TYPE_GENERIC)
-      do k=1,this%N_numVLevels
-        ! N_GRID_TYPE_GENERIC:  don't try to convert the vertical levels
-        r_P(:,:,k) = this%R_vLevel_p(k)
-      end do
-
-!    case(N_GRID_TYPE_HYBRID) ! not supported by vgrid - could do it like this:
-!      ikind = 1
-!
-!      if(0 /= hyb_to_pres(r_P_single, real(this%R_vLevel_p), this%R_pTopAvg, &
-!                          r_rCoef, r_pRef, ikind, &
-!                          real(r_pSurf, kind=4), n_ni, n_nj, &
-!                          this%N_numVLevels) &
-!                         ) then
-!        write(6,*)'In N_VertGridGetLnP:  hyb_to_pres FAILED'
-!        call flush(6)
-!        N_VertGridGetLnP = N_VI_VGERR_HYBRID_TO_PRES_CONVN
-!      end if
-!      r_P = r_P_single
-
-!    case(N_GRID_TYPE_ETA) ! vgrid gives a different result from this:
-!      if(.not. present(r_pTop)) then
-!        write(6,*)'ERROR in N_VertGridGetLnP:  pTop required for eta units'
-!        call flush(6)
-!        N_VertGridGetLnP = N_VI_VGERR_PTOP_MISSING
-!      else
-!        do k=1,this%N_numVLevels
-!          do j=1,n_nj
-!            do i=1,n_ni
-!              r_P(i,j,k) =   r_pTop(i,j) &
-!                           + (r_pSurf(i,j) - r_pTop(i,j)) * this%R_vLevel_p(k)
-!            end do
-!          end do
-!        end do
-!      end if
-      end select
+    deallocate(r_P_single_p)
 
   end function N_VertGridGetLnP
 
@@ -752,15 +537,6 @@ end function N_ConstructNull
     external flush
     integer :: n_error
 
-    ! Release the memory associated with the array of vertical levels.
-    if( associated(that%Ptr%R_vLevel_p) ) then
-      deallocate (that%Ptr%R_vLevel_p, STAT=n_error)
-      if(n_error /= 0) then
-        write(6, *)'Error deallocating vLevel in M_ReleaseVerticalGrid:  ', &
-                   'error=', n_error
-        call flush(6)
-      end if
-    end if
 
     if( associated(that%Ptr%N_ip1_p) ) then
       deallocate (that%Ptr%N_ip1_p, STAT=n_error)
