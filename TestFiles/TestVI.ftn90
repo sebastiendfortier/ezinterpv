@@ -172,116 +172,116 @@ program Test_Vertical_Interpolation
 
 
 
-!!$  !
-!!$  ! SECOND TEST
-!!$  ! SECOND TEST
-!!$  !
-!!$  s_title = "TEST 2:  generic; cubic derivs; clamped; ascending"
-!!$
-!!$  n_gridType = N_GRID_TYPE_GENERIC
-!!$
-!!$  r_levelsInit   = r_LEVELS_INCREASING
-!!$  r_stateIn      = r_stateIncreasing
-!!$  r_derivIn      = r_derivIncreasing
-!!$  r_levelsTarget = r_LEVELS_TARGET_STD
-!!$
-!!$  s_interpType = 'cubicwithderivs'
-!!$  s_extrapType = 'clamped'
-!!$
-!!$  r_stateAnswer(1,1,:) =(/0.9042932, 0.4981775, 0.3443519, 0.5971954, 0.1708000/)
-!!$  r_stateAnswer(2,1,:) =(/2.0318060,-0.5722344,-0.3647639, 0.7445440,-0.1733000/)
-!!$
-!!$  r_derivAnswer(1,1,:) =(/0.4281423,-0.8671802,-0.9382274, 0.8020958,-0.9853000/)
-!!$  r_derivAnswer(2,1,:) =(/6.4005327, 1.3408751, 1.1214883, 1.5543460, 1.0300300/)
-!!$
-!!$  call m_testOneCombo(s_title, n_gridType, s_interpType, s_extrapType, &
-!!$
-!!$                      r_levelsInit,   r_stateIn , r_derivIn, &
-!!$                      r_levelsTarget, r_stateAnswer, r_derivAnswer, &
-!!$
-!!$                      r_EXTRAP_GUIDE_DOWN, r_EXTRAP_GUIDE_UP, &
-!!$
-!!$                      r_PTOP_INIT, r_PREF_INIT, r_RCOEFF_INIT, &
-!!$                      r_PTOP_TARGET, r_PREF_TARGET, r_RCOEFF_TARGET, &
-!!$                      r_PSURF, r_PTOP &
-!!$                     )
-!!$
-!!$
-!!$
-!!$
-!!$
-!!$  !
-!!$  ! THIRD TEST
-!!$  ! THIRD TEST
-!!$  !
-!!$  s_title = "TEST 3:  generic; cubic Lagrange; clamped; ascending"
-!!$
-!!$  n_gridType = N_GRID_TYPE_GENERIC
-!!$
-!!$  r_levelsInit   = r_LEVELS_INCREASING
-!!$
-!!$  r_stateIn      = r_stateIncreasing
-!!$  r_derivIn      = r_derivIncreasing
-!!$  r_levelsTarget = r_LEVELS_TARGET_STD
-!!$
-!!$  s_interpType = 'cubiclagrange'
-!!$  s_extrapType = 'clamped'
-!!$
-!!$  r_stateAnswer(1,1,:) =(/0.9099222, 0.5043430, 0.3516999, 0.5971954, 0.1708000/)
-!!$  r_stateAnswer(2,1,:) =(/3.0054035,-1.0220673,-0.8364134, 0.7445440,-0.1733000/)
-!!$
-!!$  r_derivAnswer(1,1,:) =(/0.0000000, 0.0000000, 0.0000000, 0.0000000, 0.0000000/)
-!!$  r_derivAnswer(2,1,:) =(/0.0000000, 0.0000000, 0.0000000, 0.0000000, 0.0000000/)
-!!$
-!!$  call m_testOneCombo(s_title, n_gridType, s_interpType, s_extrapType, &
-!!$
-!!$                      r_levelsInit,   r_stateIn , r_derivIn, &
-!!$                      r_levelsTarget, r_stateAnswer, r_derivAnswer, &
-!!$
-!!$                      r_EXTRAP_GUIDE_DOWN, r_EXTRAP_GUIDE_UP, &
-!!$
-!!$                      r_PTOP_INIT, r_PREF_INIT, r_RCOEFF_INIT, &
-!!$                      r_PTOP_TARGET, r_PREF_TARGET, r_RCOEFF_TARGET, &
-!!$                      r_PSURF, r_PTOP &
-!!$                     )
-!!$
-!!$
-!!$
-!!$
-!!$
-!!$  !
-!!$  ! FOURTH TEST
-!!$  ! FOURTH TEST
-!!$  !
-!!$  s_title = "TEST 4:  generic; nearest neighbour; lapse rate; ascending"
-!!$
-!!$  n_gridType = N_GRID_TYPE_GENERIC
-!!$
-!!$  r_levelsInit   = r_LEVELS_INCREASING
-!!$  r_stateIn      = r_stateIncreasing
-!!$  r_derivIn      = r_derivIncreasing
-!!$  r_levelsTarget = r_LEVELS_TARGET_STD
-!!$
-!!$  s_interpType = 'nearestneighbour'
-!!$  s_extrapType = 'lapserate'
-!!$
-!!$  r_stateAnswer(1,1,:) =(/0.9489846, 0.6454000, 0.1708000, 0.5411954, 0.1058001/)
-!!$  r_stateAnswer(2,1,:) =(/3.0095699,-0.8450000,-0.1733000, 0.6885440,-0.2382999/)
-!!$
-!!$  r_derivAnswer(1,1,:) =(/0.0000000, 0.0000000, 0.0000000, 0.0000000, 0.0000000/)
-!!$  r_derivAnswer(2,1,:) =(/0.0000000, 0.0000000, 0.0000000, 0.0000000, 0.0000000/)
-!!$
-!!$  call m_testOneCombo(s_title, n_gridType, s_interpType, s_extrapType, &
-!!$
-!!$                      r_levelsInit,   r_stateIn , r_derivIn, &
-!!$                      r_levelsTarget, r_stateAnswer, r_derivAnswer, &
-!!$
-!!$                      r_EXTRAP_GUIDE_DOWN, r_EXTRAP_GUIDE_UP, &
-!!$
-!!$                      r_PTOP_INIT, r_PREF_INIT, r_RCOEFF_INIT, &
-!!$                      r_PTOP_TARGET, r_PREF_TARGET, r_RCOEFF_TARGET, &
-!!$                      r_PSURF, r_PTOP &
-!!$                     )
+  !
+  ! SECOND TEST
+  ! SECOND TEST
+  !
+  s_title = "TEST 2:  generic; cubic derivs; clamped; ascending"
+
+  n_gridType = N_GRID_TYPE_STAG5005
+
+  r_levelsInit   = r_LEVELS_INCREASING
+  r_stateIn      = r_stateIncreasing
+  r_derivIn      = r_derivIncreasing
+  r_levelsTarget = r_LEVELS_TARGET_STD
+
+  s_interpType = 'cubicwithderivs'
+  s_extrapType = 'clamped'
+
+  r_stateAnswer(1,1,:) =(/0.5971954, 1.1050999, 1.2870281, 0.4353272, 0.1708000/)
+  r_stateAnswer(2,1,:) =(/0.7445440, 6.5792871, 5.2396612,-0.3028076,-0.1733000/)
+
+  r_derivAnswer(1,1,:) =(/0.8020958, 0.2623369, 0.0111124,-0.0236369,-0.9853000/)
+  r_derivAnswer(2,1,:) =(/1.5543460, 3.5922914,-4.3209844, 0.2144366, 1.0300300/)
+
+  call m_testOneCombo(s_title, n_gridType, s_interpType, s_extrapType, &
+
+                      r_levelsInit,   r_stateIn , r_derivIn, &
+                      r_levelsTarget, r_stateAnswer, r_derivAnswer, &
+
+                      r_EXTRAP_GUIDE_DOWN, r_EXTRAP_GUIDE_UP, &
+
+                      r_PTOP_INIT, r_PREF_INIT, r_RCOEFF_INIT, &
+                      r_PTOP_TARGET, r_PREF_TARGET, r_RCOEFF_TARGET, &
+                      r_PSURF, r_PTOP &
+                     )
+
+
+
+
+
+  !
+  ! THIRD TEST
+  ! THIRD TEST
+  !
+  s_title = "TEST 3:  generic; cubic Lagrange; clamped; ascending"
+
+  n_gridType = N_GRID_TYPE_STAG5005
+
+  r_levelsInit   = r_LEVELS_INCREASING
+
+  r_stateIn      = r_stateIncreasing
+  r_derivIn      = r_derivIncreasing
+  r_levelsTarget = r_LEVELS_TARGET_STD
+
+  s_interpType = 'cubiclagrange'
+  s_extrapType = 'clamped'
+
+  r_stateAnswer(1,1,:) =(/0.5971954, 0.9659845, 0.9165952, 0.5209374, 0.1708000/)
+  r_stateAnswer(2,1,:) =(/0.7445440, 2.7246029, 1.4263948,-1.1904740,-0.1733000/)
+
+  r_derivAnswer(1,1,:) =(/0.0000000, 0.0000000, 0.0000000, 0.0000000, 0.0000000/)
+  r_derivAnswer(2,1,:) =(/0.0000000, 0.0000000, 0.0000000, 0.0000000, 0.0000000/)
+
+  call m_testOneCombo(s_title, n_gridType, s_interpType, s_extrapType, &
+
+                      r_levelsInit,   r_stateIn , r_derivIn, &
+                      r_levelsTarget, r_stateAnswer, r_derivAnswer, &
+
+                      r_EXTRAP_GUIDE_DOWN, r_EXTRAP_GUIDE_UP, &
+
+                      r_PTOP_INIT, r_PREF_INIT, r_RCOEFF_INIT, &
+                      r_PTOP_TARGET, r_PREF_TARGET, r_RCOEFF_TARGET, &
+                      r_PSURF, r_PTOP &
+                     )
+
+
+
+
+
+  !
+  ! FOURTH TEST
+  ! FOURTH TEST
+  !
+  s_title = "TEST 4:  generic; nearest neighbour; lapse rate; ascending"
+
+  n_gridType = N_GRID_TYPE_STAG5005
+
+  r_levelsInit   = r_LEVELS_INCREASING
+  r_stateIn      = r_stateIncreasing
+  r_derivIn      = r_derivIncreasing
+  r_levelsTarget = r_LEVELS_TARGET_STD
+
+  s_interpType = 'nearestneighbour'
+  s_extrapType = 'lapserate'
+
+  r_stateAnswer(1,1,:) =(/-0.0682094,0.9489846, 0.9489846, 0.6454000,-0.6632335/)
+  r_stateAnswer(2,1,:) =(/0.0791393, 3.0095699, 3.0095699,-0.8450000,-1.0073335/)
+
+  r_derivAnswer(1,1,:) =(/0.0000000, 0.0000000, 0.0000000, 0.0000000, 0.0000000/)
+  r_derivAnswer(2,1,:) =(/0.0000000, 0.0000000, 0.0000000, 0.0000000, 0.0000000/)
+
+  call m_testOneCombo(s_title, n_gridType, s_interpType, s_extrapType, &
+
+                      r_levelsInit,   r_stateIn , r_derivIn, &
+                      r_levelsTarget, r_stateAnswer, r_derivAnswer, &
+
+                      r_EXTRAP_GUIDE_DOWN, r_EXTRAP_GUIDE_UP, &
+
+                      r_PTOP_INIT, r_PREF_INIT, r_RCOEFF_INIT, &
+                      r_PTOP_TARGET, r_PREF_TARGET, r_RCOEFF_TARGET, &
+                      r_PSURF, r_PTOP &
+                     )
 
 
 
@@ -325,44 +325,44 @@ program Test_Vertical_Interpolation
 
 
 
-!!$  !
-!!$  ! SIXTH TEST
-!!$  ! SIXTH TEST
-!!$  !
-!!$  s_title = "TEST 6:  generic; cubic derivs; clamped; descending"
-!!$
-!!$  n_gridType = N_GRID_TYPE_GENERIC
-!!$
-!!$  r_levelsInit   = r_LEVELS_DECREASING
-!!$  r_stateIn      = r_stateDecreasing
-!!$  r_derivIn      = r_derivDecreasing
-!!$  r_levelsTarget = r_LEVELS_TARGET_STD
-!!$
-!!$  s_interpType = 'cubicwithderivs'
-!!$  s_extrapType = 'clamped'
-!!$
-!!$  r_stateAnswer(1,1,:) =(/0.9042932, 0.4981775, 0.3443519, 0.5971954, 0.1708000/)
-!!$  r_stateAnswer(2,1,:) =(/2.0318060,-0.5722344,-0.3647639, 0.7445440,-0.1733000/)
-!!$
-!!$  r_derivAnswer(1,1,:) =(/0.4281423,-0.8671802,-0.9382274, 0.8020958,-0.9853000/)
-!!$  r_derivAnswer(2,1,:) =(/6.4005327, 1.3408751, 1.1214883, 1.5543460, 1.0300300/)
-!!$
-!!$  call m_testOneCombo(s_title, n_gridType, s_interpType, s_extrapType, &
-!!$
-!!$                      r_levelsInit,   r_stateIn , r_derivIn, &
-!!$                      r_levelsTarget, r_stateAnswer, r_derivAnswer, &
-!!$
-!!$                      r_EXTRAP_GUIDE_DOWN, r_EXTRAP_GUIDE_UP, &
-!!$
-!!$                      r_PTOP_INIT, r_PREF_INIT, r_RCOEFF_INIT, &
-!!$                      r_PTOP_TARGET, r_PREF_TARGET, r_RCOEFF_TARGET, &
-!!$                      r_PSURF, r_PTOP &
-!!$                     )
-!!$
-!!$
-!!$
-!!$
-!!$
+  !
+  ! SIXTH TEST
+  ! SIXTH TEST
+  !
+  s_title = "TEST 6:  generic; cubic derivs; clamped; descending"
+
+  n_gridType = N_GRID_TYPE_STAG5005
+
+  r_levelsInit   = r_LEVELS_DECREASING
+  r_stateIn      = r_stateDecreasing
+  r_derivIn      = r_derivDecreasing
+  r_levelsTarget = r_LEVELS_TARGET_STD
+
+  s_interpType = 'cubicwithderivs'
+  s_extrapType = 'clamped'
+
+  r_stateAnswer(1,1,:) =(/0.1708000, 0.3450112, 0.2886377, 0.8757036, 0.5971954/)
+  r_stateAnswer(2,1,:)=(/-0.1733000,-0.6278682,-2.5837648, 5.5148711, 0.7445440/)
+
+  r_derivAnswer(1,1,:)=(/-0.9853000,-0.3728073, 0.2116979,-0.4327170, 0.8020958/)
+  r_derivAnswer(2,1,:) =(/1.0300300,-0.6926972,-1.5272756,-0.8219249, 1.5543460/)
+
+  call m_testOneCombo(s_title, n_gridType, s_interpType, s_extrapType, &
+
+                      r_levelsInit,   r_stateIn , r_derivIn, &
+                      r_levelsTarget, r_stateAnswer, r_derivAnswer, &
+
+                      r_EXTRAP_GUIDE_DOWN, r_EXTRAP_GUIDE_UP, &
+
+                      r_PTOP_INIT, r_PREF_INIT, r_RCOEFF_INIT, &
+                      r_PTOP_TARGET, r_PREF_TARGET, r_RCOEFF_TARGET, &
+                      r_PSURF, r_PTOP &
+                     )
+
+
+
+
+
 !!$  !
 !!$  ! SEVENTH TEST
 !!$  ! SEVENTH TEST
@@ -1226,44 +1226,44 @@ program Test_Vertical_Interpolation
   ! SIXTEENTH TEST
   !
   ! This defunct test used to test the old (pre-_X) interface
-!!$
-!!$
-!!$
-!!$
-!!$
-!!$  !
-!!$  ! SEVENTEENTH TEST
-!!$  ! SEVENTEENTH TEST
-!!$  !
-!!$  s_title = "TEST 17:  generic; linear; fixed; ascending"
-!!$
-!!$  n_gridType = N_GRID_TYPE_GENERIC
-!!$
-!!$  r_levelsInit   = r_LEVELS_INCREASING
-!!$  r_stateIn      = r_stateIncreasing
-!!$  r_derivIn      = r_derivIncreasing
-!!$  r_levelsTarget = r_LEVELS_TARGET_STD
-!!$
-!!$  s_interpType = 'linear'
-!!$  s_extrapType = 'fixed'
-!!$
-!!$  r_stateAnswer(1,1,:) =(/0.8797802, 0.4842152, 0.3319850, 0.4000000,-0.5000000/)
-!!$  r_stateAnswer(2,1,:) =(/2.5639911,-0.6168757,-0.4014246, 0.4000000,-0.5000000/)
-!!$
-!!$  r_derivAnswer(1,1,:) =(/0.0000000, 0.0000000, 0.0000000, 0.0000000, 0.0000000/)
-!!$  r_derivAnswer(2,1,:) =(/0.0000000, 0.0000000, 0.0000000, 0.0000000, 0.0000000/)
-!!$
-!!$  call m_testOneCombo(s_title, n_gridType, s_interpType, s_extrapType, &
-!!$
-!!$                      r_levelsInit,   r_stateIn , r_derivIn, &
-!!$                      r_levelsTarget, r_stateAnswer, r_derivAnswer, &
-!!$
-!!$                      r_EXTRAP_GUIDE_DOWN, r_EXTRAP_GUIDE_UP, &
-!!$
-!!$                      r_PTOP_INIT, r_PREF_INIT, r_RCOEFF_INIT, &
-!!$                      r_PTOP_TARGET, r_PREF_TARGET, r_RCOEFF_TARGET, &
-!!$                      r_PSURF, r_PTOP &
-!!$                     )
+
+
+
+
+
+  !
+  ! SEVENTEENTH TEST
+  ! SEVENTEENTH TEST
+  !
+  s_title = "TEST 17:  generic; linear; fixed; ascending"
+
+  n_gridType = N_GRID_TYPE_STAG5005
+
+  r_levelsInit   = r_LEVELS_INCREASING
+  r_stateIn      = r_stateIncreasing
+  r_derivIn      = r_derivIncreasing
+  r_levelsTarget = r_LEVELS_TARGET_STD
+
+  s_interpType = 'linear'
+  s_extrapType = 'fixed'
+
+  r_stateAnswer(1,1,:) =(/0.4000000, 0.9042622, 0.8041871, 0.5088742,-0.5000000/)
+  r_stateAnswer(2,1,:) =(/0.4000000, 2.4417365, 1.1710972,-0.6517754,-0.5000000/)
+
+  r_derivAnswer(1,1,:) =(/0.0000000, 0.0000000, 0.0000000, 0.0000000, 0.0000000/)
+  r_derivAnswer(2,1,:) =(/0.0000000, 0.0000000, 0.0000000, 0.0000000, 0.0000000/)
+
+  call m_testOneCombo(s_title, n_gridType, s_interpType, s_extrapType, &
+
+                      r_levelsInit,   r_stateIn , r_derivIn, &
+                      r_levelsTarget, r_stateAnswer, r_derivAnswer, &
+
+                      r_EXTRAP_GUIDE_DOWN, r_EXTRAP_GUIDE_UP, &
+
+                      r_PTOP_INIT, r_PREF_INIT, r_RCOEFF_INIT, &
+                      r_PTOP_TARGET, r_PREF_TARGET, r_RCOEFF_TARGET, &
+                      r_PSURF, r_PTOP &
+                     )
 
 
 
@@ -1276,11 +1276,6 @@ program Test_Vertical_Interpolation
   ! (The same as FIRST TEST, but with a different grid type.)
   s_title = "TEST 18:  unnormalized hybrid; cubic derivs; clamped; ascending"
 
-!  n_gridType = N_GRID_TYPE_SIGMA
-!  n_gridType = N_GRID_TYPE_PRESSURE
-!  n_gridType = N_GRID_TYPE_GENERIC
-!  n_gridType = N_GRID_TYPE_HYBRID
-!  n_gridType = N_GRID_TYPE_ETA
   n_gridType = N_GRID_TYPE_HYBRID_NOTNORM
 
   r_levelsInit   = r_LEVELS_INCREASING
@@ -1371,70 +1366,70 @@ program Test_Vertical_Interpolation
 !!$                      r_PTOP_TARGET, r_PREF_TARGET, r_RCOEFF_TARGET, &
 !!$                      r_PSURF, r_PTOP &
 !!$                     )
-!!$
-!!$
-!!$
-!!$
-!!$  !
-!!$  ! TWENTIETH TEST
-!!$  ! TWENTIETH TEST
-!!$  !
-!!$  ! (The same as the first test, but with staggered levels.)
-!!$  s_title = "TEST 20:  staggered vertical levels"
-!!$
-!!$  n_gridType = N_GRID_TYPE_STAGGERED
-!!$
-!!$  r_levelsInit   = r_LEVELS_INCREASING
-!!$  r_stateIn      = r_stateIncreasing
-!!$  r_derivIn      = r_derivIncreasing
-!!$  r_levelsTarget = r_LEVELS_TARGET_STD
-!!$
-!!$  s_interpType = 'linear'
-!!$  s_extrapType = 'clamped'
-!!$
-!!$! The results previous to the f90 interface
-!!$  r_stateAnswer(1,1,:) =(/0.9473432, 0.8168903, 0.3669596, 0.2841619, 0.1708000/)
-!!$  r_stateAnswer(2,1,:) =(/2.9887292, 1.3323874,-0.4509242,-0.3337408,-0.1733000/)
-!!$!! Make the tests work again, adapting to the recent f90 interface:
-!!$!  r_stateAnswer(1,1,:) =(/0.9189990, 0.7963848, 0.3385447, 0.2617664, 0.1708000/)
-!!$!  r_stateAnswer(2,1,:) =(/2.6288471, 1.0720317,-0.4107087,-0.3020445,-0.1733000/)
-!!$
-!!$  r_derivAnswer(1,1,:) =(/0.0000000, 0.0000000, 0.0000000, 0.0000000, 0.0000000/)
-!!$  r_derivAnswer(2,1,:) =(/0.0000000, 0.0000000, 0.0000000, 0.0000000, 0.0000000/)
-!!$
-!!$  !
-!!$  ! MAKE THE DATA REASONABLE FOR THE HYBRID GRID TYPE
-!!$  !
-!!$  ! convert the levels to reasonable hybrid values
-!!$  do i=1,n_PTS_INIT
-!!$    r_levelsInit(i) = r_levelsInit(i) / 3.2
-!!$  end do
-!!$
-!!$  ! convert the levels to reasonable hybrid values
-!!$  do i=n_PTS_TARGET,2,-1
-!!$    r_levelsTarget(i) = r_levelsTarget(i-1) / 3.5
-!!$  end do
-!!$  r_levelsTarget(1) = r_levelsInit(1)
-!!$  r_levelsTarget(5) = 0.90
-!!$
-!!$
-!!$
-!!$! NOTE:  modifying the initial pref and rcoeff
-!!$  call m_testOneCombo_2GridTypes &
-!!$                     (s_title, n_gridType, n_gridType, &
-!!$                      s_interpType, s_extrapType, &
-!!$
-!!$                      r_levelsInit,   r_stateIn , r_derivIn, &
-!!$                      r_levelsTarget, r_stateAnswer, r_derivAnswer, &
-!!$
-!!$                      r_EXTRAP_GUIDE_DOWN, r_EXTRAP_GUIDE_UP, &
-!!$
-!!$                      r_PTOP_INIT, r_PREF_INIT/2., r_RCOEFF_INIT*2., &
-!!$                      r_PTOP_TARGET, r_PREF_TARGET, r_RCOEFF_TARGET, &
-!!$                      r_PSURF, r_PTOP, &
-!!$
-!!$                      r_RCOEFF_INIT*2., r_RCOEFF_TARGET &
-!!$                     )
+
+
+
+
+  !
+  ! TWENTIETH TEST
+  ! TWENTIETH TEST
+  !
+  ! (The same as the first test, but with staggered levels.)
+  s_title = "TEST 20:  staggered vertical levels"
+
+  n_gridType = N_GRID_TYPE_STAGGERED
+
+  r_levelsInit   = r_LEVELS_INCREASING
+  r_stateIn      = r_stateIncreasing
+  r_derivIn      = r_derivIncreasing
+  r_levelsTarget = r_LEVELS_TARGET_STD
+
+  s_interpType = 'linear'
+  s_extrapType = 'clamped'
+
+! The results previous to the f90 interface
+  r_stateAnswer(1,1,:) =(/0.9473432, 0.8168903, 0.3669596, 0.2841619, 0.1708000/)
+  r_stateAnswer(2,1,:) =(/2.9887292, 1.3323874,-0.4509242,-0.3337408,-0.1733000/)
+!! Make the tests work again, adapting to the recent f90 interface:
+!  r_stateAnswer(1,1,:) =(/0.9189990, 0.7963848, 0.3385447, 0.2617664, 0.1708000/)
+!  r_stateAnswer(2,1,:) =(/2.6288471, 1.0720317,-0.4107087,-0.3020445,-0.1733000/)
+
+  r_derivAnswer(1,1,:) =(/0.0000000, 0.0000000, 0.0000000, 0.0000000, 0.0000000/)
+  r_derivAnswer(2,1,:) =(/0.0000000, 0.0000000, 0.0000000, 0.0000000, 0.0000000/)
+
+  !
+  ! MAKE THE DATA REASONABLE FOR THE HYBRID GRID TYPE
+  !
+  ! convert the levels to reasonable hybrid values
+  do i=1,n_PTS_INIT
+    r_levelsInit(i) = r_levelsInit(i) / 3.2
+  end do
+
+  ! convert the levels to reasonable hybrid values
+  do i=n_PTS_TARGET,2,-1
+    r_levelsTarget(i) = r_levelsTarget(i-1) / 3.5
+  end do
+  r_levelsTarget(1) = r_levelsInit(1)
+  r_levelsTarget(5) = 0.90
+
+
+
+! NOTE:  modifying the initial pref and rcoeff
+  call m_testOneCombo_2GridTypes &
+                     (s_title, n_gridType, n_gridType, &
+                      s_interpType, s_extrapType, &
+
+                      r_levelsInit,   r_stateIn , r_derivIn, &
+                      r_levelsTarget, r_stateAnswer, r_derivAnswer, &
+
+                      r_EXTRAP_GUIDE_DOWN, r_EXTRAP_GUIDE_UP, &
+
+                      r_PTOP_INIT, r_PREF_INIT/2., r_RCOEFF_INIT*2., &
+                      r_PTOP_TARGET, r_PREF_TARGET, r_RCOEFF_TARGET, &
+                      r_PSURF, r_PTOP, &
+
+                      r_RCOEFF_INIT*2., r_RCOEFF_TARGET &
+                     )
 
 
 
