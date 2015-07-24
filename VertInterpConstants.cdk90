@@ -58,8 +58,7 @@ module VerticalInterpolationConstants
   ! guaranteed.)
   integer, parameter :: N_GRID_TYPE_SIGMA    = 1, & ! P/Ps
                         N_GRID_TYPE_PRESSURE = 2, & ! in mb
-                        N_GRID_TYPE_GENERIC  = 3, & ! units are user defined; 
-                                                    ! (software won't convert it)
+                    !   N_GRID_TYPE_GENERIC  = 3, & !unsupported by vgrid descriptor
                         N_GRID_TYPE_HYBRID   = 5, & ! NORMALIZED hybrid (i.e. hybrid type 1)
                         N_GRID_TYPE_ETA      = 7, & !(Pt-P)/(Pt-Ps) -not in convip
                                                     ! UNnormalized hybrid (i.e. hybrid type 5, version 1)

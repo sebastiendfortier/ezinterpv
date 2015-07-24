@@ -2,6 +2,8 @@
 !#define test48 4
 #define test48 8
 
+#define TOCTOC_FILENUM 9
+
 !!!prog Test_Vertical_Interpolation -program that automates testing of ez_interpv
 program Test_Vertical_Interpolation
 !
@@ -89,6 +91,18 @@ program Test_Vertical_Interpolation
   real, dimension(n_NI, n_NJ) :: r_hBound
                                         ! latitude (used only for the wind)
   real, dimension(n_NI, n_NJ) :: r_lat
+
+  integer, external :: fnom, fstouv, fstfrm
+
+
+
+  ! Open the file that defines a vgrid
+  error = fnom(TOCTOC_FILENUM, 'toctoc_5005', 'STD+RND+OLD+R/O', 0)
+  if (error /= 0)write(6,*)"ERROR opening toctoc_5005:  error=", error
+
+  ! Prepare the file for accessing it
+  error = fstouv(TOCTOC_FILENUM, 'RND') ! returns no. of records or error
+  if(error < 0)write(6,*)"ERROR initializing toctoc_5005:  error=", error
 
 
 
@@ -268,49 +282,49 @@ program Test_Vertical_Interpolation
 !!$                      r_PTOP_TARGET, r_PREF_TARGET, r_RCOEFF_TARGET, &
 !!$                      r_PSURF, r_PTOP &
 !!$                     )
-!!$
-!!$
-!!$
-!!$
-!!$
-!!$  !
-!!$  ! FIFTH TEST
-!!$  ! FIFTH TEST
-!!$  !
-!!$  s_title = "TEST 5:  generic; linear; clamped; ascending"
-!!$
-!!$  n_gridType = N_GRID_TYPE_GENERIC
-!!$
-!!$  r_levelsInit   = r_LEVELS_INCREASING
-!!$  r_stateIn      = r_stateIncreasing
-!!$  r_derivIn      = r_derivIncreasing
-!!$  r_levelsTarget = r_LEVELS_TARGET_STD
-!!$
-!!$  s_interpType = 'linear'
-!!$  s_extrapType = 'clamped'
-!!$
-!!$  r_stateAnswer(1,1,:) =(/0.8797802, 0.4842152, 0.3319850, 0.5971954, 0.1708000/)
-!!$  r_stateAnswer(2,1,:) =(/2.5639911,-0.6168757,-0.4014246, 0.7445440,-0.1733000/)
-!!$
-!!$  r_derivAnswer(1,1,:) =(/0.0000000, 0.0000000, 0.0000000, 0.0000000, 0.0000000/)
-!!$  r_derivAnswer(2,1,:) =(/0.0000000, 0.0000000, 0.0000000, 0.0000000, 0.0000000/)
-!!$
-!!$  call m_testOneCombo(s_title, n_gridType, s_interpType, s_extrapType, &
-!!$
-!!$                      r_levelsInit,   r_stateIn , r_derivIn, &
-!!$                      r_levelsTarget, r_stateAnswer, r_derivAnswer, &
-!!$
-!!$                      r_EXTRAP_GUIDE_DOWN, r_EXTRAP_GUIDE_UP, &
-!!$
-!!$                      r_PTOP_INIT, r_PREF_INIT, r_RCOEFF_INIT, &
-!!$                      r_PTOP_TARGET, r_PREF_TARGET, r_RCOEFF_TARGET, &
-!!$                      r_PSURF, r_PTOP &
-!!$                     )
-!!$
-!!$
-!!$
-!!$
-!!$
+
+
+
+
+
+  !
+  ! FIFTH TEST
+  ! FIFTH TEST
+  !
+  s_title = "TEST 5:  generic; linear; clamped; ascending"
+
+  n_gridType = N_GRID_TYPE_STAG5005
+
+  r_levelsInit   = r_LEVELS_INCREASING
+  r_stateIn      = r_stateIncreasing
+  r_derivIn      = r_derivIncreasing
+  r_levelsTarget = r_LEVELS_TARGET_STD
+
+  s_interpType = 'linear'
+  s_extrapType = 'clamped'
+
+  r_stateAnswer(1,1,:) =(/0.5971954, 0.9042622, 0.8041871, 0.5088742, 0.1708000/)
+  r_stateAnswer(2,1,:) =(/0.7445440, 2.4417365, 1.1710972,-0.6517754,-0.1733000/)
+
+  r_derivAnswer(1,1,:) =(/0.0000000, 0.0000000, 0.0000000, 0.0000000, 0.0000000/)
+  r_derivAnswer(2,1,:) =(/0.0000000, 0.0000000, 0.0000000, 0.0000000, 0.0000000/)
+
+  call m_testOneCombo(s_title, n_gridType, s_interpType, s_extrapType, &
+
+                      r_levelsInit,   r_stateIn , r_derivIn, &
+                      r_levelsTarget, r_stateAnswer, r_derivAnswer, &
+
+                      r_EXTRAP_GUIDE_DOWN, r_EXTRAP_GUIDE_UP, &
+
+                      r_PTOP_INIT, r_PREF_INIT, r_RCOEFF_INIT, &
+                      r_PTOP_TARGET, r_PREF_TARGET, r_RCOEFF_TARGET, &
+                      r_PSURF, r_PTOP &
+                     )
+
+
+
+
+
 !!$  !
 !!$  ! SIXTH TEST
 !!$  ! SIXTH TEST
@@ -1734,6 +1748,11 @@ program Test_Vertical_Interpolation
     write(6,*)'* * * * * * * * * * * * * *'
   end if
 
+
+  ! Close the file that defines a vgrid
+  error = fstfrm(TOCTOC_FILENUM) ! returns no. of records or error
+  if(error < 0)write(6,*)"ERROR closing toctoc_5005:  error=", error
+
 contains
 
 !!!s/r m_testOneCombo - routine that tests a single combination of parameters
@@ -1809,20 +1828,30 @@ subroutine m_testOneCombo(s_title, n_gridType, s_interpType, s_extrapType, &
                   ubound(r_stateAnswer,3)) :: r_stateOut   , r_derivOut, &
                                               r_y_stateOut , r_y_derivOut
 
-  integer :: i, j, k, n_ni, n_nj, n_nk
+  integer :: i, j, k, n_ni, n_nj, n_nk, n_error
 
-  type(T_VerticalGrid), target :: o_gridInitial   , o_gridTarget
-  type(T_VerticalGridPtr)      :: o_gridInitial_p, o_gridTarget_p
+  type(T_VerticalGrid), target :: o_gridInit  , o_gridTarget
+  type(T_VerticalGridPtr)      :: o_gridInit_p, o_gridTarget_p
+
+                                        ! The ip1's of the field levels that are
+                                        ! present in the associated field
+  integer, dimension(n_PTS_TARGET) :: n_ip1
+  integer, dimension(:), pointer   :: n_ip1_temp_p
+
+  type(vgrid_descriptor), target  :: o_vGridDescInit,   o_vGridDescTarget
+  type(vgrid_descriptor), pointer :: o_vGridDescInit_p, o_vGridDescTarget_p
 
   character(len=19) :: s_pass     = '  PASS', &
                        s_fail     = '  **** F A I L ****', &
                        s_passFail = '  **** T E M P ****'
 
+  nullify(n_ip1_temp_p)
+
   write(6,*)
   write(6,*) s_title
 
-  o_gridInitial_p%Ptr => o_gridInitial
-  o_gridTarget_p%Ptr  => o_gridTarget
+  o_gridInit_p%Ptr   => o_gridInit
+  o_gridTarget_p%Ptr => o_gridTarget
 
   n_ni = ubound(r_stateAnswer,1)
   n_nj = ubound(r_stateAnswer,2)
@@ -1837,27 +1866,69 @@ subroutine m_testOneCombo(s_title, n_gridType, s_interpType, s_extrapType, &
   r_y_derivOut=0.
 
   !
-  ! CREATE AND SET THE INITIAL AND TARGET GRIDS
+  ! CREATE THE INITIAL GRID
   !
-  error=N_Viqkdef     (o_gridInitial_p, n_PTS_INIT, n_gridType, &
-                       r_levelsInit, r_pTopInit, r_pRefInit, &
-                       r_rCoefInit, 0.0)
-  if(error /= 0)write(6,*)'ERROR initializing gridInitial:  ', error
 
-  error=N_Viqkdef     (o_gridTarget_p, n_PTS_TARGET, n_gridType, &
-                       r_levelsTarget, r_pTopTarget, r_pRefTarget, &
-                       r_rCoefTarget, 0.0)
+  ! Obtain the ip1's defined in the vertical grid
+  n_error = vgd_new(o_vGridDescInit, TOCTOC_FILENUM, 'fst')
+  if(n_error .ne. VGD_OK)write(6,*)'ERROR in TestVI, from vgd_new:', n_error
+
+  ! Specify for which ip1's there are fields;
+  ! make a selection from the defined levels
+  n_error = vgd_get(o_vGridDescInit, 'VIPT', n_ip1_temp_p)
+  if(n_error .ne. VGD_OK)write(6,*)'ERROR in TestVI, from vgd_get:', n_error
+
+  n_ip1(1) = n_ip1_temp_p(3)
+  n_ip1(2) = n_ip1_temp_p(5)
+  n_ip1(3) = n_ip1_temp_p(8)
+  n_ip1(4) = n_ip1_temp_p(10)
+  deallocate(n_ip1_temp_p) ! vgd_get allocated it
+  nullify(n_ip1_temp_p)
+
+  o_vGridDescInit_p => o_vGridDescInit
+  error=N_Viqkdef(o_gridInit_p, n_PTS_INIT, n_gridType, &
+                  r_levelsInit, n_ip1In=n_ip1(:n_PTS_INIT), &
+                  o_vGridDescIn_p=o_vGridDescInit_p)
+  if(error /= 0)write(6,*)'ERROR initializing gridInit:  ', error
+
+  !
+  ! CREATE THE TARGET GRID
+  !
+
+  ! Obtain the ip1's defined in the vertical grid
+  n_error = vgd_new(o_vGridDescTarget, TOCTOC_FILENUM, 'fst')
+  if(n_error .ne. VGD_OK)write(6,*)'ERROR in TestVI, from vgd_new:', n_error
+
+  ! Specify for which ip1's there are fields (use 'VIPM' to have different
+  ! levels); make a selection from the defined levels
+  n_error = vgd_get(o_vGridDescTarget, 'VIPM', n_ip1_temp_p)
+  if(n_error .ne. VGD_OK)write(6,*)'ERROR in TestVI, from vgd_get:', n_error
+
+  n_ip1(1) = n_ip1_temp_p(2)
+  n_ip1(2) = n_ip1_temp_p(6)
+  n_ip1(3) = n_ip1_temp_p(7)
+  n_ip1(4) = n_ip1_temp_p(9)
+  n_ip1(5) = n_ip1_temp_p(13)
+  deallocate(n_ip1_temp_p) ! vgd_get allocated it
+  nullify(n_ip1_temp_p)
+
+  o_vGridDescTarget_p => o_vGridDescTarget
+  error=N_Viqkdef(o_gridTarget_p, n_PTS_TARGET, n_gridType, &
+                  r_levelsTarget, n_ip1In=n_ip1, &
+                  o_vGridDescIn_p=o_vGridDescTarget_p)
   if(error /= 0)write(6,*)'ERROR initializing gridTarget:  ', error
 
-
-  if (present(r_z0)) then
-    error=N_Videfset   (n_NI, n_NJ, o_gridTarget_p, o_gridInitial_p, &
-                        r_pSurf, r_pTop, &
-                        r_z0, r_ilmo, r_hBound, r_lat)
-  else
-    error=N_Videfset   (n_NI, n_NJ, o_gridTarget_p, o_gridInitial_p, &
-                        r_pSurf, r_pTop)
-  end if
+  !
+  ! SET THE INITIAL AND TARGET GRIDS
+  !
+!!$  if (present(r_z0)) then
+!!$    error=N_Videfset   (n_NI, n_NJ, o_gridTarget_p, o_gridInit_p, &
+!!$                        r_pSurf, r_pTop, &
+!!$                        r_z0, r_ilmo, r_hBound, r_lat)
+!!$  else
+    error=N_Videfset(n_NI, n_NJ, o_gridTarget_p, o_gridInit_p, &
+                     r_pSurf, r_pTop)
+!!$  end if
   if(error /= 0) write(6,*) 'ERROR in test:  videfset returned ', error
 
 
@@ -1878,23 +1949,23 @@ subroutine m_testOneCombo(s_title, n_gridType, s_interpType, s_extrapType, &
   !
   ! PERFORM THE INTERPOLATION / EXTRAPOLATION
   !
-  if(s_extrapType == 'surfacewind') then
-                                        ! This is just a lazy way to call the
-                                        ! WIND stubs
-    error = N_Visint     (r_stateOut, r_stateIn, r_derivOut, r_derivIn, &
-                          r_extrapGuideDown, r_extrapGuideUp, &
-                          m_slStateValueWindStub, m_slFluxGradientWindStub, &
-                          r_zDest, r_zSrc, &
-                          r_y_stateOut, r_y_stateIn, r_y_derivOut, r_y_derivIn &
-                         )
-
-  else 
+!!$  if(s_extrapType == 'surfacewind') then
+!!$                                        ! This is just a lazy way to call the
+!!$                                        ! WIND stubs
+!!$    error = N_Visint     (r_stateOut, r_stateIn, r_derivOut, r_derivIn, &
+!!$                          r_extrapGuideDown, r_extrapGuideUp, &
+!!$                          m_slStateValueWindStub, m_slFluxGradientWindStub, &
+!!$                          r_zDest, r_zSrc, &
+!!$                          r_y_stateOut, r_y_stateIn, r_y_derivOut, r_y_derivIn &
+!!$                         )
+!!$
+!!$  else 
     error = N_Visint     (r_stateOut, r_stateIn, r_derivOut, r_derivIn, &
                           r_extrapGuideDown, r_extrapGuideUp, &
                           m_slStateValueStub, m_slFluxGradientStub, &
                           r_zDest, r_zSrc &
                          )
-  end if
+!!$  end if
 
   if(error /= 0) then
     write(6,*) 'ERROR interpolating:  N_Visint returned ', error
@@ -1904,7 +1975,7 @@ subroutine m_testOneCombo(s_title, n_gridType, s_interpType, s_extrapType, &
   !
   ! RELEASE THE GRIDS
   !
-  call M_ReleaseVerticalGrid(o_gridInitial_p)
+  call M_ReleaseVerticalGrid(o_gridInit_p)
   call M_ReleaseVerticalGrid(o_gridTarget_p)
 
 
@@ -2063,8 +2134,8 @@ subroutine m_testOneCombo_FunnyBounds(s_title, n_gridType, s_interpType, s_extra
 
   integer :: i, j, k, n_ni, n_nj
 
-  type(T_VerticalGrid), target :: o_gridInitial,   o_gridTarget
-  type(T_VerticalGridPtr)      :: o_gridInitial_p, o_gridTarget_p
+  type(T_VerticalGrid), target :: o_gridInit,   o_gridTarget
+  type(T_VerticalGridPtr)      :: o_gridInit_p, o_gridTarget_p
 
   character(len=19) :: s_pass     = '  PASS', &
                        s_fail     = '  **** F A I L ****', &
@@ -2073,8 +2144,8 @@ subroutine m_testOneCombo_FunnyBounds(s_title, n_gridType, s_interpType, s_extra
   write(6,*)
   write(6,*) s_title
 
-  o_gridInitial_p%Ptr => o_gridInitial
-  o_gridTarget_p%Ptr  => o_gridTarget
+  o_gridInit_p%Ptr   => o_gridInit
+  o_gridTarget_p%Ptr => o_gridTarget
 
   n_ni = ubound(r_stateAnswer,1)
   n_nj = ubound(r_stateAnswer,2)
@@ -2103,7 +2174,7 @@ subroutine m_testOneCombo_FunnyBounds(s_title, n_gridType, s_interpType, s_extra
   !
   ! CREATE AND SET THE INITIAL AND TARGET GRIDS
   !
-  error=N_Viqkdef     (o_gridInitial_p, n_PTS_INIT, n_gridType, &
+  error=N_Viqkdef     (o_gridInit_p, n_PTS_INIT, n_gridType, &
                        r_levelsInit_Bd, r_pTopInit, r_pRefInit, &
                        r_rCoefInit, 0.0)
   if(error /= 0)write(6,*)'ERROR initializing gridInitial:  ', error
@@ -2114,7 +2185,7 @@ subroutine m_testOneCombo_FunnyBounds(s_title, n_gridType, s_interpType, s_extra
   if(error /= 0)write(6,*)'ERROR initializing gridTarget:  ', error
 
 
-  error=N_Videfset     (n_NI, n_NJ, o_gridTarget_p, o_gridInitial_p, &
+  error=N_Videfset     (n_NI, n_NJ, o_gridTarget_p, o_gridInit_p, &
                         r_pSurf, r_pTop, &
                         r_pSurf, r_pTop)
   if(error /= 0) write(6,*) 'ERROR in test:  videfset returned ', error
@@ -2162,7 +2233,7 @@ subroutine m_testOneCombo_FunnyBounds(s_title, n_gridType, s_interpType, s_extra
   !
   ! RELEASE THE GRIDS
   !
-  call M_ReleaseVerticalGrid(o_gridInitial_p)
+  call M_ReleaseVerticalGrid(o_gridInit_p)
   call M_ReleaseVerticalGrid(o_gridTarget_p)
 
 
@@ -2344,11 +2415,11 @@ subroutine m_testOneCombo_2GridTypes &
   integer :: i, j, k, n_ni, n_nj, n_nk
   integer :: n_error, n_vcode, n_vgd_kind, n_vgd_version
 
-  type(T_VerticalGrid), target:: o_gridInitial, o_gridTarget
-  type(T_VerticalGridPtr):: o_gridInitial_p, o_gridTarget_p
+  type(T_VerticalGrid), target :: o_gridInit, o_gridTarget
+  type(T_VerticalGridPtr)      :: o_gridInit_p, o_gridTarget_p
 
-  type(vgrid_descriptor), target  ::o_vGridDescInit,   o_vGridDescTarget
-  type(vgrid_descriptor), pointer ::o_vGridDescInit_p, o_vGridDescTarget_p
+  type(vgrid_descriptor), target  :: o_vGridDescInit,   o_vGridDescTarget
+  type(vgrid_descriptor), pointer :: o_vGridDescInit_p, o_vGridDescTarget_p
 
                                         ! The ip1's of the field levels that are
                                         ! present in the associated field
@@ -2360,8 +2431,10 @@ subroutine m_testOneCombo_2GridTypes &
                        s_fail     = '  **** F A I L ****', &
                        s_passFail = '  **** T E M P ****'
 
-  o_gridInitial_p%Ptr => o_gridInitial
-  o_gridTarget_p%Ptr  => o_gridTarget
+  nullify(n_ip1_temp_p)
+
+  o_gridInit_p%Ptr   => o_gridInit
+  o_gridTarget_p%Ptr => o_gridTarget
 
   write(6,*)
   write(6,*) s_title
@@ -2429,7 +2502,6 @@ subroutine m_testOneCombo_2GridTypes &
 
   ! In order to be useful, o_vGridDescInit will require n_ip1_p
   ! (Ask for VIPM, because vgd_new assumed the r_vLevelIn to be VIPM.)
-  nullify(n_ip1_temp_p)
   n_error = vgd_get(o_vGridDescInit, 'VIPM', n_ip1_temp_p)
   if(n_error .ne. VGD_OK)write(6,*)'ERROR in TestVI, from vgd_get:', n_error
 
@@ -2439,9 +2511,10 @@ subroutine m_testOneCombo_2GridTypes &
   if(n_error /= 0)write(6,*)'Error allocating n_ip1_p in TestVI:  error=',n_error
   n_ip1_p(:) = n_ip1_temp_p(:n_PTS_INIT)
   deallocate(n_ip1_temp_p) ! vgd_get allocated it
+  nullify(n_ip1_temp_p)
 
   o_vGridDescInit_p => o_vGridDescInit
-  error=N_Viqkdef(o_gridInitial_p, n_PTS_INIT, n_gridTypeIn, &
+  error=N_Viqkdef(o_gridInit_p, n_PTS_INIT, n_gridTypeIn, &
                   r_levelsInit, n_ip1In=n_ip1_p, &
                   o_vGridDescIn_p=o_vGridDescInit_p)
   if(error /= 0)write(6,*)'ERROR initializing gridInitial:  ', error
@@ -2508,6 +2581,7 @@ subroutine m_testOneCombo_2GridTypes &
   if(n_error /= 0)write(6,*)'Error allocating n_ip1_p in TestVI:  error=',n_error
   n_ip1_p(:) = n_ip1_temp_p(:n_PTS_TARGET)
   deallocate(n_ip1_temp_p) ! vgd_get allocated it
+  nullify(n_ip1_temp_p)
 
   o_vGridDescTarget_p => o_vGridDescTarget
   error=N_Viqkdef(o_gridTarget_p, n_PTS_TARGET, n_gridTypeOut, &
@@ -2520,7 +2594,7 @@ subroutine m_testOneCombo_2GridTypes &
   !
   ! SET THE INITIAL AND TARGET GRIDS
   !
-  error=N_Videfset(n_NI, n_NJ, o_gridTarget_p, o_gridInitial_p, r_pSurf, r_pTop)
+  error=N_Videfset(n_NI, n_NJ, o_gridTarget_p, o_gridInit_p, r_pSurf, r_pTop)
   if(error /= 0) write(6,*) 'ERROR in test:  N_Videfset returned ', error
 
 

@@ -387,36 +387,6 @@ end function N_ConstructNull
 
 
 
-!!!func L_ValueIncreasesWithHeight - Indicate whether the vLevel values increase
-!                                    with height
-  logical function L_ValueIncreasesWithHeight(n_gridTypeIn)
-!
-!AUTHOR
-!     J.W. Blezius SEPTEMBER 2002 helper on top of the Interp1D library
-!
-!REVISION
-! v1_0    Blezius J.W.          - initial version
-!
-!OBJECT
-!        For the purposes of ordering the vertical levels, it is necessary to
-!        know which way is up.  This function gives that information.
-!
-!ARGUMENTS
-    integer :: n_gridTypeIn
-!
-!NOTES
-!        While it would be cleaner if the argument were a pointer to the
-!        particular vertical grid in question, this is inconvenient because the
-!        routine that calls this function holds the vertical grid as an element
-!        of another user-defined type.  Unfortunately, fortran90 doesn't allow a
-!        component of a user-defined type to be the object of a pointer.
-!
-!!
-    L_ValueIncreasesWithHeight = (n_gridTypeIn == N_GRID_TYPE_GENERIC)
-  end function L_ValueIncreasesWithHeight
-
-
-
 !!!func N_VertGridGetLnP - Create 'cube' of vertical levels in units of ln P
   integer function N_VertGridGetLnP(that, r_P, n_ni, n_nj, r_pSurf, r_pTop)
                                         ! returns error indication:  0='no error'
