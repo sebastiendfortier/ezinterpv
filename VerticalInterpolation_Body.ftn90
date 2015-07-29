@@ -496,6 +496,7 @@ contains
 
     real, dimension(2), target :: r_levels_sample
     real, dimension(:), pointer :: r_levels_sample_p
+    real, parameter :: r_PSURF_TYPICAL=100000.0
     integer :: i, j, n_error
     integer, dimension(9) :: err
 
@@ -601,7 +602,8 @@ contains
       r_levels_sample_p => r_levels_sample
       n_error=vgd_levels(o_vGridSource_p%O_vGridDesc_p, &
                          o_vGridSource_p%N_ip1_p(1:2), &
-                         r_levels_sample_p)
+                         r_levels_sample_p, &
+                         r_PSURF_TYPICAL)
       if( r_levels_sample(2) > r_levels_sample(1) ) then
         ! The vertical level values INcrease with the index.
         n_indexSurface       = 1
