@@ -44,6 +44,7 @@ module VerticalInterpolationConstants
                         N_VI_VIERR_UNRECOGNIZED_VALUE   =105, &
                         N_VI_VIERR_LN_PRESS_CONVERSION  =106, &
                         N_VI_VIERR_MISSING_SURFACE_DATA =108, &
+                        N_VI_VIERR_VGD_DESCRIPTOR_ERROR =109, &
 
   ! errors from VerticalGrid class
                         N_VI_VGERR_HYBRID_TO_PRES_CONVN =200, &

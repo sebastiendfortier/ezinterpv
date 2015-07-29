@@ -268,9 +268,7 @@ end function N_ConstructNull
 
 !!!func N_Viqkdef - constructor:  Quick definition of the grid for vertical
 !                                 integration
-  integer function N_Viqkdef(that, n_numVLevelsIn, n_gridTypeIn, r_vLevelIn, &
-                             r_pTopAvgIn, r_pRefIn, r_rCoefIn, r_rCoef_2In, &
-                             n_ip1In, o_vGridDescIn_p)
+  integer function N_Viqkdef(that, o_vGridDescIn_p, n_ip1In)
                                         ! returns error indication:  0='no error'
 !
 !AUTHOR
@@ -285,110 +283,67 @@ end function N_ConstructNull
 !
 !ARGUMENTS
     type(T_VerticalGridPtr), intent(inout) :: that
-    integer, intent(in)::n_numVLevelsIn ! number of vertical levels in r_vLevelIn
-    integer, intent(in) :: n_gridTypeIn ! the type of grid -- see values above
-
-                                        ! the levels, see n_gridTypeIn for units
-    real(real48), dimension(n_numVLevelsIn), intent(in) :: r_vLevelIn
-
-    ! These three arguments are optional as a group (for N_GRID_TYPE_HYBRID)
-                                        ! average pressure (mb) at model top
-    real, optional,intent(in)::r_pTopAvgIn
-    real, optional,intent(in)::r_pRefIn ! reference pressure (mb)
-    real, optional,intent(in)::r_rCoefIn! known as 'expansion co-efficient'
-                                        ! for staggered co-ordinates
-    real, optional, intent(in) :: r_rCoef_2In
-                                        ! The ip1's of field levels present
-    integer, optional, dimension(n_numVLevelsIn), intent(in) :: n_ip1In
                                         ! The vgd that describes this grid
-    type(vgrid_descriptor), optional, pointer, intent(in)::o_vGridDescIn_p
+    type(vgrid_descriptor), pointer, intent(in)::o_vGridDescIn_p
+                                        ! The ip1's of field levels present
+    integer, optional, dimension(:), intent(in) :: n_ip1In
 !
 !!
     external flush
     integer :: n_error
     type(T_VerticalGrid), pointer :: this
-    integer, dimension(:), pointer :: n_ip1_p
-    real(8) :: ptop_out_dummy
-
-    ! hybrid parameters
-    real :: r_pTopAvg                   ! pressure (mb) at the model top(ceiling)
-    real :: r_pRef                      ! reference pressure (mb)
-    real :: r_rCoef                     ! known as 'expansion co-efficient'
-    real :: r_rCoef_2                   ! for staggered co-ordinates
 
     this => that%Ptr
     N_Viqkdef = 0                       ! no error yet
+    this%O_vGridDesc_p => o_vGridDescIn_p
 
-    nullify(n_ip1_p)
+    this%N_numVLevels = ubound(n_ip1In,1) - lbound(n_ip1In,1) +1
 
-    allocate(this%N_ip1_p(n_numVLevelsIn), STAT=n_error)
-    if(n_error /= 0) then
-      write(6, *) 'Error allocating vLevel in N_Viqkdef:  error=', n_error
-      call flush(6)
-      N_Viqkdef = N_VI_VIERR_FAILED_ALLOCATION
-      return
-    endif
-    this%N_ip1_p = 0
+    !
+    ! DETERMINE THE IP1 VALUES
+    !
 
-    this%N_numVLevels = n_numVLevelsIn
-
-    if(n_gridTypeIn == N_GRID_TYPE_STAG5005) then
-      r_pTopAvg = 0.
-    else if(present(r_pTopAvgIn))then
-      r_pTopAvg = r_pTopAvgIn
-    else
-      r_pTopAvg = 0.
-    end if
-
-    if(present(r_pRefIn))then
-      r_pRef = r_pRefIn
-    else
-      r_pRef = 0.
-    end if
-
-    if(present(r_rCoefIn))then
-      r_rCoef = r_rCoefIn
-    else
-      r_rCoef = 0.
-    end if
-
-    if(present(r_rCoef_2In))then
-      r_rCoef_2 = r_rCoef_2In
-    else
-      r_rCoef_2 = 0.
-    end if
+    ! if allocated(this%N_ip1_p) then deallocate it
+    nullify(this%N_ip1_p)
 
     if(present(n_ip1In))then
+      allocate(this%N_ip1_p(ubound(n_ip1In,1)-lbound(n_ip1In,1)+1), STAT=n_error)
+      if(n_error /= 0) then
+        write(6, *) 'Error allocating this%N_ip1_p in N_Viqkdef: error=', n_error
+        call flush(6)
+        N_Viqkdef = N_VI_VIERR_FAILED_ALLOCATION
+        return
+      endif
       this%N_ip1_p = n_ip1In
-    else
-      this%N_ip1_p = 0
-    end if
 
-    if(present(o_vGridDescIn_p)) then
-      this%O_vGridDesc_p => o_vGridDescIn_p
-    end if
-
-    ! If the user has not specified which levels are present,
-    ! assume that all levels in the vgrid descriptor are present
-    if(.not.(present(n_ip1In)) .and. associated(this%O_vGridDesc_p)) then
+    else ! .not. present(n_ip1In)
       ! In order to be useful, this%O_vGridDesc_p will require this%N_ip1_p
-      ! (Ask for VIPM, because vgd_new assumed the r_vLevelIn to be VIPM.)
-      n_error = vgd_get(this%O_vGridDesc_p, 'VIPM', n_ip1_p)
+
+      ! Since the user has not specified which levels are present,
+      ! assume that all levels in the vgrid descriptor are present
+
+      ! (Ask for VIPM, because vgd_new assumed the levels to be VIPM.)
+      n_error = vgd_get(this%O_vGridDesc_p, 'VIPM', this%N_ip1_p)
       if(n_error .ne. VGD_OK)then
-        write(6,*)'ERROR in VerticalGrid_class%N_VertiGridGetP, from vgd_get:', n_error
+        write(6,*)'ERROR in VerticalGrid_class%N_VertiGridGetP, from vgd_get:', &
+                  n_error
+        call flush(6)
+        N_Viqkdef = N_VI_VIERR_VGD_DESCRIPTOR_ERROR
+        return
       end if
-      ! vgd might have (depending on the grid type) added hyb=1 (the last
-      ! entry) and the 10m level (after hyb=1) to the list.  Remove them.
-      this%N_ip1_p(:) = n_ip1_p(:size(this%N_ip1_p))
-      deallocate(n_ip1_p) ! vgd_get allocated it
-    end if ! associated
+!!$      ! vgd might have (depending on the grid type) added hyb=1 (the last
+!!$      ! entry) and the 10m level (after hyb=1) to the list.  Remove them.
+!!$      this%N_ip1_p(:) = n_ip1_p(:size(this%N_ip1_p))
+!!$      deallocate(n_ip1_p) ! vgd_get allocated it
+
+    end if ! present(n_ip1In)
 
   end function N_Viqkdef
 
 
 
 !!!func N_VertGridGetLnP - Create 'cube' of vertical levels in units of ln P
-  integer function N_VertGridGetLnP(that, r_P, n_ni, n_nj, r_pSurf, r_pTop)
+  integer function N_VertGridGetLnP(that, r_P, n_ni, n_nj, r_pSurf)
                                         ! returns error indication:  0='no error'
 !
 !AUTHOR
@@ -426,11 +381,6 @@ end function N_ConstructNull
                                         ! surface pressure for each horiz point,
                                         ! in units of mb
     real(real48), dimension(:,:), intent(in) :: r_pSurf
-
-                                        ! ceiling pressure for each horiz point
-                                        ! required only for eta units,
-                                        ! in units of mb
-    real(real48), dimension(:,:), optional, intent(in) :: r_pTop
 !
 !!
     external flush

@@ -99,7 +99,7 @@ contains
 !!!func N_Videfset - Define the set of grids to be used for the vertical
 !                    interpolation
   integer function N_Videfset(n_niIn, n_njIn, o_vGridDestnPtrIn, &
-                              o_vGridSourcePtrIn, r_pSurf, r_pTopIn, &
+                              o_vGridSourcePtrIn, r_pSurf, &
                               r_z0In, r_ilmoIn, r_hBoundIn, r_latIn)
                                         ! returns error indication:  0='no error'
 !
@@ -128,9 +128,6 @@ contains
                                         ! surface pressure at each horiz location
     real(real48), dimension(:,:), intent(in) :: r_pSurf
 
-                                        ! ceiling pressure for each horiz point
-                                        ! used only for eta units
-    real(real48), dimension(:,:), intent(in) :: r_pTopIn
     ! The next four parameters are used only for surface extrapolation
                                         ! roughness length
     real(real48), dimension(:,:), optional, intent(in) :: r_z0In
@@ -257,8 +254,7 @@ contains
     !
     o_vGSourcePtr%Ptr => o_vGridSource_p
     o_vGDestnPtr%Ptr  => o_vGridDestn_p
-    n_error = N_VertGridGetLnP(o_vGSourcePtr, r_lnPSource_a, n_ni, n_nj, &
-                               r_pSurf, r_pTopIn)
+    n_error = N_VertGridGetLnP(o_vGSourcePtr, r_lnPSource_a, n_ni, n_nj, r_pSurf)
     if(n_error /= 0) then
       N_Videfset = N_VI_VIERR_LN_PRESS_CONVERSION
       write(6,*) 'failed converting source to ln(P):  error=', n_error
@@ -267,8 +263,7 @@ contains
       return
     endif
 
-    n_error = N_VertGridGetLnP(o_vGDestnPtr, r_lnPDestn_a, n_ni, n_nj, r_pSurf, &
-                               r_pTopIn)
+    n_error = N_VertGridGetLnP(o_vGDestnPtr, r_lnPDestn_a, n_ni, n_nj, r_pSurf)
     if(n_error /= 0) then
       N_Videfset = N_VI_VIERR_LN_PRESS_CONVERSION
       write(6,*) 'failed converting destination to ln(P):  error=', n_error
