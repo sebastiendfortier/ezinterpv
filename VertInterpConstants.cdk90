@@ -44,13 +44,9 @@ module VerticalInterpolationConstants
                         N_VI_VIERR_UNRECOGNIZED_VALUE   =105, &
                         N_VI_VIERR_LN_PRESS_CONVERSION  =106, &
                         N_VI_VIERR_MISSING_SURFACE_DATA =108, &
-                        N_VI_VIERR_VGD_DESCRIPTOR_ERROR =109, &
 
   ! errors from VerticalGrid class
-                        N_VI_VGERR_HYBRID_TO_PRES_CONVN =200, &
-                        N_VI_VGERR_FAILED_ALLOCATION    =201, &
-                        N_VI_VGERR_PTOP_MISSING         =202
-
+                        N_VI_VIERR_VGD_DESCRIPTOR_ERROR =203
 
 
   ! Possible values of the gridType.
@@ -59,7 +55,6 @@ module VerticalInterpolationConstants
   ! guaranteed.)
   integer, parameter :: N_GRID_TYPE_SIGMA    = 1, & ! P/Ps
                         N_GRID_TYPE_PRESSURE = 2, & ! in mb
-                    !   N_GRID_TYPE_GENERIC  = 3, & !unsupported by vgrid descriptor
                         N_GRID_TYPE_HYBRID   = 5, & ! NORMALIZED hybrid (i.e. hybrid type 1)
                         N_GRID_TYPE_ETA      = 7, & !(Pt-P)/(Pt-Ps) -not in convip
                                                     ! UNnormalized hybrid (i.e. hybrid type 5, version 1)

@@ -60,9 +60,7 @@
                                    o_vGridDestn_p
 
                                         ! Vertical level cubes.  Units are ln P
-                                        ! referenced to 1 mb, unless the gridType
-                                        ! is N_GRID_TYPE_GENERIC in which case
-                                        ! the units are user defined.
+                                        ! referenced to 1 mb
   real(real48), allocatable, dimension(:,:,:) :: r_lnPSource_a, &
                                                  r_lnPDestn_a
 
@@ -1177,7 +1175,7 @@ contains
       end if ! s_ExtrapType
 
     else
-      N_Visetopt = N_VI_VIERR_UNRECOGNIZED_VALUE
+      N_Visetopt = N_VI_VIERR_UNRECOGNIZED_OPTION
     end if ! option
 
   end function N_Visetopt
