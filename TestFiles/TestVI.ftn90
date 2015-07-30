@@ -172,7 +172,7 @@ program Test_Vertical_Interpolation
   ! SECOND TEST
   ! SECOND TEST
   !
-  s_title = "TEST 2:  generic; cubic derivs; clamped; ascending"
+  s_title = "TEST 2:  vcode 5005; cubic derivs; clamped; ascending"
 
   ! n_gridType = N_GRID_TYPE_STAG5005
 
@@ -206,7 +206,7 @@ program Test_Vertical_Interpolation
   ! THIRD TEST
   ! THIRD TEST
   !
-  s_title = "TEST 3:  generic; cubic Lagrange; clamped; ascending"
+  s_title = "TEST 3:  vcode 5005; cubic Lagrange; clamped; ascending"
 
   ! n_gridType = N_GRID_TYPE_STAG5005
 
@@ -241,7 +241,7 @@ program Test_Vertical_Interpolation
   ! FOURTH TEST
   ! FOURTH TEST
   !
-  s_title = "TEST 4:  generic; nearest neighbour; lapse rate; ascending"
+  s_title = "TEST 4:  vcode 5005; nearest neighbour; lapse rate; ascending"
 
   ! n_gridType = N_GRID_TYPE_STAG5005
 
@@ -275,7 +275,7 @@ program Test_Vertical_Interpolation
   ! FIFTH TEST
   ! FIFTH TEST
   !
-  s_title = "TEST 5:  generic; linear; clamped; ascending"
+  s_title = "TEST 5:  vcode 5005; linear; clamped; ascending"
 
   ! n_gridType = N_GRID_TYPE_STAG5005
 
@@ -309,7 +309,7 @@ program Test_Vertical_Interpolation
   ! SIXTH TEST
   ! SIXTH TEST
   !
-  s_title = "TEST 6:  generic; cubic derivs; clamped; descending"
+  s_title = "TEST 6:  vcode 5005; cubic derivs; clamped; descending"
 
   ! n_gridType = N_GRID_TYPE_STAG5005
 
@@ -319,11 +319,11 @@ program Test_Vertical_Interpolation
   s_interpType = 'cubicwithderivs'
   s_extrapType = 'clamped'
 
-  r_stateAnswer(1,1,:) =(/0.1708000, 0.3450112, 0.2886377, 0.8757036, 0.5971954/)
-  r_stateAnswer(2,1,:)=(/-0.1733000,-0.6278682,-2.5837648, 5.5148711, 0.7445440/)
+  r_stateAnswer(1,1,:) =(/0.5971954, 1.1050999, 1.2870281, 0.4353272, 0.1708000/)
+  r_stateAnswer(2,1,:) =(/0.7445440, 6.5792871, 5.2396612,-0.3028076,-0.1733000/)
 
-  r_derivAnswer(1,1,:)=(/-0.9853000,-0.3728073, 0.2116979,-0.4327170, 0.8020958/)
-  r_derivAnswer(2,1,:) =(/1.0300300,-0.6926972,-1.5272756,-0.8219249, 1.5543460/)
+  r_derivAnswer(1,1,:) =(/0.8020958, 0.2623369, 0.0111124,-0.0236369,-0.9853000/)
+  r_derivAnswer(2,1,:) =(/1.5543460, 3.5922914,-4.3209844, 0.2144366, 1.0300300/)
 
   call m_testOneCombo_5005(s_title, s_interpType, s_extrapType, &
 
@@ -332,7 +332,7 @@ program Test_Vertical_Interpolation
 
                       r_EXTRAP_GUIDE_DOWN, r_EXTRAP_GUIDE_UP, &
 
-                      r_PSURF &
+                      r_PSURF, l_reverseOrder=.true. &
                      )
 
 
@@ -343,7 +343,7 @@ program Test_Vertical_Interpolation
   ! SEVENTH TEST
   ! SEVENTH TEST
   !
-  s_title = "TEST 7:  generic; no interpolation; surface; special values"
+  s_title = "TEST 7:  vcode 5005; no interpolation; surface; special values"
 
   ! n_gridType = N_GRID_TYPE_STAG5005
 
@@ -420,7 +420,7 @@ program Test_Vertical_Interpolation
   ! EIGHTH TEST
   ! EIGHTH TEST
   !
-  s_title = "TEST 8:  generic; cubic derivs; clamped; ascending"
+  s_title = "TEST 8:  vcode 5005; cubic derivs; clamped; ascending"
             ! Just to set the ground for the following test
 
   ! n_gridType = N_GRID_TYPE_STAG5005
@@ -497,7 +497,7 @@ program Test_Vertical_Interpolation
   ! NINTH TEST
   ! NINTH TEST
   !
-  s_title = "TEST 9:  generic; cubic derivs; surface; ascending"
+  s_title = "TEST 9:  vcode 5005; cubic derivs; surface; ascending"
             ! This is the same as the previous test, except that surface
             ! extrapolation has been chosen.  Compared to the results of the
             ! previous test, surface extrapolation should apply only to the
@@ -584,7 +584,7 @@ program Test_Vertical_Interpolation
   ! TENTH TEST
   ! TENTH TEST
   !
-  s_title = "TEST 10:  generic; cubic Lagrange; surface; ascending"
+  s_title = "TEST 10:  vcode 5005; cubic Lagrange; surface; ascending"
             ! This is the same as the previous test, except that the
             ! interpolation has been changed to cubicLagrange.  In this case,
             ! surface extrapolation should apply to the surface layer as in the
@@ -664,7 +664,7 @@ program Test_Vertical_Interpolation
   ! ELEVENTH TEST
   ! ELEVENTH TEST
   !
-  s_title = "TEST 11:  generic; surface; decreasing special values"
+  s_title = "TEST 11:  vcode 5005; surface; decreasing special values"
              ! This test is based on test seven, but with the input orders
              ! reversed such that it is decreasing.  The result should be the
              ! same as in test seven.
@@ -759,7 +759,7 @@ program Test_Vertical_Interpolation
   ! TWELFTH TEST
   ! TWELFTH TEST
   !
-  s_title = "TEST 12:  generic; no interp'n; surface wind; special values"
+  s_title = "TEST 12:  vcode 5005; no interp'n; surface wind; special values"
             ! This is the same as test 7, but for the wind
 
   ! n_gridType = N_GRID_TYPE_STAG5005
@@ -843,7 +843,7 @@ program Test_Vertical_Interpolation
   ! THIRTEENTH TEST
   ! THIRTEENTH TEST
   !
-  s_title = "TEST 13:  generic; cubic derivs; clamped; ascending"
+  s_title = "TEST 13:  vcode 5005; cubic derivs; clamped; ascending"
             ! Just to set the ground (y-component) for the following test.
 
   ! n_gridType = N_GRID_TYPE_STAG5005
@@ -918,7 +918,7 @@ program Test_Vertical_Interpolation
   ! FOURTEENTH TEST
   !
   ! N.B.:  This test will fail if not preceeded by test 13
-  s_title = "TEST 14:  generic; cubic derivs; surface wind; ascending"
+  s_title = "TEST 14:  vcode 5005; cubic derivs; surface wind; ascending"
             ! This is the same as tests 8 (x-component) and 13 (y-component),
             ! except that surface wind extrapolation has been chosen.  Compared
             ! to the results of tests 8 and 13, surface wind extrapolation should
@@ -1016,7 +1016,7 @@ program Test_Vertical_Interpolation
   ! FIFTEENTH TEST
   ! FIFTEENTH TEST
   !
-  s_title = "TEST 15:  generic; cubic Lagrange; surface wind; ascending"
+  s_title = "TEST 15:  vcode 5005; cubic Lagrange; surface wind; ascending"
             ! This is the same as the previous test, except that the
             ! interpolation has been changed to cubicLagrange.  In this case,
             ! surface extrapolation should apply to the surface layer as in the
@@ -1117,7 +1117,7 @@ program Test_Vertical_Interpolation
   ! SEVENTEENTH TEST
   ! SEVENTEENTH TEST
   !
-  s_title = "TEST 17:  generic; linear; fixed; ascending"
+  s_title = "TEST 17:  vcode 5005; linear; fixed; ascending"
 
   ! n_gridType = N_GRID_TYPE_STAG5005
 
@@ -1226,7 +1226,7 @@ program Test_Vertical_Interpolation
   ! (The same as the first test, but with staggered levels.)
   s_title = "TEST 20:  staggered vertical levels"
 
-  n_gridType = N_GRID_TYPE_STAG5005
+  n_gridType = N_GRID_TYPE_STAGGERED
 
   r_levelsInit   = r_LEVELS_INCREASING
   r_stateIn      = r_stateIncreasing
@@ -1236,8 +1236,8 @@ program Test_Vertical_Interpolation
   s_interpType = 'linear'
   s_extrapType = 'clamped'
 
-  r_stateAnswer(1,1,:) =(/0.7472813, 0.8643875, 0.3686678, 0.2834436, 0.1708000/)
-  r_stateAnswer(2,1,:) =(/1.7108855, 1.9354531,-0.4533417,-0.3327242,-0.1733000/)
+  r_stateAnswer(1,1,:) =(/0.9473432, 0.8168903, 0.3669596, 0.2841619, 0.1708000/)
+  r_stateAnswer(2,1,:) =(/2.9887292, 1.3323874,-0.4509242,-0.3337408,-0.1733000/)
 
   r_derivAnswer(1,1,:) =(/0.0000000, 0.0000000, 0.0000000, 0.0000000, 0.0000000/)
   r_derivAnswer(2,1,:) =(/0.0000000, 0.0000000, 0.0000000, 0.0000000, 0.0000000/)
@@ -1284,7 +1284,7 @@ program Test_Vertical_Interpolation
   ! TWENTY-FIRST TEST
   ! TWENTY-FIRST TEST
   !
-  s_title = "TEST 21:  generic; linear; abort; ascending"
+  s_title = "TEST 21:  vcode 5005; linear; abort; ascending"
   write(6,*)" "
   write(6,*)" "
   write(6,*)s_title
