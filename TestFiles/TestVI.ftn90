@@ -45,7 +45,7 @@ program Test_Vertical_Interpolation
   character(60) :: s_title, s_interpType, s_extrapType
   logical :: l_pass
   integer :: n_gridType, n_gridTypeIn, n_gridTypeOut
-  real, dimension(n_PTS_INIT) :: r_levelsInit, r_temp1
+  real, dimension(n_PTS_INIT) :: r_levelsInit
   real, dimension(n_PTS_TARGET) :: r_levelsTarget
   real, dimension(n_NI,n_NJ,n_PTS_INIT) :: r_stateIncreasing, r_stateDecreasing,&
                                            r_stateIn, &
@@ -74,9 +74,6 @@ program Test_Vertical_Interpolation
                                         ! angle, in radians, INCREASING
   real, dimension(n_PTS_INIT), parameter :: r_LEVELS_INCREASING= &
                                                        (/0.64, 1.25, 2.44, 2.97/)
-                                        ! angle, in radians, DECREASING
-  real, dimension(n_PTS_INIT), parameter :: r_LEVELS_DECREASING= &
-                                                       (/2.97, 2.44, 1.25, 0.64/)
                                         ! angle, in radians, standard values
   real, dimension(n_PTS_TARGET), parameter :: r_LEVELS_TARGET_STD= &
                                                    (/1.13, 2.62, 2.79, 0.5, 3.1/)
@@ -179,10 +176,8 @@ program Test_Vertical_Interpolation
 
   ! n_gridType = N_GRID_TYPE_STAG5005
 
-  r_levelsInit   = r_LEVELS_INCREASING
   r_stateIn      = r_stateIncreasing
   r_derivIn      = r_derivIncreasing
-  r_levelsTarget = r_LEVELS_TARGET_STD
 
   s_interpType = 'cubicwithderivs'
   s_extrapType = 'clamped'
@@ -215,11 +210,9 @@ program Test_Vertical_Interpolation
 
   ! n_gridType = N_GRID_TYPE_STAG5005
 
-  r_levelsInit   = r_LEVELS_INCREASING
 
   r_stateIn      = r_stateIncreasing
   r_derivIn      = r_derivIncreasing
-  r_levelsTarget = r_LEVELS_TARGET_STD
 
   s_interpType = 'cubiclagrange'
   s_extrapType = 'clamped'
@@ -252,10 +245,8 @@ program Test_Vertical_Interpolation
 
   ! n_gridType = N_GRID_TYPE_STAG5005
 
-  r_levelsInit   = r_LEVELS_INCREASING
   r_stateIn      = r_stateIncreasing
   r_derivIn      = r_derivIncreasing
-  r_levelsTarget = r_LEVELS_TARGET_STD
 
   s_interpType = 'nearestneighbour'
   s_extrapType = 'lapserate'
@@ -288,10 +279,8 @@ program Test_Vertical_Interpolation
 
   ! n_gridType = N_GRID_TYPE_STAG5005
 
-  r_levelsInit   = r_LEVELS_INCREASING
   r_stateIn      = r_stateIncreasing
   r_derivIn      = r_derivIncreasing
-  r_levelsTarget = r_LEVELS_TARGET_STD
 
   s_interpType = 'linear'
   s_extrapType = 'clamped'
@@ -324,10 +313,8 @@ program Test_Vertical_Interpolation
 
   ! n_gridType = N_GRID_TYPE_STAG5005
 
-  r_levelsInit   = r_LEVELS_DECREASING
   r_stateIn      = r_stateDecreasing
   r_derivIn      = r_derivDecreasing
-  r_levelsTarget = r_LEVELS_TARGET_STD
 
   s_interpType = 'cubicwithderivs'
   s_extrapType = 'clamped'
@@ -365,11 +352,6 @@ program Test_Vertical_Interpolation
 
   ! Set the source and destionation levels
   ! Set also the state values (simulate temperature or humidity values)
-                                        ! The r_levelsInit determine only to
-                                        ! which points the extrapolation will
-                                        ! be applied
-  r_levelsInit(1) = 12000.
-  r_levelsInit(2) = 15000.
   do j=1,n_NJ
     do i=1,n_NI
       r_stateIn(i,j,1) = 0.             ! at the surface
@@ -377,15 +359,11 @@ program Test_Vertical_Interpolation
     end do
   end do
   do k=3,n_PTS_INIT
-    r_levelsInit(k) = 16000 + k
     do j=1,n_NJ
       do i=1,n_NI
         r_stateIn(i,j,k) = 100. + k
       end do
     end do
-  end do
-  do k=1,n_PTS_TARGET
-    r_levelsTarget(k) = 13000 + k       ! Set them to extrapolate all points
   end do
 
 
@@ -447,12 +425,7 @@ program Test_Vertical_Interpolation
 
   ! n_gridType = N_GRID_TYPE_STAG5005
 
-  r_levelsInit   = r_LEVELS_INCREASING
   r_derivIn      = r_derivIncreasing
-  r_levelsTarget = r_LEVELS_TARGET_STD
-  r_levelsTarget(1) = 0.90
-  r_levelsTarget(2) = 1.13
-  r_levelsTarget(4) = 1.30  ! INTERpolation range to be adjusted by extrapSurface
 
 
   ! Set the state values
@@ -528,9 +501,7 @@ program Test_Vertical_Interpolation
             ! This is the same as the previous test, except that surface
             ! extrapolation has been chosen.  Compared to the results of the
             ! previous test, surface extrapolation should apply only to the
-            ! surface layer [r_levelsTarget(1:2) should have the same result as
-            ! test number SEVEN], and should adjust the interpolation in the next
-            ! layer above that [r_levelsTarget(4)].  The derivative in the lowest
+            ! surface layer .  The derivative in the lowest
             ! interval and below is modified somewhat from test 8 since the
             ! surface extrapolation ensures a smooth derivative at the lowest
             ! level.
@@ -541,12 +512,7 @@ program Test_Vertical_Interpolation
 
   ! n_gridType = N_GRID_TYPE_STAG5005
 
-  r_levelsInit   = r_LEVELS_INCREASING
   r_derivIn      = r_derivIncreasing
-  r_levelsTarget = r_LEVELS_TARGET_STD
-  r_levelsTarget(1) = 0.90
-  r_levelsTarget(2) = 1.13
-  r_levelsTarget(4) = 1.30  ! INTERpolation range to be adjusted by extrapSurface
 
 
   ! Set the state values
@@ -622,24 +588,11 @@ program Test_Vertical_Interpolation
             ! This is the same as the previous test, except that the
             ! interpolation has been changed to cubicLagrange.  In this case,
             ! surface extrapolation should apply to the surface layer as in the
-            ! previous test [r_levelsTarget(1:2) should have the same result as
-            ! test number NINE], and should adjust the interpolation in the next
-            ! layer above that to use cubic with derivatives, albeit with a
-            ! manufactured derivative [r_levelsTarget(4) should have a result
-            ! that is different from that of test number NINE, also different
-            ! from that of test number EIGHT, but similar to both of them],
-            ! r_levelsTarget(5) will be the same because it is clamped
-            ! extrapolation in both cases, but the rest [r_levelsTarget(3)]
-            ! should be a little different.
+            ! previous test.
 
   ! n_gridType = N_GRID_TYPE_STAG5005
 
-  r_levelsInit   = r_LEVELS_INCREASING
   r_derivIn      = r_derivIncreasing
-  r_levelsTarget = r_LEVELS_TARGET_STD
-  r_levelsTarget(1) = 0.90
-  r_levelsTarget(2) = 1.13
-  r_levelsTarget(4) = 1.30  ! INTERpolation range to be adjusted by extrapSurface
 
 
   ! Set the state values
@@ -725,11 +678,6 @@ program Test_Vertical_Interpolation
 
   ! Set the source and destionation levels
   ! Set also the state values (simulate temperature or humidity values)
-                                        ! The r_levelsInit determine only to
-                                        ! which points the extrapolation will be
-                                        ! applied
-  r_levelsInit(1) = 12000
-  r_levelsInit(2) = 15000
   do j=1,n_NJ
     do i=1,n_NI
       r_stateIn(i,j,1) = 0.             ! at the surface
@@ -737,15 +685,11 @@ program Test_Vertical_Interpolation
     end do
   end do
   do k=3,n_PTS_INIT
-    r_levelsInit(k) = 16000 + k
     do j=1,n_NJ
       do i=1,n_NI
         r_stateIn(i,j,k) = 100. + k
       end do
     end do
-  end do
-  do k=1,n_PTS_TARGET
-    r_levelsTarget(k) = 13000 + k       ! Set them to extrapolate all points
   end do
 
 
@@ -784,10 +728,8 @@ program Test_Vertical_Interpolation
 
   ! Reverse the input order to decreasing
   r_temp3 = r_stateIn
-  r_temp1 = r_levelsInit
   do k=1,n_PTS_INIT
     r_stateIn(:,:,k) = r_temp3(:,:,n_PTS_INIT+1-k)
-    r_levelsInit(k) = r_temp1(n_PTS_INIT+1-k)
   end do
 
   r_temp3 = r_zSrc
@@ -822,10 +764,6 @@ program Test_Vertical_Interpolation
 
   ! n_gridType = N_GRID_TYPE_STAG5005
 
-                                        !determine only what will be extrapolated
-                                        ! r_zSrc gives the levels used
-  r_levelsInit(1) = 10000.
-  r_levelsInit(2) = 160000.
   r_derivIn      = r_derivDecreasing
 
 
@@ -841,15 +779,11 @@ program Test_Vertical_Interpolation
     end do
   end do
   do k=3,n_PTS_INIT
-    r_levelsInit(k) = 16000 + k
     do j=1,n_NJ
       do i=1,n_NI
         r_stateIn(i,j,k) = 143. + k
       end do
     end do
-  end do
-  do k=1,n_PTS_TARGET
-    r_levelsTarget(k) = 12. *  k        ! Set them to extrapolate all points
   end do
 
 
@@ -914,12 +848,7 @@ program Test_Vertical_Interpolation
 
   ! n_gridType = N_GRID_TYPE_STAG5005
 
-  r_levelsInit   = r_LEVELS_INCREASING
   r_derivIn      = r_derivIncreasing
-  r_levelsTarget = r_LEVELS_TARGET_STD
-  r_levelsTarget(1) = 0.90
-  r_levelsTarget(2) = 1.13
-  r_levelsTarget(4) = 1.30  ! INTERpolation range to be adjusted by extrapSurface
 
 
   ! Set the state values
@@ -995,24 +924,15 @@ program Test_Vertical_Interpolation
             ! to the results of tests 8 and 13, surface wind extrapolation should
             ! apply only to the surface layer.
             !
-            ! Specifically, r_levelsTarget(1:2) should have the same result as
-            ! test number TWELVE x- and y-components, and should adjust the
-            ! interpolation in the next layer above that [r_levelsTarget(4)].
-            ! r_levelsTarget(3,5) should have the same result as test number 8
-            ! (x-component) and as test number 13 (y-component).  The derivative
+            ! The derivative
             ! in the lowest interval and below is modified somewhat from tests 8
             ! and 13 since the surface extrapolation ensures a smooth derivative
             ! at the lowest level.
 
   ! n_gridType = N_GRID_TYPE_STAG5005
 
-  r_levelsInit   = r_LEVELS_INCREASING
   r_derivIn      = r_derivIncreasing
   r_y_derivIn    = r_derivIncreasing
-  r_levelsTarget = r_LEVELS_TARGET_STD
-  r_levelsTarget(1) = 0.90
-  r_levelsTarget(2) = 1.13
-  r_levelsTarget(4) = 1.30  ! INTERpolation range to be adjusted by extrapSurface
 
 
   ! Set the state values
@@ -1100,25 +1020,14 @@ program Test_Vertical_Interpolation
             ! This is the same as the previous test, except that the
             ! interpolation has been changed to cubicLagrange.  In this case,
             ! surface extrapolation should apply to the surface layer as in the
-            ! previous test [r_levelsTarget(1:2) should have the same result as
-            ! test number FOURTEEN], and should adjust the interpolation in the
+            ! previous test, and should adjust the interpolation in the
             ! next layer above that to use cubic with derivatives, albeit with a
-            ! manufactured derivative [r_levelsTarget(4) should have a result
-            ! that is different from that of test number FOURTEEN, also different
-            ! from that of test numbers EIGHT and THIRTEEN, but similar to both
-            ! of them], r_levelsTarget(5) will be the same because it is clamped
-            ! extrapolation in both cases, but the rest [r_levelsTarget(3)]
-            ! should be a little different.
+            ! manufactured derivative.
 
   ! n_gridType = N_GRID_TYPE_STAG5005
 
-  r_levelsInit   = r_LEVELS_INCREASING
   r_derivIn      = r_derivIncreasing
   r_y_derivIn    = r_derivIncreasing
-  r_levelsTarget = r_LEVELS_TARGET_STD
-  r_levelsTarget(1) = 0.90
-  r_levelsTarget(2) = 1.13
-  r_levelsTarget(4) = 1.30  ! INTERpolation range to be adjusted by extrapSurface
 
 
   ! Set the state values
@@ -1212,10 +1121,8 @@ program Test_Vertical_Interpolation
 
   ! n_gridType = N_GRID_TYPE_STAG5005
 
-  r_levelsInit   = r_LEVELS_INCREASING
   r_stateIn      = r_stateIncreasing
   r_derivIn      = r_derivIncreasing
-  r_levelsTarget = r_LEVELS_TARGET_STD
 
   s_interpType = 'linear'
   s_extrapType = 'fixed'
@@ -1392,10 +1299,8 @@ program Test_Vertical_Interpolation
 !!!$
 !!!$!   n_gridType = N_GRID_TYPE_STAG5005
 !!!$
-!!!$  r_levelsInit   = r_LEVELS_INCREASING
 !!!$  r_stateIn      = r_stateIncreasing
 !!!$  r_derivIn      = r_derivIncreasing
-!!!$  r_levelsTarget = r_LEVELS_TARGET_STD
 !!!$
 !!!$  s_interpType = 'linear'
 !!!$  s_extrapType = 'abort'
