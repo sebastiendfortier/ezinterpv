@@ -268,7 +268,7 @@ end function N_ConstructNull
 
 !!!func N_Viqkdef - constructor:  Quick definition of the grid for vertical
 !                                 integration
-  integer function N_Viqkdef(that, o_vGridDescIn_p, n_ip1In)
+  integer function N_Viqkdef(that, o_vGridDescIn_p, n_ip1)
                                         ! returns error indication:  0='no error'
 !
 !AUTHOR
@@ -286,7 +286,7 @@ end function N_ConstructNull
                                         ! The vgd that describes this grid
     type(vgrid_descriptor), pointer, intent(in)::o_vGridDescIn_p
                                         ! The ip1's of field levels present
-    integer, optional, dimension(:), intent(in) :: n_ip1In
+    integer, optional, dimension(:), intent(in) :: n_ip1
 !
 !!
     external flush
@@ -297,7 +297,7 @@ end function N_ConstructNull
     N_Viqkdef = 0                       ! no error yet
     this%O_vGridDesc_p => o_vGridDescIn_p
 
-    this%N_numVLevels = ubound(n_ip1In,1) - lbound(n_ip1In,1) +1
+    this%N_numVLevels = ubound(n_ip1,1) - lbound(n_ip1,1) +1
 
     !
     ! DETERMINE THE IP1 VALUES
@@ -306,17 +306,17 @@ end function N_ConstructNull
     ! if allocated(this%N_ip1_p) then deallocate it
     nullify(this%N_ip1_p)
 
-    if(present(n_ip1In))then
-      allocate(this%N_ip1_p(ubound(n_ip1In,1)-lbound(n_ip1In,1)+1), STAT=n_error)
+    if(present(n_ip1))then
+      allocate(this%N_ip1_p(ubound(n_ip1,1)-lbound(n_ip1,1)+1), STAT=n_error)
       if(n_error /= 0) then
         write(6, *) 'Error allocating this%N_ip1_p in N_Viqkdef: error=', n_error
         call flush(6)
         N_Viqkdef = N_VI_VIERR_FAILED_ALLOCATION
         return
       endif
-      this%N_ip1_p = n_ip1In
+      this%N_ip1_p = n_ip1
 
-    else ! .not. present(n_ip1In)
+    else ! .not. present(n_ip1)
       ! In order to be useful, this%O_vGridDesc_p will require this%N_ip1_p
 
       ! Since the user has not specified which levels are present,
@@ -336,7 +336,7 @@ end function N_ConstructNull
 !!$      this%N_ip1_p(:) = n_ip1_p(:size(this%N_ip1_p))
 !!$      deallocate(n_ip1_p) ! vgd_get allocated it
 
-    end if ! present(n_ip1In)
+    end if ! present(n_ip1)
 
   end function N_Viqkdef
 
