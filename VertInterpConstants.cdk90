@@ -46,7 +46,8 @@ module VerticalInterpolationConstants
                         N_VI_VIERR_MISSING_SURFACE_DATA =108, &
 
   ! errors from VerticalGrid class
-                        N_VI_VIERR_VGD_DESCRIPTOR_ERROR =203
+                        N_VI_VIERR_VGD_DESCRIPTOR_ERROR =203, &
+                        N_VI_VIERR_IP1S_NOT_SPECIFIED   =204
 
 
   ! Possible values of the gridType.
