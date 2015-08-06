@@ -63,25 +63,20 @@ use VerticalInterpolationConstants
     type(vgrid_descriptor), pointer::O_vGridDesc_p
   end type T_VerticalGrid
 
-  type T_VerticalGridPtr
-    type(T_VerticalGrid), pointer :: Ptr
-  end type T_VerticalGridPtr
-
   interface assignment(=)
     module procedure M_AssignVerticalGrid
   end interface
 
   interface operator(/=)
     module procedure M_NotEqualVerticalGrid
-    module procedure M_NotEqualVerticalGridPtr
   end interface
 
 
 
 contains
 
-!!!func M_NotEqualVerticalGridPtr - non-equality comparison operator
-  logical function M_NotEqualVerticalGridPtr(o_gridAPtr, o_gridBPtr)
+!!!func M_NotEqualVerticalGrid - non-equality comparison operator
+  logical function M_NotEqualVerticalGrid(o_gridA, o_gridB)
 !
 !AUTHOR
 !     J.W. Blezius OCT 2002
@@ -94,8 +89,8 @@ contains
 !        grid object to another.
 !
 !ARGUMENTS
-    type (T_VerticalGridPtr), intent(in) :: o_gridAPtr, &
-                                            o_gridBPtr
+    type (T_VerticalGrid), intent(in) :: o_gridA, &
+                                         o_gridB
 !
 !NOTES
 !
@@ -104,60 +99,23 @@ contains
   real, parameter :: r_ZERO = 1.0e-8
   integer :: k                          ! index of the vertical levels
 
-  type (T_VerticalGrid), pointer :: o_gridA_p, &
-                                    o_gridB_p
 
-  o_gridA_p => o_gridAPtr%Ptr
-  o_gridB_p => o_gridBPtr%Ptr
+  M_NotEqualVerticalGrid = .false.   ! assume equal until proven otherwise
 
-
-  M_NotEqualVerticalGridPtr = .false.   ! assume equal until proven otherwise
-
-  if(o_gridA_p%N_numVLevels /= o_gridB_p%N_numVLevels &
+  if(o_gridA%N_numVLevels /= o_gridB%N_numVLevels &
     ) then
-    M_NotEqualVerticalGridPtr = .true.
-  else if(.not. (o_gridA_p%O_vGridDesc_p == o_gridB_p%O_vGridDesc_p)) then
-      M_NotEqualVerticalGridPtr = .true.
+    M_NotEqualVerticalGrid = .true.
+  else if(.not. (o_gridA%O_vGridDesc_p == o_gridB%O_vGridDesc_p)) then
+      M_NotEqualVerticalGrid = .true.
   else
-    do k=1, o_gridA_p%N_numVLevels
-      if(o_gridA_p%N_ip1_p(k) /= o_gridB_p%N_ip1_p(k) &
+    do k=1, o_gridA%N_numVLevels
+      if(o_gridA%N_ip1_p(k) /= o_gridB%N_ip1_p(k) &
         ) then
-        M_NotEqualVerticalGridPtr = .true.
+        M_NotEqualVerticalGrid = .true.
         exit                            ! no need to check any further
       end if
     end do
   end if
-
-  end function M_NotEqualVerticalGridPtr
-
-
-!!!func M_NotEqualVerticalGrid - non-equality comparison operator
-  logical function M_NotEqualVerticalGrid(o_gridA, o_gridB)
-!
-!AUTHOR
-!     J.W. Blezius SEPT 2002
-!
-!REVISION
-! v1_0    Blezius J.W.          - initial version
-!
-!OBJECT
-!        To compare (that means a deep comparison) the value of one vertical
-!        grid object to another.
-!
-!ARGUMENTS
-    type (T_VerticalGrid), target, intent(in) :: o_gridA, &
-                                                 o_gridB
-!
-!NOTES
-!
-!!
-    type (T_VerticalGridPtr) :: o_gridAPtr, &
-                                o_gridBPtr
-
-    o_gridAPtr%Ptr => o_gridA
-    o_gridBPtr%Ptr => o_gridB
-
-    M_NotEqualVerticalGrid = (o_gridAPtr /= o_gridBPtr)
 
   end function M_NotEqualVerticalGrid
 
@@ -215,7 +173,7 @@ contains
 
 
 !!!func N_ConstructNull - constructor:  Put the object in a valid state
-  integer function N_ConstructNull(that, n_numVLevelsIn)
+  integer function N_ConstructNull(this, n_numVLevelsIn)
                                         ! returns error indication:  0='no error'
 !
 !AUTHOR
@@ -229,7 +187,7 @@ contains
 !        object in a valid state, but containing no data.
 !
 !ARGUMENTS
-    type(T_VerticalGridPtr), intent(inout) :: that
+    type(T_VerticalGrid), pointer, intent(inout) :: this
     integer, intent(in)::n_numVLevelsIn ! number of vertical levels in the object
 !
 !NOTES
@@ -237,9 +195,7 @@ contains
 !!
     external flush
     integer :: n_error
-    type(T_VerticalGrid), pointer :: this
 
-    this => that%Ptr
     N_ConstructNull = 0                 ! no error yet
     nullify(this%O_vGridDesc_p)
 
@@ -268,7 +224,7 @@ end function N_ConstructNull
 
 !!!func N_Viqkdef - constructor:  Quick definition of the grid for vertical
 !                                 integration
-  integer function N_Viqkdef(that, o_vGridDescIn_p, s_ip1Type, n_ip1)
+  integer function N_Viqkdef(this, o_vGridDescIn_p, s_ip1Type, n_ip1)
                                         ! returns error indication:  0='no error'
 !
 !AUTHOR
@@ -282,7 +238,7 @@ end function N_ConstructNull
 !        are initialized.
 !
 !ARGUMENTS
-    type(T_VerticalGridPtr), intent(inout) :: that
+    type(T_VerticalGrid), pointer, intent(inout) :: this
                                         ! The vgd that describes this grid
     type(vgrid_descriptor), pointer, intent(in)::o_vGridDescIn_p
                                         ! The ip1's of field levels present
@@ -292,10 +248,8 @@ end function N_ConstructNull
 !!
     external flush
     integer :: n_error, n_kind, n_version, n_numVLevels
-    type(T_VerticalGrid), pointer :: this
     integer, pointer, dimension(:) :: n_ip1_p
 
-    this => that%Ptr
     N_Viqkdef = 0                       ! no error yet
     this%O_vGridDesc_p => o_vGridDescIn_p
 
@@ -382,7 +336,7 @@ end function N_ConstructNull
 
 
 !!!func N_VertGridGetLnP - Create 'cube' of vertical levels in units of ln P
-  integer function N_VertGridGetLnP(that, r_P, n_ni, n_nj, r_pSurf)
+  integer function N_VertGridGetLnP(this, r_P, n_ni, n_nj, r_pSurf)
                                         ! returns error indication:  0='no error'
 !
 !AUTHOR
@@ -406,7 +360,7 @@ end function N_ConstructNull
 
                                         ! parameter cannot be a pointer to a
                                         ! user type:  replace 'this' with 'that'
-    type(T_VerticalGridPtr), intent(inout) :: that
+    type(T_VerticalGrid), pointer, intent(inout) :: this
 
     integer, intent(in) :: n_ni, n_nj   ! horizontal dimensions
 
@@ -415,7 +369,7 @@ end function N_ConstructNull
                                         !  because r_P is used to call
                                         !  hyb_to_pres which has a fortran77
                                         !  interface.)
-    real(real48), dimension(n_ni,n_nj,that%Ptr%N_numVLevels), intent(out) :: r_P
+    real(real48), dimension(n_ni,n_nj,this%N_numVLevels), intent(out) :: r_P
 
                                         ! surface pressure for each horiz point,
                                         ! in units of mb
@@ -429,15 +383,13 @@ end function N_ConstructNull
     integer k                           ! index of the vertical levels
 ! integer ikind                       ! kind of grid (convip's kind, extended)
     integer :: n_error
-    type(T_VerticalGrid), pointer :: this
 
     real(single), dimension(:,:,:), pointer :: r_P_single_p
-! real(single), dimension(n_ni,n_nj,that%Ptr%N_numVLevels) :: r_P_single
+! real(single), dimension(n_ni,n_nj,this%N_numVLevels) :: r_P_single
     logical, parameter :: l_IN_LOG = .true.
     logical :: l_firstTime=.true.
 
 
-    this => that%Ptr
     nullify(r_P_single_p)
     N_VertGridGetLnP = 0                  ! no error yet
     
@@ -478,7 +430,7 @@ end function N_ConstructNull
 
 
 !!!s/r M_ReleaseVerticalGrid - VerticalGrid destructor
-  subroutine M_ReleaseVerticalGrid(that)
+  subroutine M_ReleaseVerticalGrid(this)
 !
 !AUTHOR
 !     J.W. Blezius MAY 2002 helper on top of the Interp1D library
@@ -491,15 +443,15 @@ end function N_ConstructNull
 !
 !ARGUMENTS
     implicit none
-    type(T_VerticalGridPtr), intent(inout) :: that
+    type(T_VerticalGrid), pointer, intent(inout) :: this
 !
 !!
     external flush
     integer :: n_error
 
 
-    if( associated(that%Ptr%N_ip1_p) ) then
-      deallocate (that%Ptr%N_ip1_p, STAT=n_error)
+    if( associated(this%N_ip1_p) ) then
+      deallocate (this%N_ip1_p, STAT=n_error)
       if(n_error /= 0) then
         write(6, *)'Error deallocating vLevel in M_ReleaseVerticalGrid:  ', &
                    'error=', n_error

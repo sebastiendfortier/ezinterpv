@@ -96,8 +96,8 @@ contains
 
 !!!func N_Videfset - Define the set of grids to be used for the vertical
 !                    interpolation
-  integer function N_Videfset(n_niIn, n_njIn, o_vGridDestnPtrIn, &
-                              o_vGridSourcePtrIn, r_pSurf, &
+  integer function N_Videfset(n_niIn, n_njIn, o_vGridDestnIn_p, &
+                              o_vGridSourceIn_p, r_pSurf, &
                               r_z0In, r_ilmoIn, r_hBoundIn, r_latIn)
                                         ! returns error indication:  0='no error'
 !
@@ -120,8 +120,8 @@ contains
     integer, intent(in)::n_niIn, n_njIn ! size of h grid in the interpolation
 
                                         ! the two grids requested
-    type(T_VerticalGridPtr), intent(in) :: o_vGridDestnPtrIn, &
-                                           o_vGridSourcePtrIn
+    type(T_VerticalGrid), pointer, intent(inout) :: o_vGridDestnIn_p, &
+                                                    o_vGridSourceIn_p
 
                                         ! surface pressure at each horiz location
     real(real48), dimension(:,:), intent(in) :: r_pSurf
@@ -153,21 +153,16 @@ contains
 
 
 
-                                        ! temporary variables
-    type(T_VerticalGridPtr) :: o_vGDestnPtr, &
-                               o_vGSourcePtr
-
-
     N_Videfset = 0                      ! no error yet
 
     ! Start with a clean slate
     call m_clearGrids(l_SUPPRESS_MESSAGE)
 
-    ! Record the input values
+    ! Record the input values to the module
     n_ni = n_niIn
     n_nj = n_njIn
-    o_vGridSource_p => o_vGridSourcePtrIn%Ptr
-    o_vGridDestn_p  => o_vGridDestnPtrIn%Ptr
+    o_vGridSource_p => o_vGridSourceIn_p
+    o_vGridDestn_p  => o_vGridDestnIn_p
 
     !
     ! Validate the request
@@ -250,9 +245,7 @@ contains
     !
     ! Create cubes of vertical levels, and convert them to ln P
     !
-    o_vGSourcePtr%Ptr => o_vGridSource_p
-    o_vGDestnPtr%Ptr  => o_vGridDestn_p
-    n_error = N_VertGridGetLnP(o_vGSourcePtr, r_lnPSource_a, n_ni, n_nj, r_pSurf)
+    n_error=N_VertGridGetLnP(o_vGridSource_p, r_lnPSource_a, n_ni, n_nj, r_pSurf)
     if(n_error /= 0) then
       N_Videfset = N_VI_VIERR_LN_PRESS_CONVERSION
       write(6,*) 'failed converting source to ln(P):  error=', n_error
@@ -261,7 +254,7 @@ contains
       return
     endif
 
-    n_error = N_VertGridGetLnP(o_vGDestnPtr, r_lnPDestn_a, n_ni, n_nj, r_pSurf)
+    n_error = N_VertGridGetLnP(o_vGridDestn_p, r_lnPDestn_a, n_ni, n_nj, r_pSurf)
     if(n_error /= 0) then
       N_Videfset = N_VI_VIERR_LN_PRESS_CONVERSION
       write(6,*) 'failed converting destination to ln(P):  error=', n_error
@@ -274,7 +267,7 @@ contains
     !
     ! Check to see whether the input and output vertical levels are the same
     !
-    if(.not. (o_vGridSourcePtrIn /= o_vGridDestnPtrIn) ) then
+    if(.not. (o_vGridSource_p /= o_vGridDestn_p) ) then
       l_vLevelsIdentical = .true.
       ! Since no real interpolation will be done, this routine is finished.
     else
@@ -319,7 +312,7 @@ contains
       if (present(r_hBoundIn)) r_hBound_a   = r_hBoundIn
       if (present(r_latIn))    r_latitude_a = r_latIn
 
-    end if ! o_vGridSourcePtrIn /= o_vGridDestnPtrIn
+    end if ! o_vGridSource_p /= o_vGridDestn_p
 
   end function N_Videfset
 

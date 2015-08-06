@@ -1683,8 +1683,8 @@ subroutine m_testOneCombo_5005(s_title, s_interpType, s_extrapType, &
 
   integer :: i, j, k, n_ni, n_nj, n_nk, n_error
 
-  type(T_VerticalGrid), target :: o_gridInit  , o_gridTarget
-  type(T_VerticalGridPtr)      :: o_gridInit_p, o_gridTarget_p
+  type(T_VerticalGrid), target  :: o_gridInit  , o_gridTarget
+  type(T_VerticalGrid), pointer :: o_gridInit_p, o_gridTarget_p
 
                                         ! The ip1's of the field levels that are
                                         ! present in the associated field
@@ -1703,8 +1703,8 @@ subroutine m_testOneCombo_5005(s_title, s_interpType, s_extrapType, &
   write(6,*)
   write(6,*) s_title
 
-  o_gridInit_p%Ptr   => o_gridInit
-  o_gridTarget_p%Ptr => o_gridTarget
+  o_gridInit_p   => o_gridInit
+  o_gridTarget_p => o_gridTarget
 
   n_ni = ubound(r_stateAnswer,1)
   n_nj = ubound(r_stateAnswer,2)
@@ -1736,7 +1736,7 @@ subroutine m_testOneCombo_5005(s_title, s_interpType, s_extrapType, &
   n_ip1(3) = n_ip1_temp_p(8)
   n_ip1(4) = n_ip1_temp_p(10)
 
-  if(present(l_reverseOrder) .and. l_reverseOrder == .true.) then
+  if(present(l_reverseOrder) .and. l_reverseOrder .eqv. .true.) then
     n_ip1(4) = n_ip1_temp_p(3)
     n_ip1(3) = n_ip1_temp_p(5)
     n_ip1(2) = n_ip1_temp_p(8)
@@ -1971,7 +1971,7 @@ subroutine m_testOneCombo_2GridTypes &
 !        To test the ez_interpv package, with two different grid types
 !
 !ARGUMENTS
-  use VerticalGrid_class, only: T_VerticalGrid, T_VerticalGridPtr, N_Viqkdef
+  use VerticalGrid_class, only: T_VerticalGrid, N_Viqkdef
   use VerticalInterpolation_class, only: N_Videfset, N_Visint
   implicit none
 
@@ -2008,8 +2008,8 @@ subroutine m_testOneCombo_2GridTypes &
   integer :: i, j, k, n_ni, n_nj, n_nk
   integer :: n_error, n_vcode, n_vgd_kind, n_vgd_version
 
-  type(T_VerticalGrid), target :: o_gridInit, o_gridTarget
-  type(T_VerticalGridPtr)      :: o_gridInit_p, o_gridTarget_p
+  type(T_VerticalGrid), target  :: o_gridInit,   o_gridTarget
+  type(T_VerticalGrid), pointer :: o_gridInit_p, o_gridTarget_p
 
   type(vgrid_descriptor), target  :: o_vGridDescInit,   o_vGridDescTarget
   type(vgrid_descriptor), pointer :: o_vGridDescInit_p, o_vGridDescTarget_p
@@ -2026,8 +2026,8 @@ subroutine m_testOneCombo_2GridTypes &
 
   nullify(n_ip1_temp_p)
 
-  o_gridInit_p%Ptr   => o_gridInit
-  o_gridTarget_p%Ptr => o_gridTarget
+  o_gridInit_p   => o_gridInit
+  o_gridTarget_p => o_gridTarget
 
   write(6,*)
   write(6,*) s_title
@@ -2299,8 +2299,8 @@ subroutine m_testOneCombo_ip1Type(s_title, s_interpType, s_extrapType, &
 
   integer :: i, j, k, n_ni, n_nj, n_nk, n_error
 
-  type(T_VerticalGrid), target :: o_gridInit  , o_gridTarget
-  type(T_VerticalGridPtr)      :: o_gridInit_p, o_gridTarget_p
+  type(T_VerticalGrid), target  :: o_gridInit  , o_gridTarget
+  type(T_VerticalGrid), pointer :: o_gridInit_p, o_gridTarget_p
 
   type(vgrid_descriptor), target  :: o_vGridDescInit,   o_vGridDescTarget
   type(vgrid_descriptor), pointer :: o_vGridDescInit_p, o_vGridDescTarget_p
@@ -2312,8 +2312,8 @@ subroutine m_testOneCombo_ip1Type(s_title, s_interpType, s_extrapType, &
   write(6,*)
   write(6,*) s_title
 
-  o_gridInit_p%Ptr   => o_gridInit
-  o_gridTarget_p%Ptr => o_gridTarget
+  o_gridInit_p   => o_gridInit
+  o_gridTarget_p => o_gridTarget
 
   n_ni = ubound(r_stateAnswer,1)
   n_nj = ubound(r_stateAnswer,2)
