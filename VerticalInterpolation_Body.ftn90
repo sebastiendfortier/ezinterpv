@@ -642,7 +642,7 @@ contains
         err = 0
         allocate(r_derivIn_heap(n_ni, n_nj, o_vGridSource_p%N_numVLevels), &
                  stat=err(1))
-        allocate(r_derivOut_heap(n_ni, n_nj, o_vGridSource_p%N_numVLevels), &
+        allocate(r_derivOut_heap(n_ni, n_nj, o_vGridDestn_p%N_numVLevels), &
                  stat=err(2))
         allocate(r_stateOutTmp(n_ni, n_nj, o_vGridDestn_p%N_numVLevels), &
                  stat=err(3))
