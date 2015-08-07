@@ -69,6 +69,11 @@ use VerticalInterpolationConstants
     module procedure M_NotEqualVerticalGrid
   end interface
 
+  interface N_Viqkdef
+    module procedure N_Viqkdef_ip1List
+    module procedure N_Viqkdef_ip1Type
+  end interface
+
 
 
 contains
@@ -225,9 +230,9 @@ end function N_ConstructNull
 
 
 
-!!!func N_Viqkdef - constructor:  Quick definition of the grid for vertical
-!                                 integration
-  integer function N_Viqkdef(this, o_vGridDescIn_p, s_ip1Type, n_ip1)
+!!!func N_Viqkdef - OVERLOADED constructor:  Quick definition of the grid for
+!                                            vertical integration
+  integer function N_Viqkdef_ip1List(this, o_vGridDescIn_p, n_ip1)
                                         ! returns error indication:  0='no error'
 !
 !AUTHOR
@@ -238,103 +243,150 @@ end function N_ConstructNull
 !
 !OBJECT
 !        The VerticalGrid constructor.  The attributes of the VerticalGrid_class
-!        are initialized.
+!        are initialized.  The ip1 values are obtained from the supplied list.
+!
+!NOTES
+!        N_VIQKDEF IS OVERLOADED:  The ip1 list can be given either explicitly
+!                                  or by naming the type of grid (momentum or
+!                                  thermodynamic).  The two methods can be
+!                                  distinguished by this ip1 parameter, and that
+!                                  is the whole point of overloading the method.
 !
 !ARGUMENTS
     type(T_VerticalGrid), pointer, intent(inout) :: this
                                         ! The vgd that describes this grid
     type(vgrid_descriptor), pointer, intent(in)::o_vGridDescIn_p
                                         ! The ip1's of field levels present
-    integer, optional, dimension(:), intent(in) :: n_ip1
-    character(len=4), optional, intent(in) :: s_ip1Type ! VIPM or VIPT
+    integer, dimension(:), intent(in) :: n_ip1
 !
 !!
     external flush
     integer :: n_error, n_kind, n_version, n_numVLevels
     integer, pointer, dimension(:) :: n_ip1_p
 
-    N_Viqkdef = 0                       ! no error yet
+    N_Viqkdef_ip1List = 0               ! no error yet
+    this%O_vGridDesc_p => o_vGridDescIn_p
+
+
+    !
+    ! DETERMINE THE IP1 VALUES
+    !
+
+    if (associated(this%N_ip1_p)) then
+      deallocate(this%N_ip1_p)
+    end if
+
+    nullify(this%N_ip1_p)
+    nullify(n_ip1_p)
+
+    this%N_numVLevels = ubound(n_ip1,1)-lbound(n_ip1,1)+1
+
+    allocate(this%N_ip1_p(this%N_numVLevels), STAT=n_error)
+    if(n_error /= 0) then
+      write(6, *) 'Error allocating this%N_ip1_p in N_Viqkdef: error=', n_error
+      call flush(6)
+      N_Viqkdef_ip1List = N_VI_VIERR_FAILED_ALLOCATION
+      return
+    endif
+
+    ! ... IP1 VALUES GIVEN EXPLICITLY
+    this%N_ip1_p = n_ip1
+
+  end function N_Viqkdef_ip1List
+
+
+
+!!!func N_Viqkdef - OVERLOADED constructor:  Quick definition of the grid for
+!                                            vertical integration
+  integer function N_Viqkdef_ip1Type(this, o_vGridDescIn_p, s_ip1Type)
+                                        ! returns error indication:  0='no error'
+!
+!AUTHOR
+!     J.W. Blezius AUG 2015 overload the method.
+!
+!OBJECT
+!        The VerticalGrid constructor.  The attributes of the VerticalGrid_class
+!        are initialized.  The ip1 values are obtained from the vertical-grid
+!        descriptor, given the type of grid (VIPT or VIPM).
+!
+!NOTES
+!        For more information, see the header of the preceding method by the same
+!        name.
+!
+!ARGUMENTS
+    type(T_VerticalGrid), pointer, intent(inout) :: this
+                                        ! The vgd that describes this grid
+    type(vgrid_descriptor), pointer, intent(in)::o_vGridDescIn_p
+    character(len=4), intent(in) :: s_ip1Type ! VIPM or VIPT
+!
+!!
+    external flush
+    integer :: n_error, n_kind, n_version, n_numVLevels
+    integer, pointer, dimension(:) :: n_ip1_p
+
+    N_Viqkdef_ip1Type = 0               ! no error yet
     this%O_vGridDesc_p => o_vGridDescIn_p
 
     !
     ! DETERMINE THE IP1 VALUES
     !
 
-    ! if allocated(this%N_ip1_p) then deallocate it
+    if (associated(this%N_ip1_p)) then
+      deallocate(this%N_ip1_p)
+    end if
+
     nullify(this%N_ip1_p)
     nullify(n_ip1_p)
 
-    ! ... IP1 VALUES GIVEN EXPLICITLY
-    if(present(n_ip1))then
-      allocate(this%N_ip1_p(ubound(n_ip1,1)-lbound(n_ip1,1)+1), STAT=n_error)
-      if(n_error /= 0) then
-        write(6, *) 'Error allocating this%N_ip1_p in N_Viqkdef: error=', n_error
-        call flush(6)
-        N_Viqkdef = N_VI_VIERR_FAILED_ALLOCATION
-        return
-      endif
-      this%N_ip1_p = n_ip1
-
     ! ... IP1 VALUES FROM VGRID, GIVEN 'VIPT' / 'VIPM'
-    else if(present(s_ip1Type))then
-      ! Obtain a list of all (and then some) levels from vgrid
-      n_error=vgd_get(this%O_vGridDesc_p, s_ip1Type, n_ip1_p)
-      if(n_error /= VGD_OK)then
-        write(6, *) 'Error from vgd_get in N_Viqkdef: error=', n_error
-        call flush(6)
-        N_Viqkdef = N_VI_VIERR_VGD_DESCRIPTOR_ERROR
-      end if
+    ! Obtain a list of all (and then some) levels from vgrid
+    n_error=vgd_get(this%O_vGridDesc_p, s_ip1Type, n_ip1_p)
+    if(n_error /= VGD_OK)then
+      write(6, *) 'Error from vgd_get in N_Viqkdef: error=', n_error
+      call flush(6)
+      N_Viqkdef_ip1Type = N_VI_VIERR_VGD_DESCRIPTOR_ERROR
+    end if
 
-      ! In order to adjust the number of levels, need the grid kind & version
-      n_error=vgd_get(this%O_vGridDesc_p, 'KIND', n_kind)
-      if(n_error /= VGD_OK)then
-        write(6, *) 'Error getting n_kind in N_Viqkdef: error=', n_error
-        call flush(6)
-        N_Viqkdef = N_VI_VIERR_VGD_DESCRIPTOR_ERROR
-      end if
+    ! In order to adjust the number of levels, need the grid kind & version
+    n_error=vgd_get(this%O_vGridDesc_p, 'KIND', n_kind)
+    if(n_error /= VGD_OK)then
+      write(6, *) 'Error getting n_kind in N_Viqkdef: error=', n_error
+      call flush(6)
+      N_Viqkdef_ip1Type = N_VI_VIERR_VGD_DESCRIPTOR_ERROR
+    end if
 
-      n_error=vgd_get(this%O_vGridDesc_p, 'VERS', n_version)
-      if(n_error /= VGD_OK)then
-        write(6, *) 'Error getting n_version in N_Viqkdef: error=', n_error
-        call flush(6)
-        N_Viqkdef = N_VI_VIERR_VGD_DESCRIPTOR_ERROR
-      end if
+    n_error=vgd_get(this%O_vGridDesc_p, 'VERS', n_version)
+    if(n_error /= VGD_OK)then
+      write(6, *) 'Error getting n_version in N_Viqkdef: error=', n_error
+      call flush(6)
+      N_Viqkdef_ip1Type = N_VI_VIERR_VGD_DESCRIPTOR_ERROR
+    end if
 
-      ! Omit the levels that would not be present in a field
-      ! vgd might have (depending on the grid type) added hyb=1 (the last
-      ! entry) and the 10m level (after hyb=1) to the list. Remove the 10m level.
-      n_numVLevels = ubound(n_ip1_p,1)
-      select case (n_kind*1000 + n_version)
-      case (5005)
-        n_numVLevels = n_numVLevels - 1
+    ! Omit the levels that would not be present in a field.
+    ! Vgd might have (depending on the grid type) added hyb=1 (the last entry)
+    ! and the 10m level (after hyb=1) to the list. Remove the 10m level.
+    n_numVLevels = ubound(n_ip1_p,1)
+    select case (n_kind*1000 + n_version)
+    case (5005)
+      n_numVLevels = n_numVLevels - 1
 
-      case default
-        ! Do not adjust the number of levels
-      end select
+    case default
+      ! Do not adjust the number of levels
+    end select
 
-      allocate(this%N_ip1_p(n_numVLevels), STAT=n_error)
-      if(n_error /= 0) then
-        write(6, *) 'Error allocating this%N_ip1_p in N_Viqkdef: error=', n_error
-        call flush(6)
-        N_Viqkdef = N_VI_VIERR_FAILED_ALLOCATION
-        return
-      endif
+    allocate(this%N_ip1_p(n_numVLevels), STAT=n_error)
+    if(n_error /= 0) then
+      write(6, *) 'Error allocating this%N_ip1_p in N_Viqkdef: error=', n_error
+      call flush(6)
+      N_Viqkdef_ip1Type = N_VI_VIERR_FAILED_ALLOCATION
+      return
+    endif
 
-      this%N_ip1_p = n_ip1_p(:n_numVLevels)
+    this%N_ip1_p = n_ip1_p(:n_numVLevels)
 
-    ! ... 
-    else ! .not. present(n_ip1) and .not. present(s_ip1Type)
-      write(*,*)"ERROR in N_Viqkdef: ip1 levels must be specified in some manner"
-        call flush(6)
-        N_Viqkdef = N_VI_VIERR_IP1S_NOT_SPECIFIED
-        this%N_numVLevels = 0
-        return
+    this%N_numVLevels = n_numVLevels
 
-    end if ! present(n_ip1)
-
-  this%N_numVLevels = ubound(this%N_ip1_p,1)
-
-  end function N_Viqkdef
+  end function N_Viqkdef_ip1Type
 
 
 
