@@ -41,8 +41,6 @@ use VerticalInterpolationConstants
 !        because it is not necessarily on the heap.
 !
 !!
-!!$  use vGrid_Descriptors, only: vgrid_descriptor, VGD_OK, &
-!!$                               vgd_new, vgd_get, vgd_levels
   use vGrid_Descriptors
   implicit none
   public
@@ -96,21 +94,18 @@ contains
 !
 !!
 
-  real, parameter :: r_ZERO = 1.0e-8
   integer :: k                          ! index of the vertical levels
 
 
-  M_NotEqualVerticalGrid = .false.   ! assume equal until proven otherwise
+  M_NotEqualVerticalGrid = .false.      ! assume equal until proven otherwise
 
-  if(o_gridA%N_numVLevels /= o_gridB%N_numVLevels &
-    ) then
+  if(o_gridA%N_numVLevels /= o_gridB%N_numVLevels) then
     M_NotEqualVerticalGrid = .true.
   else if(.not. (o_gridA%O_vGridDesc_p == o_gridB%O_vGridDesc_p)) then
       M_NotEqualVerticalGrid = .true.
   else
     do k=1, o_gridA%N_numVLevels
-      if(o_gridA%N_ip1_p(k) /= o_gridB%N_ip1_p(k) &
-        ) then
+      if(o_gridA%N_ip1_p(k) /= o_gridB%N_ip1_p(k)) then
         M_NotEqualVerticalGrid = .true.
         exit                            ! no need to check any further
       end if
@@ -149,6 +144,13 @@ contains
     o_gridOut%N_numVLevels = o_gridIn%N_numVLevels
                                                       ! deep copy
     if(associated(o_gridIn%N_ip1_p))then
+      if(associated(o_gridOut%N_ip1_p)) then
+        if(size(o_gridOut%N_ip1_p) /= o_gridIn%N_numVLevels) then
+          deallocate(o_gridOut%N_ip1_p)
+          nullify(o_gridOut%N_ip1_p)
+        end if
+      end if
+
       if(.not. associated(o_gridOut%N_ip1_p)) then
           allocate(o_gridOut%N_ip1_p(o_gridIn%N_numVLevels), STAT=n_error)
           if(n_error /= 0) then
@@ -158,16 +160,17 @@ contains
             return
           endif
       end if
-    else
+
+      o_gridOut%N_ip1_p = o_gridIn%N_ip1_p
+
+    else ! .not. associated(o_gridIn%N_ip1_p)
       if(associated(o_gridOut%N_ip1_p)) then
         deallocate(o_gridOut%N_ip1_p)
+        nullify(o_gridOut%N_ip1_p)
       end if
     end if
 
-    if(associated(o_gridIn%N_ip1_p))then
-      o_gridOut%N_ip1_p         = o_gridIn%N_ip1_p
-    end if
-    o_gridOut%O_vGridDesc_p  => o_gridIn%O_vGridDesc_p
+    o_gridOut%O_vGridDesc_p => o_gridIn%O_vGridDesc_p
   end subroutine M_AssignVerticalGrid
 
 
@@ -336,7 +339,7 @@ end function N_ConstructNull
 
 
 !!!func N_VertGridGetLnP - Create 'cube' of vertical levels in units of ln P
-  integer function N_VertGridGetLnP(this, r_P, n_ni, n_nj, r_pSurf)
+  integer function N_VertGridGetLnP(this, r_P, r_pSurf)
                                         ! returns error indication:  0='no error'
 !
 !AUTHOR
@@ -362,14 +365,8 @@ end function N_ConstructNull
                                         ! user type:  replace 'this' with 'that'
     type(T_VerticalGrid), pointer, intent(inout) :: this
 
-    integer, intent(in) :: n_ni, n_nj   ! horizontal dimensions
-
                                         ! vertical levels as pressure
-                                        ! (These dimensions must be explicit
-                                        !  because r_P is used to call
-                                        !  hyb_to_pres which has a fortran77
-                                        !  interface.)
-    real(real48), dimension(n_ni,n_nj,this%N_numVLevels), intent(out) :: r_P
+    real(real48), dimension(:,:,:), intent(out) :: r_P
 
                                         ! surface pressure for each horiz point,
                                         ! in units of mb
@@ -377,15 +374,9 @@ end function N_ConstructNull
 !
 !!
     external flush
-    integer, external :: hyb_to_pres
-
-    integer i, j                        ! indices of the horizontal locations
-    integer k                           ! index of the vertical levels
-! integer ikind                       ! kind of grid (convip's kind, extended)
     integer :: n_error
 
     real(single), dimension(:,:,:), pointer :: r_P_single_p
-! real(single), dimension(n_ni,n_nj,this%N_numVLevels) :: r_P_single
     logical, parameter :: l_IN_LOG = .true.
     logical :: l_firstTime=.true.
 

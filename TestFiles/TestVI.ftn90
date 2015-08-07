@@ -94,6 +94,20 @@ program Test_Vertical_Interpolation
   integer, external :: fnom, fstouv, fstfrm
 
 
+  ! Possible values of the gridType.
+  ! These values are the same as those used in CONVIP (except for eta) at the
+  ! time of writing.  (However, future compatibility with CONVIP is not
+  ! guaranteed.)
+  integer, parameter :: N_GRID_TYPE_SIGMA    = 1, & ! P/Ps
+                        N_GRID_TYPE_PRESSURE = 2, & ! in mb
+                        N_GRID_TYPE_HYBRID   = 5, & ! NORMALIZED hybrid (i.e. hybrid type 1)
+                        N_GRID_TYPE_ETA      = 7, & !(Pt-P)/(Pt-Ps) -not in convip
+                                                    ! UNnormalized hybrid (i.e. hybrid type 5, version 1)
+                        N_GRID_TYPE_HYBRID_NOTNORM = 8, &
+                        N_GRID_TYPE_STAGGERED = 9, &! Staggered (i.e. hybrid type 5, version 2)
+                        N_GRID_TYPE_STAG5005  = 5005  ! Vcode=5005 (i.e. hybrid type 5, version 5)
+
+
 
   ! Open the file that defines a vgrid
   error = fnom(TOCTOC_FILENUM, 'toctoc_5005', 'STD+RND+OLD+R/O', 0)
