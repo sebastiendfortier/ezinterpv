@@ -1314,7 +1314,7 @@ program Test_Vertical_Interpolation
 !!!$  r_derivAnswer(1,1,:) =(/0.0000000, 0.0000000, 0.0000000, 0.0000000, 0.0000000/)
 !!!$  r_derivAnswer(2,1,:) =(/0.0000000, 0.0000000, 0.0000000, 0.0000000, 0.0000000/)
 !!!$
-!!!$  call m_testOneCombo_5005(s_title, n_gridType, s_interpType, s_extrapType, &
+!!!$  call m_testOneCombo_5005(s_title, s_interpType, s_extrapType, &
 !!!$
 !!!$                      r_stateIn , r_derivIn, &
 !!!$                      r_stateAnswer, r_derivAnswer, &
