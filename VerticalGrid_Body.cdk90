@@ -502,6 +502,14 @@ end function N_ConstructNull
       end if
     end if
 
+    ! N.B.:  vgd_free does not deallocate data that were obtained with vgd_get
+    n_error = vgd_free(this%O_vGridDesc_p)
+    if(n_error /= VGD_OK) then
+      write(6, *)'Error freeing vgrid descriptor object in ', &
+                 'M_ReleaseVerticalGrid:  error from vgrid=', n_error
+      call flush(6)
+    end if
+
   end subroutine M_ReleaseVerticalGrid
 
 !end module VerticalGrid_class
