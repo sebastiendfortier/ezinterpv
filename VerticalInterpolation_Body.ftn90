@@ -84,11 +84,10 @@
 
 contains
 
-!!!func N_Videfset - Define the set of grids to be used for the vertical
+!!!func N_Videfset - Select the pair of grids to be used for the vertical
 !                    interpolation
-  integer function N_Videfset(n_niIn, n_njIn, o_vGridDestnIn_p, &
-                              o_vGridSourceIn_p, r_pSurf, &
-                              r_z0In, r_ilmoIn, r_hBoundIn, r_latIn)
+  integer function N_Videfset(o_vGrid_Destn_p, o_vGrid_Source_p, r_pSurf, &
+                              r_z0, r_ilmo, r_hBound, r_lat)
                                         ! returns error indication:  0='no error'
 !
 !AUTHOR
@@ -107,24 +106,22 @@ contains
 !        recorded for future use by the Interpolate routine.
 !
 !ARGUMENTS
-    integer, intent(in)::n_niIn, n_njIn ! size of h grid in the interpolation
-
                                         ! the two grids requested
-    type(T_VerticalGrid), pointer, intent(inout) :: o_vGridDestnIn_p, &
-                                                    o_vGridSourceIn_p
+    type(T_VerticalGrid), pointer, intent(in) :: o_vGrid_Destn_p, &
+                                                 o_vGrid_Source_p
 
                                         ! surface pressure at each horiz location
     real(real48), dimension(:,:), intent(in) :: r_pSurf
 
     ! The next four parameters are used only for surface extrapolation
                                         ! roughness length
-    real(real48), dimension(:,:), optional, intent(in) :: r_z0In
+    real(real48), dimension(:,:), optional, intent(in) :: r_z0
                                         ! inverse Monin-Obukhov length
-    real(real48), dimension(:,:), optional, intent(in) :: r_ilmoIn
+    real(real48), dimension(:,:), optional, intent(in) :: r_ilmo
                                         ! height of the boundary layer
-    real(real48), dimension(:,:), optional, intent(in) :: r_hBoundIn
+    real(real48), dimension(:,:), optional, intent(in) :: r_hBound
                                         ! latitude (used only for the wind)
-    real(real48), dimension(:,:), optional, intent(in) :: r_latIn
+    real(real48), dimension(:,:), optional, intent(in) :: r_lat
 !
 !NOTES
 !        It is assumed that the vertical levels of the o_vGridSource_p are in
@@ -149,10 +146,10 @@ contains
     call m_clearGrids(l_SUPPRESS_MESSAGE)
 
     ! Record the input values to the module
-    n_ni = n_niIn
-    n_nj = n_njIn
-    o_vGridSource_p => o_vGridSourceIn_p
-    o_vGridDestn_p  => o_vGridDestnIn_p
+    n_ni = ubound(r_pSurf,1) - lbound(r_pSurf,1) + 1
+    n_nj = ubound(r_pSurf,2) - lbound(r_pSurf,2) + 1
+    o_vGridSource_p => o_vGrid_Source_p
+    o_vGridDestn_p  => o_vGrid_Destn_p
 
     !
     ! Validate the request
@@ -188,7 +185,7 @@ contains
       return
     endif
 
-    if (present(r_z0In)) then
+    if (present(r_z0)) then
       allocate(r_z0_a(n_ni, n_nj), STAT=n_error)
       if( n_error /= 0) then
         N_Videfset = N_VI_VIERR_FAILED_ALLOCATION
@@ -199,7 +196,7 @@ contains
       endif
     endif
 
-    if (present(r_ilmoIn)) then
+    if (present(r_ilmo)) then
       allocate(r_ilmo_a(n_ni, n_nj), STAT=n_error)
       if( n_error /= 0) then
         N_Videfset = N_VI_VIERR_FAILED_ALLOCATION
@@ -210,7 +207,7 @@ contains
       endif
     endif
 
-    if (present(r_hBoundIn)) then
+    if (present(r_hBound)) then
       allocate(r_hBound_a(n_ni, n_nj), STAT=n_error)
       if( n_error /= 0) then
         N_Videfset = N_VI_VIERR_FAILED_ALLOCATION
@@ -221,7 +218,7 @@ contains
       endif
     endif
 
-    if (present(r_latIn)) then
+    if (present(r_lat)) then
       allocate(r_latitude_a(n_ni, n_nj), STAT=n_error)
       if( n_error /= 0) then
         N_Videfset = N_VI_VIERR_FAILED_ALLOCATION
@@ -297,10 +294,10 @@ contains
       !
       ! Save parameter values
       !
-      if (present(r_z0In))     r_z0_a       = r_z0In
-      if (present(r_ilmoIn))   r_ilmo_a     = r_ilmoIn
-      if (present(r_hBoundIn)) r_hBound_a   = r_hBoundIn
-      if (present(r_latIn))    r_latitude_a = r_latIn
+      if (present(r_z0))     r_z0_a       = r_z0
+      if (present(r_ilmo))   r_ilmo_a     = r_ilmo
+      if (present(r_hBound)) r_hBound_a   = r_hBound
+      if (present(r_lat))    r_latitude_a = r_lat
 
     end if ! o_vGridSource_p /= o_vGridDestn_p
 
@@ -354,14 +351,12 @@ contains
                                         ! ('surface layer' is comprised of the  )
                                         ! (space between the Earth's surface and)
                                         ! (the first model level above it.   )
-    optional m_slStateValue
-    external m_slStateValue
+    procedure (), optional :: m_slStateValue
 
                                         ! s/r to calculate the normalized flux,
                                         ! and the gradient w.r.t. z
                                         ! at one level within the surface layer
-    optional m_slFluxGradient
-    external m_slFluxGradient
+    procedure (), optional :: m_slFluxGradient
 
                                         ! height (z), in m, above surface of
                                         ! source and destination cubes
