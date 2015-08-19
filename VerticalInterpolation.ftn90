@@ -36,7 +36,7 @@ module VerticalInterpolation_class8
 #define Interp1D_CubicWithDerivs_X   Interp1D_CubicWithDerivs_X8
 #define Interp1D_CubicLagrange_X       Interp1D_CubicLagrange_X8
 #define Extrap1D_LapseRate_X               Extrap1D_LapseRate_X8
-#define ExtraP1D_Fixed_X                       ExtraP1D_Fixed_X8
+#define Extrap1D_Fixed_X                       Extrap1D_Fixed_X8
 #define Extrap1D_Surface_X                   Extrap1D_Surface_X8
 #define Extrap1D_SurfaceWind_X           Extrap1D_SurfaceWind_X8
 #include "VerticalInterpolation_Body.ftn90"

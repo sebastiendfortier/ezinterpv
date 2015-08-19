@@ -1,6 +1,9 @@
 ! Select the version of the code to be tested:
-!#define test48 4
+
+!!$#define test48 4
 #define test48 8
+#define VerticalGrid_class VerticalGrid_class8
+#define VerticalInterpolation_class VerticalInterpolation_class8
 
 #define TOCTOC_FILENUM 9
 
@@ -34,7 +37,7 @@ program Test_Vertical_Interpolation
   external m_slStateValueStub,     m_slFluxGradientStub
   external m_slStateValueWindStub, m_slFluxGradientWindStub
 
-  real, parameter :: r_HMIN = 30.
+  real(test48), parameter :: r_HMIN = 30.
   integer, parameter :: n_PTS_INIT=4
   integer, parameter :: n_PTS_TARGET=5
   integer, parameter :: n_NI=2, &  ! sin and tan
@@ -45,21 +48,23 @@ program Test_Vertical_Interpolation
   character(60) :: s_title, s_interpType, s_extrapType
   logical :: l_pass
   integer :: n_gridType, n_gridTypeIn, n_gridTypeOut
-  real, dimension(n_PTS_INIT) :: r_levelsInit
-  real, dimension(n_PTS_TARGET) :: r_levelsTarget
-  real, dimension(n_NI,n_NJ,n_PTS_INIT) :: r_stateIncreasing, r_stateDecreasing,&
+  real(test48), dimension(n_PTS_INIT) :: r_levelsInit
+  real(test48), dimension(n_PTS_TARGET) :: r_levelsTarget
+  real(test48), dimension(n_NI,n_NJ,n_PTS_INIT) :: &
+                                           r_stateIncreasing, r_stateDecreasing,&
                                            r_stateIn, &
                                            r_derivIncreasing, r_derivDecreasing,&
                                            r_derivIn, r_y_derivIn, &
                                            r_zSrc, r_temp3, r_y_stateIn
-  real, dimension(n_NI,n_NJ,n_PTS_TARGET) :: r_stateAnswer, r_derivAnswer, &
+  real(test48), dimension(n_NI,n_NJ,n_PTS_TARGET) :: &
+                                             r_stateAnswer, r_derivAnswer, &
                                              r_zDest, &
                                              r_y_stateAnswer, r_y_derivAnswer
-  real, dimension(1,1,21) :: r_stateIn_21,     r_derivIn_21, &
-                             r_stateAnswer_21, r_derivAnswer_21
+  real(test48), dimension(1,1,21) :: r_stateIn_21,     r_derivIn_21, &
+                                     r_stateAnswer_21, r_derivAnswer_21
 
-  real, parameter :: r_EXTRAP_GUIDE_DOWN=0.4, &
-                     r_EXTRAP_GUIDE_UP=-0.5
+  real(test48), parameter :: r_EXTRAP_GUIDE_DOWN=0.4, &
+                             r_EXTRAP_GUIDE_UP=-0.5
 
   real, parameter :: r_PTOP_INIT=10., &
                      r_PREF_INIT=800., &
@@ -69,27 +74,27 @@ program Test_Vertical_Interpolation
                      r_PREF_TARGET=800., &
                      r_RCOEFF_TARGET=1.
 
-  real, parameter :: r_factn = 1.2
+  real, parameter :: R_FACTN = 1.2
 
-  real, dimension(n_NI, n_NJ), parameter :: r_PSURF   = 100000.
-  real, dimension(1,    1),    parameter :: r_PSURF_1 = 100000.
+  real(test48), dimension(n_NI, n_NJ), parameter :: r_PSURF   = 100000.
+  real(test48), dimension(1,    1),    parameter :: r_PSURF_1 = 100000.
 
                                         ! angle, in radians, INCREASING
-  real, dimension(n_PTS_INIT), parameter :: r_LEVELS_INCREASING= &
+  real(test48), dimension(n_PTS_INIT), parameter :: r_LEVELS_INCREASING= &
                                                        (/0.64, 1.25, 2.44, 2.97/)
                                         ! angle, in radians, standard values
-  real, dimension(n_PTS_TARGET), parameter :: r_LEVELS_TARGET_STD= &
+  real(test48), dimension(n_PTS_TARGET), parameter :: r_LEVELS_TARGET_STD= &
                                                    (/1.13, 2.62, 2.79, 0.5, 3.1/)
 
   ! The next four parameters are used only for surface extrapolation
                                         ! roughness length
-  real, dimension(n_NI, n_NJ) :: r_z0
+  real(test48), dimension(n_NI, n_NJ) :: r_z0
                                         ! inverse Monin-Obukhov length
-  real, dimension(n_NI, n_NJ) :: r_ilmo
+  real(test48), dimension(n_NI, n_NJ) :: r_ilmo
                                         ! height of the boundary layer
-  real, dimension(n_NI, n_NJ) :: r_hBound
+  real(test48), dimension(n_NI, n_NJ) :: r_hBound
                                         ! latitude (used only for the wind)
-  real, dimension(n_NI, n_NJ) :: r_lat
+  real(test48), dimension(n_NI, n_NJ) :: r_lat
 
   integer, external :: fnom, fstouv, fstfrm
 
@@ -388,6 +393,7 @@ program Test_Vertical_Interpolation
   ! (z0), inverse of Monin-Obukhov length (ilmo) and height of the boundary layer
   ! (hBound).  Set the height (in m) of the lowest source level above the surface
   ! (r_zSrc (i,j,2)) and of the surface itself (r_zSrc (i,j,1)).
+  r_zSrc(:,:,:) = 1000.
   do j=1,n_NJ
     do i=1,n_NI
       r_zSrc (i,j,1) = 0.
@@ -401,7 +407,7 @@ program Test_Vertical_Interpolation
                                         ! Perform a quality control on hBound
       r_hBound(i,j)=max(r_HMIN, &
                         r_hBound(i,j), &
-                        (r_stateIn(i,j,2)+2*r_z0(i,j))*r_factn &
+                        (r_stateIn(i,j,2)+2*r_z0(i,j))*R_FACTN &
                        )
       r_ilmo(i,j)=-0.01+i*0.01
       r_lat(i,j)=0 !unused
@@ -411,8 +417,8 @@ program Test_Vertical_Interpolation
   s_interpType = 'cubiclagrange'
   s_extrapType = 'surface'
 
-  r_stateAnswer(1,1,:) =(/0.0000,100.9805374,102.1502533,99.1717529,104.0000000/)
-  r_stateAnswer(2,1,:) =(/0.0000,101.5910034,102.8939438,99.1717529,104.0000000/)
+  r_stateAnswer(1,1,:) =(/0.0000000000,112.4697037,116.1466980,99.17175293,104.0000000/)
+  r_stateAnswer(2,1,:) =(/0.0000000000,121.3532562,126.9689178,99.17175293,104.0000000/)
 
   r_derivAnswer(1,1,:) =(/0.0000000, 0.0000000, 0.0000000, 0.0000000, 0.0000000/)
   r_derivAnswer(2,1,:) =(/0.0000000, 0.0000000, 0.0000000, 0.0000000, 0.0000000/)
@@ -465,6 +471,7 @@ program Test_Vertical_Interpolation
   ! (z0), inverse of Monin-Obukhov length (ilmo) and height of the boundary layer
   ! (hBound).  Set the height (in m) of the lowest source level above the surface
   ! (r_zSrc (i,j,2)) and of the surface itself (r_zSrc (i,j,1)).
+  r_zSrc(:,:,:) = 1000.
   do j=1,n_NJ
     do i=1,n_NI
       r_zSrc (i,j,1) = 0.               !r_zSrc, r_zDest ignored by cubiclagrange
@@ -478,7 +485,7 @@ program Test_Vertical_Interpolation
                                         ! Perform a quality control on hBound
       r_hBound(i,j)=max(r_HMIN, &
                         r_hBound(i,j), &
-                        (r_stateIn(i,j,2)+2*r_z0(i,j))*r_factn &
+                        (r_stateIn(i,j,2)+2*r_z0(i,j))*R_FACTN &
                        )
       r_ilmo(i,j)=-0.01+i*0.01
       r_lat(i,j)=0 !unused
@@ -552,6 +559,7 @@ program Test_Vertical_Interpolation
   ! (z0), inverse of Monin-Obukhov length (ilmo) and height of the boundary layer
   ! (hBound).  Set the height (in m) of the lowest source level above the surface
   ! (r_zSrc (i,j,2)) and of the surface itself (r_zSrc (i,j,1)).
+  r_zSrc(:,:,:) = 1000.
   do j=1,n_NJ
     do i=1,n_NI
       r_zSrc (i,j,1) = 0.               !r_zSrc, r_zDest ignored by cubiclagrange
@@ -565,7 +573,7 @@ program Test_Vertical_Interpolation
                                         ! Perform a quality control on hBound
       r_hBound(i,j)=max(r_HMIN, &
                         r_hBound(i,j), &
-                        (r_stateIn(i,j,2)+2*r_z0(i,j))*r_factn &
+                        (r_stateIn(i,j,2)+2*r_z0(i,j))*R_FACTN &
                        )
       r_ilmo(i,j)=-0.01+i*0.01
       r_lat(i,j)=0 !unused
@@ -575,11 +583,11 @@ program Test_Vertical_Interpolation
   s_interpType = 'cubicwithderivs'
   s_extrapType = 'surface'
 
-  r_stateAnswer(1,1,:) =(/0.000,102.6604156,115.3266602,131.8916016,140.0000000/)
-  r_stateAnswer(2,1,:) =(/0.000,103.1044159,114.9999237,132.4138641,140.0000000/)
+  r_stateAnswer(1,1,:) =(/0.0000000,114.1495895,129.3231201,131.8916016,140.0000000/)
+  r_stateAnswer(2,1,:) =(/0.0000000,122.8666687,139.0749054,132.4138641,140.0000000/)
 
-  r_derivAnswer(1,1,:) =(/0.8020958, 7.4401641,12.0839014, 5.9654603,-0.9853000/)
-  r_derivAnswer(2,1,:) =(/1.5543460, 7.6184368,11.0575256, 5.5481100, 1.0300300/)
+  r_derivAnswer(1,1,:) =(/0.8020958, 21.4986687,  5.4256353,  5.9654603, -0.9853000/)
+  r_derivAnswer(2,1,:) =(/1.5543460, 31.8001499, -0.3952063,  5.5481100,  1.0300300/)
 
   call m_testOneCombo_5005(s_title, s_interpType, s_extrapType, &
 
@@ -632,6 +640,7 @@ program Test_Vertical_Interpolation
   ! (z0), inverse of Monin-Obukhov length (ilmo) and height of the boundary layer
   ! (hBound).  Set the height (in m) of the lowest source level above the surface
   ! (r_zSrc (i,j,2)) and of the surface itself (r_zSrc (i,j,1)).
+  r_zSrc(:,:,:) = 1000.
   do j=1,n_NJ
     do i=1,n_NI
       r_zSrc (i,j,1) = 0.               !r_zSrc, r_zDest ignored by cubiclagrange
@@ -645,7 +654,7 @@ program Test_Vertical_Interpolation
                                         ! Perform a quality control on hBound
       r_hBound(i,j)=max(r_HMIN, &
                         r_hBound(i,j), &
-                        (r_stateIn(i,j,2)+2*r_z0(i,j))*r_factn &
+                        (r_stateIn(i,j,2)+2*r_z0(i,j))*R_FACTN &
                        )
       r_ilmo(i,j)=-0.01+i*0.01
       r_lat(i,j)=0 !unused
@@ -655,8 +664,8 @@ program Test_Vertical_Interpolation
   s_interpType = 'cubiclagrange'
   s_extrapType = 'surface'
 
-  r_stateAnswer(1,1,:) =(/0.000,102.1753082,112.2073593,130.2463379,140.0000000/)
-  r_stateAnswer(2,1,:) =(/0.000,102.7857742,112.9510498,130.2463379,140.0000000/)
+  r_stateAnswer(1,1,:) =(/0.0000000,113.6644821,126.2038116,130.2463379,140.0000000/)
+  r_stateAnswer(2,1,:) =(/0.0000000,122.5480347,137.0260315,130.2463379,140.0000000/)
 
   r_derivAnswer(1,1,:) =(/0.0000000, 0.0000000, 0.0000000, 0.0000000, 0.0000000/)
   r_derivAnswer(2,1,:) =(/0.0000000, 0.0000000, 0.0000000, 0.0000000, 0.0000000/)
@@ -714,6 +723,7 @@ program Test_Vertical_Interpolation
   ! (z0), inverse of Monin-Obukhov length (ilmo) and height of the boundary layer
   ! (hBound).  Set the height (in m) of the lowest source level above the surface
   ! (r_zSrc (i,j,2)) and of the surface itself (r_zSrc (i,j,1)).
+  r_zSrc(:,:,:) = 1000.
   do j=1,n_NJ
     do i=1,n_NI
       r_zSrc (i,j,1) = 0.
@@ -727,7 +737,7 @@ program Test_Vertical_Interpolation
                                         ! Perform a quality control on hBound
       r_hBound(i,j)=max(r_HMIN, &
                         r_hBound(i,j), &
-                        (r_stateIn(i,j,2)+2*r_z0(i,j))*r_factn &
+                        (r_stateIn(i,j,2)+2*r_z0(i,j))*R_FACTN &
                        )
       r_ilmo(i,j)=-0.01+i*0.01
       r_lat(i,j)=0 !unused
@@ -737,8 +747,8 @@ program Test_Vertical_Interpolation
   s_interpType = 'cubiclagrange'
   s_extrapType = 'surface'
 
-  r_stateAnswer(1,1,:) =(/0.0000,100.9805374,102.1502533,99.1717529,104.0000000/)
-  r_stateAnswer(2,1,:) =(/0.0000,101.5910034,102.8939438,99.1717529,104.0000000/)
+  r_stateAnswer(1,1,:) =(/0.0000000,112.4697037,116.1467056,99.1717529,104.0000000/)
+  r_stateAnswer(2,1,:) =(/0.0000000,121.3532562,126.9689178,99.1717529,104.0000000/)
 
   r_derivAnswer(1,1,:) =(/0.0000000, 0.0000000, 0.0000000, 0.0000000, 0.0000000/)
   r_derivAnswer(2,1,:) =(/0.0000000, 0.0000000, 0.0000000, 0.0000000, 0.0000000/)
@@ -808,6 +818,7 @@ program Test_Vertical_Interpolation
   ! (z0), inverse of Monin-Obukhov length (ilmo) and height of the boundary layer
   ! (hBound).  Set the height (in m) of the lowest source level above the surface
   ! (r_zSrc (i,j,2)) and of the surface itself (r_zSrc (i,j,1)).
+  r_zSrc(:,:,:) = 1000.
   do j=1,n_NJ
     do i=1,n_NI
       r_zSrc (i,j,1) = 0.
@@ -818,7 +829,7 @@ program Test_Vertical_Interpolation
 
       r_z0(i,j)=1.0
       r_ilmo(i,j)=-0.10+i*0.10
-      r_hBound(i,j)=100./max(r_ilmo(i,j),1.e-9)
+      r_hBound(i,j)=100./max(r_ilmo(i,j),real(1.d-9, test48))
       r_lat(i,j)=1.0
     end do
   end do
@@ -888,6 +899,7 @@ program Test_Vertical_Interpolation
   ! (z0), inverse of Monin-Obukhov length (ilmo) and height of the boundary layer
   ! (hBound).  Set the height (in m) of the lowest source level above the surface
   ! (r_zSrc (i,j,2)) and of the surface itself (r_zSrc (i,j,1)).
+  r_zSrc(:,:,:) = 1000.
   do j=1,n_NJ
     do i=1,n_NI
       r_zSrc (i,j,1) = 0.               !r_zSrc, r_zDest ignored by cubiclagrange
@@ -898,7 +910,7 @@ program Test_Vertical_Interpolation
 
       r_z0(i,j)=1.0
       r_ilmo(i,j)=-0.10+i*0.10
-      r_hBound(i,j)=100./max(r_ilmo(i,j),1.e-9)
+      r_hBound(i,j)=100./max(r_ilmo(i,j),real(1.d-9, test48))
       r_lat(i,j)=1.0
     end do
   end do
@@ -976,6 +988,7 @@ program Test_Vertical_Interpolation
   ! (z0), inverse of Monin-Obukhov length (ilmo) and height of the boundary layer
   ! (hBound).  Set the height (in m) of the lowest source level above the surface
   ! (r_zSrc (i,j,2)) and of the surface itself (r_zSrc (i,j,1)).
+  r_zSrc = 1000.
   do j=1,n_NJ
     do i=1,n_NI
                                         ! r_zSrc, r_zDest NOT ignored by
@@ -990,7 +1003,7 @@ program Test_Vertical_Interpolation
 
       r_z0(i,j)=1.0
       r_ilmo(i,j)=-0.10+i*0.10
-      r_hBound(i,j)=100./max(r_ilmo(i,j),1.e-9)
+      r_hBound(i,j)=100./max(r_ilmo(i,j),real(1.d-9, test48))
       r_lat(i,j)=1.0
     end do
   end do
@@ -1071,6 +1084,7 @@ program Test_Vertical_Interpolation
   ! (z0), inverse of Monin-Obukhov length (ilmo) and height of the boundary layer
   ! (hBound).  Set the height (in m) of the lowest source level above the surface
   ! (r_zSrc (i,j,2)) and of the surface itself (r_zSrc (i,j,1)).
+  r_zSrc(:,:,:) = 1000.
   do j=1,n_NJ
     do i=1,n_NI
       r_zSrc (i,j,1) = 0.               !r_zSrc, r_zDest ignored by cubiclagrange
@@ -1081,7 +1095,7 @@ program Test_Vertical_Interpolation
 
       r_z0(i,j)=1.0
       r_ilmo(i,j)=-0.10+i*0.10
-      r_hBound(i,j)=100./max(r_ilmo(i,j),1.e-9)
+      r_hBound(i,j)=100./max(r_ilmo(i,j),real(1.d-9, test48))
       r_lat(i,j)=1.0
     end do
   end do
@@ -1120,11 +1134,11 @@ program Test_Vertical_Interpolation
 
 
 
-!!$  !
-!!$  ! SIXTEENTH TEST
-!!$  ! SIXTEENTH TEST
-!!$  !
-!!$  ! This defunct test used to test the old (pre-_X) interface
+!!!$  !
+!!!$  ! SIXTEENTH TEST
+!!!$  ! SIXTEENTH TEST
+!!!$  !
+!!!$  ! This defunct test used to test the old (pre-_X) interface
 
 
 
@@ -1144,8 +1158,8 @@ program Test_Vertical_Interpolation
   s_interpType = 'linear'
   s_extrapType = 'fixed'
 
-  r_stateAnswer(1,1,:) =(/0.4000000, 0.9042622, 0.8041871, 0.5088742,-0.5000000/)
-  r_stateAnswer(2,1,:) =(/0.4000000, 2.4417365, 1.1710972,-0.6517754,-0.5000000/)
+  r_stateAnswer(1,1,:) =(/0.4000000,  0.9042623,  0.8041871,  0.5088742, -0.5000000/)
+  r_stateAnswer(2,1,:) =(/0.4000000,  2.4417364,  1.1710972, -0.6517754, -0.5000000/)
 
   r_derivAnswer(1,1,:) =(/0.0000000, 0.0000000, 0.0000000, 0.0000000, 0.0000000/)
   r_derivAnswer(2,1,:) =(/0.0000000, 0.0000000, 0.0000000, 0.0000000, 0.0000000/)
@@ -1661,26 +1675,26 @@ subroutine m_testOneCombo_5005(s_title, s_interpType, s_extrapType, &
 
                                         ! input data for the interpolation and
                                         ! the expected results
-  real, dimension(:,:,:), intent(in) :: r_stateIn , r_derivIn, &
+  real(test48), dimension(:,:,:), intent(in) :: r_stateIn , r_derivIn, &
                                         r_stateAnswer, r_derivAnswer
 
                                         ! more interpolation parameters
-  real, intent(in) :: r_extrapGuideDown, r_extrapGuideUp
+  real(test48), intent(in) :: r_extrapGuideDown, r_extrapGuideUp
 
                                         ! grid parameter
-  real, dimension(:,:), intent(in) :: r_pSurf
-  real, dimension(:,:,:), optional, intent(in) :: r_zSrc, r_zDest
+  real(test48), dimension(:,:), intent(in) :: r_pSurf
+  real(test48), dimension(:,:,:), optional, intent(in) :: r_zSrc, r_zDest
 
   ! The next four parameters are used only for surface extrapolation
                                         ! roughness length
-  real, dimension(:,:), optional, intent(in) :: r_z0
+  real(test48), dimension(:,:), optional, intent(in) :: r_z0
                                         ! inverse Monin-Obukhov length
-  real, dimension(:,:), optional, intent(in) :: r_ilmo
+  real(test48), dimension(:,:), optional, intent(in) :: r_ilmo
                                         ! height of the boundary layer
-  real, dimension(:,:), optional, intent(in) :: r_hBound
+  real(test48), dimension(:,:), optional, intent(in) :: r_hBound
                                         ! latitude (used only for the wind)
-  real, dimension(:,:), optional, intent(in) :: r_lat
-  real, dimension(:,:,:), optional, intent(in) :: r_y_stateIn, r_y_stateAnswer, &
+  real(test48), dimension(:,:), optional, intent(in) :: r_lat
+  real(test48), dimension(:,:,:), optional, intent(in) :: r_y_stateIn, r_y_stateAnswer, &
                                                   r_y_derivIn, r_y_derivAnswer
   logical, optional, intent(in) :: l_reverseOrder
 !
@@ -1690,7 +1704,8 @@ subroutine m_testOneCombo_5005(s_title, s_interpType, s_extrapType, &
 !
 !!
                                         ! a place to hold the results
-  real, dimension(ubound(r_stateAnswer,1), &
+  real(test48), &
+        dimension(ubound(r_stateAnswer,1), &
                   ubound(r_stateAnswer,2), &
                   ubound(r_stateAnswer,3)) :: r_stateOut   , r_derivOut, &
                                               r_y_stateOut , r_y_derivOut
@@ -1856,7 +1871,7 @@ subroutine m_testOneCombo_5005(s_title, s_interpType, s_extrapType, &
   do k=1, n_nk
     do j=1,n_nj
       do i=1,n_ni
-        if (     abs(r_stateOut(i,j,k)   - r_stateAnswer(i,j,k)  ) > 8e-6 &
+        if (     abs(r_stateOut(i,j,k)   - r_stateAnswer(i,j,k)  ) > 1.6e-5 &
             .or. abs(r_derivOut(i,j,k  ) - r_derivAnswer(i,j,k)  ) >11e-6) then
           l_pass = .false.
           s_passFail = s_fail
@@ -1996,25 +2011,26 @@ subroutine m_testOneCombo_2GridTypes &
 
                                         ! input data for the interpolation and
                                         ! the expected results
-  real, dimension(:), intent(in) :: r_levelsInit, r_levelsTarget
-  real, dimension(:,:,:), intent(in) :: r_stateIn , r_derivIn, &
+  real(test48), dimension(:), intent(in) :: r_levelsInit, r_levelsTarget
+  real(test48), dimension(:,:,:), intent(in) :: r_stateIn , r_derivIn, &
                                         r_stateAnswer, r_derivAnswer
 
                                         ! more interpolation parameters
-  real, intent(in) :: r_extrapGuideDown, r_extrapGuideUp
+  real(test48), intent(in) :: r_extrapGuideDown, r_extrapGuideUp
 
                                         ! grid parameters
   real, intent(in) :: r_pTopInit, r_pRefInit, r_rCoefInit, &
                       r_pTopTarget, r_pRefTarget, r_rCoefTarget, &
                       r_rCoef_2_Init, r_rCoef_2_Target
-  real, dimension(:,:), intent(in) :: r_pSurf
+  real(test48), dimension(:,:), intent(in) :: r_pSurf
 !
 !NOTES
 !
 !!
 
                                         ! a place to hold the results
-  real, dimension(ubound(r_stateAnswer,1), &
+  real(test48), &
+        dimension(ubound(r_stateAnswer,1), &
                   ubound(r_stateAnswer,2), &
                   ubound(r_stateAnswer,3)) :: r_stateOut   , r_derivOut, &
                                               r_y_stateOut , r_y_derivOut
@@ -2292,14 +2308,14 @@ subroutine m_testOneCombo_ip1Type(s_title, s_interpType, s_extrapType, &
 
                                         ! input data for the interpolation and
                                         ! the expected results
-  real, dimension(:,:,:), intent(in) :: r_stateIn , r_derivIn, &
+  real(test48), dimension(:,:,:), intent(in) :: r_stateIn , r_derivIn, &
                                         r_stateAnswer, r_derivAnswer
 
                                         ! more interpolation parameters
-  real, intent(in) :: r_extrapGuideDown, r_extrapGuideUp
+  real(test48), intent(in) :: r_extrapGuideDown, r_extrapGuideUp
 
                                         ! grid parameter
-  real, dimension(:,:), intent(in) :: r_pSurf
+  real(test48), dimension(:,:), intent(in) :: r_pSurf
 !
 !NOTES
 !        Assume that both the initial and target grid types are as defined in the
@@ -2307,7 +2323,8 @@ subroutine m_testOneCombo_ip1Type(s_title, s_interpType, s_extrapType, &
 !
 !!
                                         ! a place to hold the results
-  real, dimension(ubound(r_stateAnswer,1), &
+  real(test48), &
+        dimension(ubound(r_stateAnswer,1), &
                   ubound(r_stateAnswer,2), &
                   ubound(r_stateAnswer,3)) :: r_stateOut   , r_derivOut
 
@@ -2555,8 +2572,8 @@ subroutine m_slFluxGradientStub(ft,dtdz,ttop,tsurf,ztop,z0t,ilmo,h,n)
 !ARGUMENTS
       IMPLICIT NONE
       INTEGER N
-      REAL FT(N),DTDZ(N),TTOP(N),TSURF(N),ZTOP(N),Z0T(N)
-      REAL ILMO(N),H(N)
+      REAL(test48) FT(N),DTDZ(N),TTOP(N),TSURF(N),ZTOP(N),Z0T(N)
+      REAL(test48) ILMO(N),H(N)
 
 !          - Output -
 ! FT      normalised temperature or humidity flux at surface
@@ -2581,7 +2598,7 @@ subroutine m_slFluxGradientStub(ft,dtdz,ttop,tsurf,ztop,z0t,ilmo,h,n)
 
 !***************************************************************
 !     AUTOMATIC ARRAYS
-      AUTOMATIC ( FH , REAL , (N) )
+      AUTOMATIC ( FH , REAL(test48) , (N) )
 !***************************************************************
       REAL AS,ASX,CI,BS,BETA,FACTN,HMIN,ANGMAX
 !
@@ -2604,7 +2621,7 @@ subroutine m_slFluxGradientStub(ft,dtdz,ttop,tsurf,ztop,z0t,ilmo,h,n)
       call m_slStateValueStub(fh,ztop,z0t,ilmo,h,n)
       DO J=1,N
         ft(j)=(ttop(j)-tsurf(j))/fh(j)
-        dtdz(j)=ft(j)*phih(ztop(j),ilmo(j),h(j))/(ztop(j)+z0t(j))
+        dtdz(j)=ft(j)*phih(real(ztop(j)),real(ilmo(j)),real(h(j)))/(ztop(j)+z0t(j))
       END DO
 !
       return
@@ -2655,7 +2672,7 @@ end subroutine m_slFluxGradientStub
 
 !!s/r m_slStateValueStub - Testing stub for the StateValue routine
 !#include "phy_macros_f.h" -- already included before the previous routine
-subroutine m_slStateValueStub(fh,z,z0t,ilmo,h,n)
+subroutine m_slStateValueStub(fh_48,z_48,z0t_48,ilmo_48,h_48,n)
 !subroutine m_slStateValueStub(f,zz,z0,ilmo,h,n)
 !
 !AUTHOR
@@ -2675,7 +2692,7 @@ subroutine m_slStateValueStub(fh,z,z0t,ilmo,h,n)
 !ARGUMENTS
       IMPLICIT NONE
       INTEGER N
-      REAL FH(N),Z(N),Z0T(N),ILMO(N),H(N)
+      REAL(test48) FH_48(N),Z_48(N),Z0T_48(N),ILMO_48(N),H_48(N)
 !
 !          - Output -
 ! FH      normalised temperature or humidity value at desired height
@@ -2695,6 +2712,7 @@ subroutine m_slStateValueStub(fh,z,z0t,ilmo,h,n)
 
       INTEGER J
       REAL AS,ASX,CI,BS,BETA,FACTN,HMIN,ANGMAX
+      REAL FH(N),Z(N),Z0T(N),ILMO(N),H(N)
 
       REAL RAC3,X,X0,Y,Y0,Z0(1),HI,LZZ0(1)
 
@@ -2707,6 +2725,11 @@ subroutine m_slStateValueStub(fh,z,z0t,ilmo,h,n)
 ! Initilisation of constants in the common SURFCON
 !
 ! Note: some of the constants may be reinitialised at runtime using a namelist
+
+      Z(:)    = real(Z_48(:),4)
+      Z0T(:)  = real(Z0T_48(:),4)
+      ILMO(:) = real(ILMO_48(:),4)
+      H(:)    = real(H_48(:),4)
 
       AS    = 12.
       ASX   = 5.
@@ -2737,6 +2760,8 @@ subroutine m_slStateValueStub(fh,z,z0t,ilmo,h,n)
       ENDIF
 !---------------------------------------------------------------------
       END DO
+      
+      FH_48(:)   = real(FH(:),test48)
 
       return
 

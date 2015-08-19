@@ -77,8 +77,8 @@
 
   ! OPTIONS
   procedure (), pointer :: &
-                   m_Interp1D_p => null (), & ! the interpolation algorithm to use
-                   m_Extrap1D_p => null ()    ! the extrapolation algorithm to use
+                  m_Interp1D_p => null (), & ! the interpolation algorithm to use
+                  m_Extrap1D_p => null ()    ! the extrapolation algorithm to use
 
 
 
@@ -817,28 +817,29 @@ contains
                         m_slFluxGradient, 0, 0, &
                         r_ExtArraysIn, r_ExtArraysOut &
                        )
+
+
+      !
+      ! NORMAL EXTRAPOLATION
+      ! NORMAL EXTRAPOLATION
+      ! NORMAL EXTRAPOLATION
+      !
+      call m_Extrap1D_p(n_ni*n_nj, o_vGridSource_p%N_numVLevels, &
+                        o_vGridDestn_p%N_numVLevels, &
+                        n_ni*n_nj, n_ni*n_nj, &
+
+                        r_lnPSource_a,r_stateIn,r_derivIn_local, &
+                        n_interpIndex_a, &
+                        r_lnPDestn_a,r_stateOut,r_derivOut_local,&
+
+                        .true., .true., &
+                        r_extrapGuideDown_local, &
+                        r_extrapGuideUp_local, &
+
+                        m_slFluxGradient, 0, 0, &
+                        r_ExtArraysIn, r_ExtArraysOut &
+                       )
     end if 
-
-
-    !
-    ! NORMAL EXTRAPOLATION
-    ! NORMAL EXTRAPOLATION
-    ! NORMAL EXTRAPOLATION
-    !
-    call m_Extrap1D_p(n_ni*n_nj, o_vGridSource_p%N_numVLevels, &
-                      o_vGridDestn_p%N_numVLevels, &
-                      n_ni*n_nj, n_ni*n_nj, &
-
-                      r_lnPSource_a,r_stateIn,r_derivIn_local, &
-                      n_interpIndex_a,r_lnPDestn_a,r_stateOut, r_derivOut_local,&
-
-                      .true., .true., &
-                      r_extrapGuideDown_local, &
-                      r_extrapGuideUp_local, &
-
-                      m_slFluxGradient, 0, 0, &
-                      r_ExtArraysIn, r_ExtArraysOut &
-                     )
 
 
 
