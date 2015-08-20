@@ -481,6 +481,9 @@ contains
       ! No real interpolation needs to be done.
       ! Just copy the array over.
       r_stateOut = r_stateIn
+      if(present(r_derivIn) .and. present(r_derivOut)) then
+        r_derivOut = r_derivIn
+      end if
       return
     end if
 
@@ -808,7 +811,7 @@ contains
                         n_ni*n_nj, n_ni*n_nj, &
 
                         r_lnPSource_a,r_stateIn,r_derivIn_local, &
-                        n_interpIndex_a,r_lnPDestn_a,r_stateOut, r_derivOut_local,&
+                        n_interpIndex_a,r_lnPDestn_a,r_stateOut,r_derivOut_local,&
 
                         .false., .false., &
                         r_extrapGuideDown_local, &

@@ -1,7 +1,6 @@
 !!!mod VerticalGrid_class - Class that represents one vertical grid
 !module VerticalGrid_class
 !module VerticalGrid_class8
-use VerticalInterpolationConstants
 !
 !AUTHOR
 !     J.W. Blezius MAY 2002 helper on top of the Interp1D library
@@ -41,6 +40,7 @@ use VerticalInterpolationConstants
 !        because it is not necessarily on the heap.
 !
 !!
+  use VerticalInterpolationConstants
   use vGrid_Descriptors
   implicit none
   public
@@ -226,7 +226,7 @@ contains
     ! Array of vertical levels was successfully allocated.
     this%N_numVLevels = n_numVLevelsIn
 
-end function N_ConstructNull
+  end function N_ConstructNull
 
 
 
@@ -262,7 +262,6 @@ end function N_ConstructNull
 !!
     external flush
     integer :: n_error, n_kind, n_version, n_numVLevels
-    integer, pointer, dimension(:) :: n_ip1_p
 
     N_Viqkdef_ip1List = 0               ! no error yet
     this%O_vGridDesc_p => o_vGridDesc_p
@@ -277,7 +276,6 @@ end function N_ConstructNull
     end if
 
     nullify(this%N_ip1_p)
-    nullify(n_ip1_p)
 
     this%N_numVLevels = ubound(n_ip1,1)-lbound(n_ip1,1)+1
 
