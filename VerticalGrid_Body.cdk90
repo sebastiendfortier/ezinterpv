@@ -362,10 +362,17 @@ contains
 
     ! Omit the levels that would not be present in a field.
     ! Vgd might have (depending on the grid type) added hyb=1 (the last entry)
-    ! and the 10m level (after hyb=1) to the list. Remove the 10m level.
+    ! and the 10m level (after hyb=1) to the list. Remove the 10m level them.
     n_numVLevels = ubound(n_ip1_p,1)
     select case (n_kind*1000 + n_version)
-    case (5005)
+    case (5002, 5003)
+      if(s_ip1Type == 'VIPM') then
+        n_numVLevels = n_numVLevels - 1
+      else ! 'VIPT'
+        n_numVLevels = n_numVLevels - 2
+      end if
+
+    case (5004, 5005)
       n_numVLevels = n_numVLevels - 1
 
     case default
