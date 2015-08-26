@@ -16,15 +16,11 @@ OPTIMIZ = -O 2
 #OPTIMIZ = -O 0 -debug
 
 LIBRMN = rmn_015.2
-TEMPLIB = ../$(EC_ARCH)/lib/libezinterpv.a
 
 default: test
 
-# Explicit path, /users/dor/arma/jbl/home1/SVN_checkouts/ez_interpv/TestFiles, is
-# given here so as to over-ride the (old) include files that are still hanging
-# around in armnlib: -- OLD NEWS NOW
 .ftn90.o:
-	s.compile -includes ../$(EC_ARCH)/include -abi $(ABI) $(OPTIMIZ) -opt "=$(FFLAGS)" \
+	s.compile -abi $(ABI) $(OPTIMIZ) -opt "=$(FFLAGS)" \
 	-src $<
 
 .cdk90.o:
@@ -75,8 +71,8 @@ test:	copyHlocal copyMODlocal TestVI.o removeMOD removeH
 	-abi $(ABI) $(OPTIMIZ) -libappl descrip -librmn $(LIBRMN)
 
 testlib: TestVI.o
-	(. s.ssmuse.dot /ssm/net/rpn/libs/$(LIBRMN); s.compile -includes ../$(EC_ARCH)/include -libpath . ../$(EC_ARCH)/lib -libappl ezinterpv descrip -o TestVInterp_$(BASE_ARCH).Abs -obj TestVI.o \
-	-abi$(ABI) -librmn $(LIBRMN))
+	s.compile -includes $(EC_INCLUDE_PATH) -libpath $(EC_LD_LIBRARY_PATH) -libappl ezinterpv descrip \
+	-o TestVInterp_$(BASE_ARCH).Abs -obj TestVI.o -abi$(ABI) -librmn $(LIBRMN)
 
 copielocale:
 	cp ../*.o . 
