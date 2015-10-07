@@ -396,7 +396,7 @@ contains
 
 
 !!!func N_VertGridGetLnP - Create 'cube' of vertical levels in units of ln P
-  integer function N_VertGridGetLnP(this, r_P, r_pSurf)
+  integer function N_VertGridGetLnP(this, r_P, r_pSurf, l_in_log)
                                         ! returns error indication:  0='no error'
 !
 !AUTHOR
@@ -415,6 +415,9 @@ contains
 !        obtain a pressure.
 !
 !NOTES
+!        Contrary to the name of the function, it will return pressures that are
+!        not in log, depending on the fourth, optional parameter.  The advertized
+!        interface to this functionality is the functon, N_VertGridGetP.
 !
 !ARGUMENTS
 
@@ -428,18 +431,25 @@ contains
                                         ! surface pressure for each horiz point,
                                         ! in units of mb
     real(real48), dimension(:,:), intent(in) :: r_pSurf
+    logical, intent(in), optional :: l_in_log
 !
 !!
     external flush
     integer :: n_error
 
     real(single), dimension(:,:,:), pointer :: r_P_single_p
-    logical, parameter :: l_IN_LOG = .true.
+    logical :: l_log
     logical :: l_firstTime=.true.
 
 
     nullify(r_P_single_p)
     N_VertGridGetLnP = 0                  ! no error yet
+
+    if(present(l_in_log)) then
+      l_log = l_in_log
+    else
+      l_log = .true.
+    end if
     
 
     if(l_firstTime .eqv. .true.) then
@@ -463,7 +473,7 @@ contains
     endif
     n_error = vgd_levels(this%O_vGridDesc_p, this%N_ip1_p(:this%N_numVLevels),&
                          r_P_single_p, &
-                         real(r_pSurf, kind=4) / r_MBAR_PER_PASCAL, l_IN_LOG)
+                         real(r_pSurf, kind=4) / r_MBAR_PER_PASCAL, l_log)
     if(n_error .ne. VGD_OK)then
       write(6,*)'ERROR in VerticalGrid_class%N_VertGridGetLnP, ', &
                 'from vgd_levels:', n_error
@@ -474,6 +484,39 @@ contains
     deallocate(r_P_single_p)
 
   end function N_VertGridGetLnP
+
+
+
+!!!func N_VertGridGetP - Create 'cube' of vertical levels in pressure
+  integer function N_VertGridGetP(this, r_P, r_pSurf)
+                                        ! returns error indication:  0='no error'
+!
+!AUTHOR
+!     J.W. Blezius OCT 2015 revive this deleted function
+!
+!OBJECT
+!         This is a wrapper to the function, N_VertGridGetLnP, that sets the
+!         parameter, l_in_log, to .false.
+!
+!NOTES
+!
+!ARGUMENTS
+
+                                        ! parameter cannot be a pointer to a
+                                        ! user type:  replace 'this' with 'that'
+    type(T_VerticalGrid), pointer, intent(in) :: this
+
+                                        ! vertical levels as pressure
+    real(real48), dimension(:,:,:), intent(out) :: r_P
+
+                                        ! surface pressure for each horiz point,
+                                        ! in units of mb
+    real(real48), dimension(:,:), intent(in) :: r_pSurf
+!
+!!
+
+    N_VertGridGetP = N_VertGridGetLnP(this, r_P, r_pSurf, l_in_log=.false.)
+  end function N_VertGridGetP
 
 
 
