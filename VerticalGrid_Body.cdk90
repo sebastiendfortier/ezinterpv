@@ -552,16 +552,17 @@ contains
       nullify(this%N_ip1_p)
     end if
 
-    ! N.B.:  vgd_free does not deallocate data that were obtained with vgd_get
-    if( associated(this%O_vGridDesc_p) ) then
-      n_error = vgd_free(this%O_vGridDesc_p)
-      if(n_error /= VGD_OK) then
-        write(6, *)'Error freeing vgrid descriptor object in ', &
-                   'M_ReleaseVerticalGrid:  error from vgrid=', n_error
-        call flush(6)
-      end if
-      nullify(this%O_vGridDesc_p)
-    end if
+! vgd_free causes deallocation error in some circumstances
+!!$    ! N.B.:  vgd_free does not deallocate data that were obtained with vgd_get
+!!$    if( associated(this%O_vGridDesc_p) ) then
+!!$      n_error = vgd_free(this%O_vGridDesc_p)
+!!$      if(n_error /= VGD_OK) then
+!!$        write(6, *)'Error freeing vgrid descriptor object in ', &
+!!$                   'M_ReleaseVerticalGrid:  error from vgrid=', n_error
+!!$        call flush(6)
+!!$      end if
+!!$      nullify(this%O_vGridDesc_p)
+!!$    end if
 
   end subroutine M_ReleaseVerticalGrid
 
