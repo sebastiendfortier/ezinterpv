@@ -482,6 +482,7 @@ contains
     r_P = r_P_single_p + r_LOG_MBAR_PER_PASCAL
 
     deallocate(r_P_single_p)
+    nullify   (r_P_single_p)
 
   end function N_VertGridGetLnP
 
@@ -548,14 +549,18 @@ contains
                    'error=', n_error
         call flush(6)
       end if
+      nullify(this%N_ip1_p)
     end if
 
     ! N.B.:  vgd_free does not deallocate data that were obtained with vgd_get
-    n_error = vgd_free(this%O_vGridDesc_p)
-    if(n_error /= VGD_OK) then
-      write(6, *)'Error freeing vgrid descriptor object in ', &
-                 'M_ReleaseVerticalGrid:  error from vgrid=', n_error
-      call flush(6)
+    if( associated(this%O_vGridDesc_p) ) then
+      n_error = vgd_free(this%O_vGridDesc_p)
+      if(n_error /= VGD_OK) then
+        write(6, *)'Error freeing vgrid descriptor object in ', &
+                   'M_ReleaseVerticalGrid:  error from vgrid=', n_error
+        call flush(6)
+      end if
+      nullify(this%O_vGridDesc_p)
     end if
 
   end subroutine M_ReleaseVerticalGrid

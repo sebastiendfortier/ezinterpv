@@ -2140,6 +2140,7 @@ subroutine m_testOneCombo_2GridTypes &
   error=N_Viqkdef(o_gridInit_p, o_vGridDescInit_p, n_ip1=n_ip1_p)
   if(error /= 0)write(6,*)'ERROR initializing gridInitial:  ', error
   deallocate(n_ip1_p)
+  nullify(n_ip1_p)
 
 
   !
@@ -2208,6 +2209,7 @@ subroutine m_testOneCombo_2GridTypes &
   error=N_Viqkdef(o_gridTarget_p, o_vGridDescTarget_p, n_ip1=n_ip1_p)
   if(error /= 0)write(6,*)'ERROR initializing gridTarget:  ', error
   deallocate(n_ip1_p)
+  nullify(n_ip1_p)
 
 
   !
