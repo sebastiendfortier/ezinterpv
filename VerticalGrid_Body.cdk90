@@ -481,7 +481,12 @@ contains
                 'from vgd_levels:', n_error
       N_VertGridGetLnP = N_VI_VIERR_VGD_DESCRIPTOR_ERROR
     end if
-    r_P = r_P_single_p + r_LOG_MBAR_PER_PASCAL
+
+    if(l_log) then
+      r_P = r_P_single_p + r_LOG_MBAR_PER_PASCAL
+    else
+      r_P = r_P_single_p + r_MBAR_PER_PASCAL
+    end if
 
     deallocate(r_P_single_p)
     nullify   (r_P_single_p)
