@@ -56,6 +56,8 @@
 
                                         ! The ip1's of the field levels that are
                                         ! present in the associated field
+                                        ! N.B.:  the dimension of this array may
+                                        !        be greater than N_numVLevels
     integer, pointer, dimension(:) :: N_ip1_p
                                         ! The vgd that describes this grid
     type(vgrid_descriptor), pointer::O_vGridDesc_p
@@ -139,8 +141,6 @@ contains
     type (T_VerticalGrid), intent(in)  :: o_gridIn
 !
 !NOTES
-!        This assumes that the destination vLevel array has been allocated, and
-!        that the two vLevels have the same dimensions.
 !
 !!
     external flush
@@ -150,7 +150,7 @@ contains
                                                       ! deep copy
     if(associated(o_gridIn%N_ip1_p))then
       if(associated(o_gridOut%N_ip1_p)) then
-        if(size(o_gridOut%N_ip1_p) /= o_gridIn%N_numVLevels) then
+        if(size(o_gridOut%N_ip1_p) < o_gridIn%N_numVLevels) then
           deallocate(o_gridOut%N_ip1_p)
           nullify(o_gridOut%N_ip1_p)
         end if
@@ -166,7 +166,9 @@ contains
           endif
       end if
 
-      o_gridOut%N_ip1_p = o_gridIn%N_ip1_p
+      ! Specifying the slices protects against the dimension of <grid>%N_ip1_p
+      ! exceeding <grid>%N_numVLevels
+      o_gridOut%N_ip1_p(:o_gridOut%N_numVLevels) = o_gridIn%N_ip1_p(:o_gridIn%N_numVLevels)
 
     else ! .not. associated(o_gridIn%N_ip1_p)
       if(associated(o_gridOut%N_ip1_p)) then
