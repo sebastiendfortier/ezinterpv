@@ -633,7 +633,7 @@ end function N_ConstructNull
 
 
 !!!func N_VertGridGetP - Create 'cube' of vertical levels in units of P (mb)
-  integer function N_VertGridGetP(that, r_P, n_ni, n_nj, r_pSurf, r_pTop)
+  integer function N_VertGridGetP(that, r_P, n_ni, n_nj, r_pSurf, r_pTop, l_in_log)
                                         ! returns error indication:  0='no error'
 !
 !AUTHOR
@@ -676,6 +676,7 @@ end function N_ConstructNull
                                         ! required only for eta units,
                                         ! in units of mb
     real(real48), dimension(:,:), optional, intent(in) :: r_pTop
+    logical, intent(in), optional :: l_in_log
 !
 !!
     external flush
@@ -689,12 +690,18 @@ end function N_ConstructNull
 
     real(real48), dimension(:,:,:), pointer :: r_P_p
 ! real(single), dimension(n_ni,n_nj,that%Ptr%N_numVLevels) :: r_P_single
-    logical, parameter :: l_IN_LOG = .false.
+    logical :: l_log
 
 
     this => that%Ptr
     nullify(r_P_p)
     N_VertGridGetP = 0                  ! no error yet
+
+    if(present(l_in_log)) then
+      l_log = l_in_log
+    else
+      l_log = .false.
+    end if
 
     !
     ! Create the 'cube' of source vertical levels
@@ -707,12 +714,17 @@ end function N_ConstructNull
                                         ! Obtain, the cube of P.
                                         ! vgd_levels allocates r_P_p
       n_error = vgd_levels(this%O_vGridDesc_p, this%N_ip1_p(:this%N_numVLevels),&
-                           r_P_p, r_pSurf / r_MBAR_PER_PASCAL, l_IN_LOG)
+                           r_P_p, r_pSurf / r_MBAR_PER_PASCAL, l_log)
       if(n_error .ne. VGD_OK)then
         write(6,*)'ERROR in VerticalGrid_class%N_VertGridGetP, ', &
                   'from vgd_levels:', n_error
       end if
-      r_P = r_P_p * r_MBAR_PER_PASCAL
+
+      if(l_log) then
+        r_P = r_P_p + r_LOG_MBAR_PER_PASCAL
+      else
+        r_P = r_P_p * r_MBAR_PER_PASCAL
+      end if
 
       deallocate(r_P_p)
 
@@ -817,7 +829,8 @@ end function N_ConstructNull
 
                                         ! Obtain the cube of pressures
                                         ! After this call, lnP is really just P
-    N_VertGridGetLnP = N_VertGridGetP(that, r_lnP, n_ni, n_nj, r_pSurf, r_pTop)
+    N_VertGridGetLnP = N_VertGridGetP(that, r_lnP, n_ni, n_nj, r_pSurf, r_pTop, &
+                                      l_in_log=.true.)
 
     select case (this%N_gridType)
 !   case(N_GRID_TYPE_SIGMA, N_GRID_TYPE_PRESSURE, N_GRID_TYPE_HYBRID, &
@@ -826,7 +839,7 @@ end function N_ConstructNull
     case default
                                         ! Convert the 'cube' of source vertical
                                         ! levels from P to ln P
-      r_lnP = log(r_lnP)
+!!$      r_lnP = log(r_lnP)
 
     case(N_GRID_TYPE_GENERIC)
       ! Do nothing
