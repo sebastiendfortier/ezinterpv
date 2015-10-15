@@ -713,6 +713,14 @@ end function N_ConstructNull
                   'from vgd_levels:', n_error
       end if
       r_P = r_P_single_p * r_MBAR_PER_PASCAL
+write(*,*)"JWB:       r_P_single_p(1,1,2), r_P(1,1,2), log(r_P(1,1,2))=", &
+                      r_P_single_p(1,1,2), r_P(1,1,2), log(r_P(1,1,2))
+n_error = vgd_levels(this%O_vGridDesc_p, this%N_ip1_p(:this%N_numVLevels),&
+                     r_P_single_p, &
+                     real(r_pSurf, kind=4) / r_MBAR_PER_PASCAL, .true.)
+      r_P = r_P_single_p + log(r_MBAR_PER_PASCAL)
+write(*,*)"JWB(log):  r_P_single_p(1,1,2), r_P(1,1,2)=", &
+                      r_P_single_p(1,1,2), r_P(1,1,2)
 
       deallocate(r_P_single_p)
 
