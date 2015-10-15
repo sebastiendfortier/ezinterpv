@@ -670,6 +670,7 @@ end function N_ConstructNull
                                         ! surface pressure for each horiz point,
                                         ! in units of mb
     real(real48), dimension(:,:), intent(in) :: r_pSurf
+    real(double), dimension(ubound(r_pSurf,1),ubound(r_pSurf,2)) :: r_pSurf_8
 
                                         ! ceiling pressure for each horiz point
                                         ! required only for eta units,
@@ -686,7 +687,7 @@ end function N_ConstructNull
     integer :: n_error
     type(T_VerticalGrid), pointer :: this
 
-    real(single), dimension(:,:,:), pointer :: r_P_single_p
+    real(double), dimension(:,:,:), pointer :: r_P_single_p
 ! real(single), dimension(n_ni,n_nj,that%Ptr%N_numVLevels) :: r_P_single
     logical, parameter :: l_IN_LOG = .false.
 
@@ -705,9 +706,10 @@ end function N_ConstructNull
     case default
                                         ! Obtain, the cube of P.
                                         ! vgd_levels allocates r_P_single_p
+      r_pSurf_8 = r_pSurf
       n_error = vgd_levels(this%O_vGridDesc_p, this%N_ip1_p(:this%N_numVLevels),&
                            r_P_single_p, &
-                           real(r_pSurf, kind=4) / r_MBAR_PER_PASCAL, l_IN_LOG)
+                           r_pSurf_8 / r_MBAR_PER_PASCAL, l_IN_LOG)
       if(n_error .ne. VGD_OK)then
         write(6,*)'ERROR in VerticalGrid_class%N_VertGridGetP, ', &
                   'from vgd_levels:', n_error
@@ -717,7 +719,7 @@ write(*,*)"JWB:       r_P_single_p(1,1,2), r_P(1,1,2), log(r_P(1,1,2))=", &
                       r_P_single_p(1,1,2), r_P(1,1,2), log(r_P(1,1,2))
 n_error = vgd_levels(this%O_vGridDesc_p, this%N_ip1_p(:this%N_numVLevels),&
                      r_P_single_p, &
-                     real(r_pSurf, kind=4) / r_MBAR_PER_PASCAL, .true.)
+                     r_pSurf_8 / r_MBAR_PER_PASCAL, .true.)
       r_P = r_P_single_p + log(r_MBAR_PER_PASCAL)
 write(*,*)"JWB(log):  r_P_single_p(1,1,2), r_P(1,1,2)=", &
                       r_P_single_p(1,1,2), r_P(1,1,2)
