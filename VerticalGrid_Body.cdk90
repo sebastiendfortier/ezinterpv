@@ -49,7 +49,7 @@ use VerticalInterpolationConstants
   save
 
   real(real48), parameter :: r_MBAR_PER_PASCAL = real(0.01d0,real48)
-  real(real48), parameter :: r_LOG_MBAR_PER_PASCAL = log(0.01)
+  real(real48), parameter :: r_LOG_MBAR_PER_PASCAL = log(r_MBAR_PER_PASCAL)
 
   type T_VerticalGrid
     ! information capable of specifying particular grid types is placed in
