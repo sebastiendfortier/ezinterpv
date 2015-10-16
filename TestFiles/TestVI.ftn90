@@ -1872,7 +1872,7 @@ subroutine m_testOneCombo_5005(s_title, s_interpType, s_extrapType, &
     do j=1,n_nj
       do i=1,n_ni
         if (     abs(r_stateOut(i,j,k)   - r_stateAnswer(i,j,k)  ) > 1.6e-5 &
-            .or. abs(r_derivOut(i,j,k  ) - r_derivAnswer(i,j,k)  ) >11e-6) then
+            .or. abs(r_derivOut(i,j,k  ) - r_derivAnswer(i,j,k)  ) > 2e-5) then
           l_pass = .false.
           s_passFail = s_fail
           exit
