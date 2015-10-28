@@ -2,8 +2,8 @@
 
 !!$#define test48 4
 #define test48 8
-#define VerticalGrid_class VerticalGrid_class8
-#define VerticalInterpolation_class VerticalInterpolation_class8
+#define VerticalGrid_90_class VerticalGrid_90_class8
+#define VerticalInterpolation_90_class VerticalInterpolation_90_class8
 
 #define TOCTOC_FILENUM 9
 
@@ -28,8 +28,8 @@ program Test_Vertical_Interpolation
 !
 
 !!
-  use VerticalGrid_class
-  use VerticalInterpolation_class
+  use VerticalGrid_90_class
+  use VerticalInterpolation_90_class
   implicit none
 
 
@@ -1665,8 +1665,8 @@ subroutine m_testOneCombo_5005(s_title, s_interpType, s_extrapType, &
 !        To test the ez_interpv package.
 !
 !ARGUMENTS
-  use VerticalGrid_class
-  use VerticalInterpolation_class
+  use VerticalGrid_90_class
+  use VerticalInterpolation_90_class
   implicit none
 
                                         ! parameters of most interest
@@ -2000,8 +2000,8 @@ subroutine m_testOneCombo_2GridTypes &
 !        To test the ez_interpv package, with two different grid types
 !
 !ARGUMENTS
-  use VerticalGrid_class, only: T_VerticalGrid, N_Viqkdef
-  use VerticalInterpolation_class, only: N_Videfset, N_Visint
+  use VerticalGrid_90_class, only: T_VerticalGrid, N_Viqkdef
+  use VerticalInterpolation_90_class, only: N_Videfset, N_Visint
   implicit none
 
                                         ! parameters of most interest
@@ -2300,8 +2300,8 @@ subroutine m_testOneCombo_ip1Type(s_title, s_interpType, s_extrapType, &
 !        To test the ez_interpv package.
 !
 !ARGUMENTS
-  use VerticalGrid_class
-  use VerticalInterpolation_class
+  use VerticalGrid_90_class
+  use VerticalInterpolation_90_class
   implicit none
 
                                         ! parameters of most interest

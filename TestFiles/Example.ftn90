@@ -4,8 +4,8 @@
 #define NUM_LEVELS_DEST   57
 
 program Example_Vertical_Interpolation
-  use VerticalGrid_class
-  use VerticalInterpolation_class
+  use VerticalGrid_90_class
+  use VerticalInterpolation_90_class
   implicit none
 
   integer :: error_li, kk

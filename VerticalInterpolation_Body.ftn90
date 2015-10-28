@@ -1,6 +1,6 @@
-!!!mod VerticalInterpolation_class -class that manages the vertical interpolation
-!module VerticalInterpolation_class
-!module VerticalInterpolation_class8
+!!!mod VerticalInterpolation_90_class -class that manages vertical interpolation
+!module VerticalInterpolation_90_class
+!module VerticalInterpolation_90_class8
 !
 !AUTHOR
 !     J.W. Blezius MAY 2002 helper on top of the Interp1D library
@@ -40,8 +40,8 @@
 !
 !!
   
-  use VerticalInterpolationConstants
-  use VerticalGrid_class
+  use VerticalInterpolationConstants_90
+  use VerticalGrid_90_class
   use vGrid_Descriptors, only: vgd_levels
   implicit none
 
@@ -1103,7 +1103,6 @@ contains
 !        syntax.
 !
 !ARGUMENTS
-      use VerticalInterpolationConstants
       integer, intent(in) :: numInterpSets
       integer, intent(in) :: srcNumLevels
       integer, intent(in) :: destNumLevels
@@ -1220,5 +1219,5 @@ contains
     l_gridsSelected = .false.           ! ViSelectGrids must be called again
   end subroutine m_clearGrids
 
-!end module VerticalInterpolation_class
-!end module VerticalInterpolation_class8
+!end module VerticalInterpolation_90_class
+!end module VerticalInterpolation_90_class8

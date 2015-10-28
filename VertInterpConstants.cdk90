@@ -1,6 +1,6 @@
-!!!mod VerticalInterpolationConstants - Constants for vertical interpolation
-!                                       package
-module VerticalInterpolationConstants
+!!!mod VerticalInterpolationConstants_90 - Constants for vertical interpolation
+!                                          package
+module VerticalInterpolationConstants_90
 !
 !AUTHOR
 !     J.W. Blezius MAY 2002 first library to replace duplicate interpolation
@@ -35,7 +35,7 @@ module VerticalInterpolationConstants
   !
   !!!!!
 
-  ! errors from the VerticalInterpolation class
+  ! errors from the VerticalInterpolation_90 class
   integer, parameter :: N_VI_VIERR_FAILED_ALLOCATION    =100, &
                         N_VI_VIERR_UNDEFINED_GRID_REQD  =101, &
                         N_VI_VIERR_GRIDS_NOT_SELECTED   =102, &
@@ -45,8 +45,8 @@ module VerticalInterpolationConstants
                         N_VI_VIERR_LN_PRESS_CONVERSION  =106, &
                         N_VI_VIERR_MISSING_SURFACE_DATA =108, &
 
-  ! errors from VerticalGrid class
+  ! errors from VerticalGrid_90 class
                         N_VI_VIERR_VGD_DESCRIPTOR_ERROR =203, &
                         N_VI_VIERR_IP1S_NOT_SPECIFIED   =204
 
-end module VerticalInterpolationConstants 
+end module VerticalInterpolationConstants_90
