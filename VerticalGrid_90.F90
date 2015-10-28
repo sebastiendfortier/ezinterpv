@@ -4,7 +4,7 @@
 !     J.W. Blezius AUG 2009 
 !
 !REVISION
-! v1_4    Blezius J.W. AUG 2009 - VerticalGrid_Body.cdk90 split off of this file
+! v1_4    Blezius J.W. AUG 2009 - VerticalGrid_Body.inc split off of this file
 !
 !OBJECT
 !        To provide a means to easily compile the contained module twice, once
@@ -18,7 +18,7 @@
 !version that accepts real(single) arguments
 module VerticalGrid_90_class
 #define real48 single
-#include "VerticalGrid_Body.cdk90"
+#include "VerticalGrid_Body_90.inc"
 #undef real48
 end module VerticalGrid_90_class
 
@@ -29,7 +29,7 @@ module VerticalGrid_90_class8
 #define VerticalGrid_90_class                   VerticalGrid_90_class8
 #define VerticalInterpolation_90_class VerticalInterpolation_90_class8
 #define VerticalGridRepository                 VerticalGridRepository8
-#include "VerticalGrid_Body.cdk90"
+#include "VerticalGrid_Body_90.inc"
 #undef VerticalGridRepository
 #undef VerticalInterpolation_90_class
 #undef VerticalGrid_90_class

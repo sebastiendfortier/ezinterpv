@@ -71,7 +71,7 @@ test:	copyHlocal copyMODlocal TestVI.o removeMOD removeH
 	-abi $(ABI) $(OPTIMIZ) -libappl descrip -librmn $(LIBRMN)
 
 testlib: TestVI.o
-	s.compile -includes $(EC_INCLUDE_PATH) -libpath $(EC_LD_LIBRARY_PATH) -libappl ezinterpv descrip \
+	s.compile -includes $(EC_INCLUDE_PATH) -libpath $(EC_LD_LIBRARY_PATH) -libappl ezinterpv90 descrip \
 	-o TestVInterp_$(BASE_ARCH).Abs -obj TestVI.o -abi$(ABI) -librmn $(LIBRMN)
 
 copielocale:

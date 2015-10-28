@@ -1,6 +1,6 @@
 .SUFFIXES:
 
-.SUFFIXES : .o .ftn90 .cdk .cdk90 .c .a
+.SUFFIXES : .o .F90 .inc .c .a
 
 SHELL = /bin/sh
 
@@ -18,7 +18,7 @@ OPTIMIZ = 2
 #OPTIMIZ =  0
 #OPTIMIZ =  0 -debug
 
-MYLIB = libezinterpv.a
+MYLIB = libezinterpv90.a
 
 TEMPLIB = ./$(EC_ARCH)/lib_local.a
 
@@ -35,45 +35,45 @@ TARRLS = beta
 .cdk90.o:
 	s.compile -includes . -O $(OPTIMIZ) -optf "=$(FFLAGS)" $(SUPP_OPT) $(FTN90_SUPP_OPT) -src $<
 
-.cdk90.a        : 
+.inc.a        : 
 	s.compile -includes . -O $(OPTIMIZ) -optf "=$(FFLAGS)" $(SUPP_OPT) $(FTN90_SUPP_OPT) -src $<
 	ar rv $@ $*.o
 
-.ftn90.o:
+.F90.o:
 	s.compile -includes . -O $(OPTIMIZ) -defines "=$(DEFINE)" -optf "=$(FFLAGS)" $(SUPP_OPT) $(FTN90_SUPP_OPT) -src $<
 
-.ftn90.a        : 
+.F90.a        : 
 	s.compile -includes . -O $(OPTIMIZ) -defines "=$(DEFINE)" -optf "=$(FFLAGS)" $(SUPP_OPT) $(FTN90_SUPP_OPT) -src $<
 	ar rv $@ $*.o
 
 
 OBJECTS= \
-	VertInterpConstants.o VerticalGrid.o VerticalInterpolation.o 
+	VertInterpConstants_90.o VerticalGrid_90.o VerticalInterpolation_90.o 
 
 obj:	$(OBJECTS)
 
-VertInterpConstants.o: VertInterpConstants.cdk90
+VertInterpConstants_90.o: VertInterpConstants_90.F90
 
-VerticalGrid.o: VerticalGrid.ftn90 VerticalGrid_Body.cdk90 VertInterpConstants.o
+VerticalGrid_90.o: VertInterpConstants_90.o VerticalGrid_90.F90 VerticalGrid_Body_90.inc
 
-VerticalInterpolation.o: VerticalInterpolation.ftn90 VerticalInterpolation_Body.ftn90 \
-	VertInterpConstants.o VerticalGrid.o
+VerticalInterpolation_90.o: VertInterpConstants_90.o VerticalInterpolation_90.F90 \
+	VerticalInterpolation_Body_90.inc VerticalGrid_90.o
 
 
 genlib: $(OBJECTS)
 #Creer ou mettre a jour la programmatheque 
 	ar rcv $(MYLIB) $(OBJECTS)
 
-tarball:  *.ftn90 *.cdk90 *.h  Makefile
-	tar cfzv /data/armnraid1/www/ssm/sources/ez_interpv_$(TARRLS)_all.tgz *.ftn90 *.cdk90 *.h Makefile
+tarball:  *.F90 *.inc *.h  Makefile
+	tar cfzv /data/armnraid1/www/ssm/sources/ez_interpv_$(TARRLS)_all.tgz *.F90 *.inc *.h Makefile
 
 gen_ec_arch_dir:
 #Creer le repertoire $EC_ARCH 
 	mkdir -p ./$(EC_ARCH)
 
 locallib: gen_ec_arch_dir \
-        $(TEMPLIB)(VertInterpConstants.o)   $(TEMPLIB)(VerticalGrid.o) \
-        $(TEMPLIB)(VerticalInterpolation.o)
+        $(TEMPLIB)(VertInterpConstants_90.o)   $(TEMPLIB)(VerticalGrid_90.o) \
+        $(TEMPLIB)(VerticalInterpolation_90.o)
 
 updlib: 
 #mettre a jour la programmatheque 

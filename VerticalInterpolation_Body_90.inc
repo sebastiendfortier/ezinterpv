@@ -757,7 +757,7 @@ contains
         r_ExtArraysIn(:,:,6) = r_latitude_a
 
         r_ExtArraysOut(:,:,1:o_vGridDestn_p%N_numVLevels) = r_y_stateOut
-        r_ExtArraysOut(:,:,o_vGridDestn_p%N_numVLevels+1: \
+        r_ExtArraysOut(:,:,o_vGridDestn_p%N_numVLevels+1: &
                            2*o_vGridDestn_p%N_numVLevels   ) = r_y_derivOut
         call Extrap1D_SurfaceWind_X( &
                                 n_ni*n_nj, o_vGridSource_p%N_numVLevels, &
@@ -777,7 +777,7 @@ contains
                                )
 
         r_y_stateOut = r_ExtArraysOut(:,:,1:o_vGridDestn_p%N_numVLevels)
-        r_y_derivOut = r_ExtArraysOut(:,:,o_vGridDestn_p%N_numVLevels+1: \
+        r_y_derivOut = r_ExtArraysOut(:,:,o_vGridDestn_p%N_numVLevels+1: &
                                           2*o_vGridDestn_p%N_numVLevels)
       end if ! associated(m_Extrap1D_p, Extrap1D_Surface_X)
 

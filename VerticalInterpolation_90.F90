@@ -19,7 +19,7 @@
 !version that accepts real(single) arguments
 module VerticalInterpolation_90_class
 #define real48 single
-#include "VerticalInterpolation_Body.ftn90"
+#include "VerticalInterpolation_Body_90.inc"
 #undef real48
 end module VerticalInterpolation_90_class
 
@@ -39,7 +39,7 @@ module VerticalInterpolation_90_class8
 #define Extrap1D_Fixed_X                             Extrap1D_Fixed_X8
 #define Extrap1D_Surface_X                         Extrap1D_Surface_X8
 #define Extrap1D_SurfaceWind_X                 Extrap1D_SurfaceWind_X8
-#include "VerticalInterpolation_Body.ftn90"
+#include "VerticalInterpolation_Body_90.inc"
 #undef Interp1D_CubicLagrange_X
 #undef Interp1D_CubicWithDerivs_X
 #undef Interp1D_Linear_X
