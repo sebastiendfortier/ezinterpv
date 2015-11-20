@@ -106,8 +106,16 @@ contains
 
   if(o_gridA%N_numVLevels /= o_gridB%N_numVLevels) then
     M_NotEqualVerticalGrid = .true.
-  else if(.not. (o_gridA%O_vGridDesc_p == o_gridB%O_vGridDesc_p)) then
+  else if(     .not. associated(o_gridA%O_vGridDesc_p) &
+          .or. .not. associated(o_gridB%O_vGridDesc_p)) then
+    if(     associated(o_gridA%O_vGridDesc_p) &
+       .or. associated(o_gridB%O_vGridDesc_p)) then
+      ! One is associated and the other is not
       M_NotEqualVerticalGrid = .true.
+    ! else if both are not associated, then they are equal
+    end if
+  else if(.not. (o_gridA%O_vGridDesc_p == o_gridB%O_vGridDesc_p)) then
+    M_NotEqualVerticalGrid = .true.
   else
     do k=1, o_gridA%N_numVLevels
       if(o_gridA%N_ip1_p(k) /= o_gridB%N_ip1_p(k)) then
