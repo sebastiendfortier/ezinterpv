@@ -10,12 +10,12 @@ FFLAGS =
 
 CFLAGS =
 
-OPTIMIZ = -O 2
+OPTIMIZ = -O 2 -openmp
 #OPTIMIZ = -O 1
 #OPTIMIZ = -O 0
 #OPTIMIZ = -O 0 -debug
 
-LIBRMN = rmn_015.2
+LIBRMN = rmn_Alpha-016
 
 default: test
 
@@ -63,7 +63,7 @@ testWithInterpv: copyHlocal copyMODlocal TestVI.o removeMOD removeH
 	cp ../*.o .
 	cp ../../interpv/*.o .
 	s.compile -o TestVInterp_$(BASE_ARCH).Abs -obj $(INTERPV_OBJECTS) $(TEST_OBJECTS) \
-	-abi$(ABI) -libappl descrip -librmn $(LIBRMN)
+	-abi $(ABI) -libappl descrip -librmn $(LIBRMN)
 
 test:	copyHlocal copyMODlocal TestVI.o removeMOD removeH
 	cp ../*.o .
@@ -72,7 +72,7 @@ test:	copyHlocal copyMODlocal TestVI.o removeMOD removeH
 
 testlib: TestVI.o
 	s.compile -includes $(EC_INCLUDE_PATH) -libpath $(EC_LD_LIBRARY_PATH) -libappl ezinterpv90 descrip \
-	-o TestVInterp_$(BASE_ARCH).Abs -obj TestVI.o -abi$(ABI) -librmn $(LIBRMN)
+	-o TestVInterp_$(BASE_ARCH).Abs -obj TestVI.o -abi$(ABI) $(OPTIMIZ) -librmn $(LIBRMN)
 
 copielocale:
 	cp ../*.o . 
