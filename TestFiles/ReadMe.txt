@@ -15,3 +15,8 @@ Before building:
 - make the ezinterpv library available, if you are testing the library:
     . ssmuse-sh -d /fs/ssm/eccc/mrd/rpn/ezinterpv/16.0-alpha
 
+ALTOGETHER on Einstein (ubuntu-14 on EC network):
+    . s.ssmuse.dot /ssm/net/hpcs/201402/02/base /ssm/net/hpcs/exp/intel2016/01
+    . s.ssmuse.dot SI/ezinterpv_16.0-beta-2
+    . ssmuse-sh -d /ssm/net/rpn/libs/16.0-beta-2
+    make testlib
