@@ -37,7 +37,7 @@ default: test
 #	s.compile -abi $(ABI) $(OPTIMIZ) -opt "=$(FFLAGS)" -src $<
 
 TEST_OBJECTS=\
-	VertInterpConstants.o  VerticalGrid.o  VerticalInterpolation.o TestVI.o
+	VertInterpConstants_90.o  VerticalGrid_90.o  VerticalInterpolation_90.o TestVI.o
 
 INTERPV_OBJECTS=\
 	Interp1D_Constants.o Extrap1D_LapseRate.o Extrap1D_Fixed.o Extrap1D_Surface.o \
@@ -45,7 +45,7 @@ INTERPV_OBJECTS=\
 	Interp1D_FindPos.o Interp1D_Linear.o Interp1D_NearestNeighbour.o Extrap1D_Abort.o
 
 SPEED_OBJECTS=\
-	VertInterpConstants.o  VerticalGrid.o  VerticalInterpolation.o SpeedConvertP.o
+	VertInterpConstants_90.o  VerticalGrid_90.o  VerticalInterpolation_90.o SpeedConvertP.o
 
 copyHlocal:
 	cp ../*.h .
@@ -67,8 +67,8 @@ testWithInterpv: copyHlocal copyMODlocal TestVI.o removeMOD removeH
 
 test:	copyHlocal copyMODlocal TestVI.o removeMOD removeH
 	cp ../*.o .
-	s.compile -o TestVInterp_$(BASE_ARCH).Abs -obj $(TEST_OBJECTS) \
-	-abi $(ABI) $(OPTIMIZ) -libappl descrip -librmn $(LIBRMN)
+	s.compile -includes $(EC_INCLUDE_PATH) -libpath $(EC_LD_LIBRARY_PATH) -o TestVInterp_$(BASE_ARCH).Abs \
+	-obj $(TEST_OBJECTS) -abi $(ABI) $(OPTIMIZ) -libappl descrip -librmn $(LIBRMN)
 
 testlib: TestVI.o
 	s.compile -includes $(EC_INCLUDE_PATH) -libpath $(EC_LD_LIBRARY_PATH) -libappl ezinterpv90 descrip \
