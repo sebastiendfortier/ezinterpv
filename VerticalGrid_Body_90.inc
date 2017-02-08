@@ -347,6 +347,8 @@ contains
 
     ! ... IP1 VALUES FROM VGRID, GIVEN 'VIPT' / 'VIPM'
     ! Obtain a list of all (and then some) levels from vgrid
+    ! (N.B.:  Although it is not documented, vgrid passes ownership of memory
+    ! (       pointed by n_ip1_p to the caller)
     n_error=vgd_get(this%O_vGridDesc_p, s_ip1Type, n_ip1_p)
     if(n_error /= VGD_OK)then
       write(6, *) 'Error from vgd_get in N_Viqkdef: error=', n_error
@@ -399,6 +401,10 @@ contains
     this%N_ip1_p = n_ip1_p(:n_numVLevels)
 
     this%N_numVLevels = n_numVLevels
+
+    ! Release memory allocated by vgrid descriptor
+    deallocate(n_ip1_p)
+    nullify(n_ip1_p)
 
   end function N_Viqkdef_ip1Type
 
