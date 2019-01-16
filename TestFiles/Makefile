@@ -15,7 +15,7 @@ OPTIMIZ = -O 2 -openmp
 #OPTIMIZ = -O 0
 #OPTIMIZ = -O 0 -debug
 
-LIBRMN = rmn_016-beta
+LIBRMN = rmn
 
 default: test
 
