@@ -439,7 +439,7 @@ contains
                                         ! ADJUSTED indices to the levels of
                                         ! r_lnPSource_a which are just below the
                                         ! levels of r_lnPDestn_a
-    integer,dimension(n_ni, n_nj,o_vGridDestn_p%N_numVLevels) :: n_interpIndexTmp
+    integer,dimension(:, :, :), allocatable :: n_interpIndexTmp
 
     integer :: n_indexSurface           ! index at the Earth's surface
     integer :: n_indexSurface_plus1     ! index at layer above the surface
@@ -453,8 +453,7 @@ contains
 
     integer :: n_numExtArraysIn, n_numExtArraysOut
     real(real48), dimension(n_ni, n_nj, 6)  :: r_ExtArraysIn
-    real(real48), dimension(n_ni, n_nj, 2*o_vGridDestn_p%N_numVLevels) :: &
-                                               r_ExtArraysOut
+    real(real48), dimension(:, :, :), allocatable :: r_ExtArraysOut
 
     real, dimension(2), target :: r_levels_sample
     real, dimension(:), pointer :: r_levels_sample_p
@@ -491,6 +490,29 @@ contains
       N_Visint=N_VI_VIERR_GRIDS_NOT_SELECTED
       return
     end if
+
+
+    !
+    ! Allocate arrays
+    !
+    allocate(n_interpIndexTmp(n_ni, n_nj,o_vGridDestn_p%N_numVLevels), &
+             STAT=n_error)
+    if( n_error /= 0) then
+      N_Visint = N_VI_VIERR_FAILED_ALLOCATION
+      write(6,*) 'failed allocating n_interpIndexTmp in N_Visint: error=',n_error
+      call flush(6)
+      return
+    endif
+
+    allocate(r_ExtArraysOut(n_ni, n_nj, 2*o_vGridDestn_p%N_numVLevels), &
+             STAT=n_error)
+    if( n_error /= 0) then
+      N_Visint = N_VI_VIERR_FAILED_ALLOCATION
+      write(6,*) 'failed allocating r_ExtArraysOut in N_Visint: error=',n_error
+      call flush(6)
+      return
+    endif
+
 
     ! ensure that r_extrapGuideDown and r_extrapGuideUp are defined
     if( present(r_extrapGuideDown) ) then
@@ -842,7 +864,19 @@ contains
                         m_slFluxGradient, 0, 0, &
                         r_ExtArraysIn, r_ExtArraysOut &
                        )
-    end if 
+    end if
+
+    if( allocated(n_interpIndexTmp) ) then
+      deallocate(n_interpIndexTmp, STAT=n_error)
+      if( n_error /= 0 ) write(6,*) 'ERROR deallocating n_interpIndexTmp in ',&
+                                    'N_Visint:  error=', n_error
+    endif
+
+    if( allocated(r_ExtArraysOut) ) then
+      deallocate(r_ExtArraysOut, STAT=n_error)
+      if( n_error /= 0 ) write(6,*) 'ERROR deallocating r_ExtArraysOut in ',&
+                                    'N_Visint:  error=', n_error
+    endif
 
 
 
