@@ -44,6 +44,10 @@ program Example_Vertical_Interpolation
 
   o_gridInit_p   => o_gridInit
   o_gridTarget_p => o_gridTarget
+  o_gridInit_p%N_ip1_p         => null()
+  o_gridInit_p%O_vGridDesc_p   => null()
+  o_gridTarget_p%N_ip1_p       => null()
+  o_gridTarget_p%O_vGridDesc_p => null()
 
   o_vGridDescInit_p   => o_vGridDescInit
   o_vGridDescTarget_p => o_vGridDescTarget

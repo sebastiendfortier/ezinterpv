@@ -1743,6 +1743,10 @@ subroutine m_testOneCombo_5005(s_title, s_interpType, s_extrapType, &
 
   o_gridInit_p   => o_gridInit
   o_gridTarget_p => o_gridTarget
+  o_gridInit_p%N_ip1_p         => null()
+  o_gridInit_p%O_vGridDesc_p   => null()
+  o_gridTarget_p%N_ip1_p       => null()
+  o_gridTarget_p%O_vGridDesc_p => null()
 
   n_ni = ubound(r_stateAnswer,1)
   n_nj = ubound(r_stateAnswer,2)
@@ -2067,6 +2071,10 @@ subroutine m_testOneCombo_2GridTypes &
 
   o_gridInit_p   => o_gridInit
   o_gridTarget_p => o_gridTarget
+  o_gridInit_p%N_ip1_p         => null()
+  o_gridInit_p%O_vGridDesc_p   => null()
+  o_gridTarget_p%N_ip1_p       => null()
+  o_gridTarget_p%O_vGridDesc_p => null()
 
   write(6,*)
   write(6,*) s_title
@@ -2358,6 +2366,10 @@ subroutine m_testOneCombo_ip1Type(s_title, s_interpType, s_extrapType, &
 
   o_gridInit_p   => o_gridInit
   o_gridTarget_p => o_gridTarget
+  o_gridInit_p%N_ip1_p         => null()
+  o_gridInit_p%O_vGridDesc_p   => null()
+  o_gridTarget_p%N_ip1_p       => null()
+  o_gridTarget_p%O_vGridDesc_p => null()
 
   n_ni = ubound(r_stateAnswer,1)
   n_nj = ubound(r_stateAnswer,2)

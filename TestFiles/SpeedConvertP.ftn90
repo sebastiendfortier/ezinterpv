@@ -29,6 +29,8 @@ program SpeedConvertP
 
   ! Define a vertical grid
   gridSource_p => gridSource
+  gridSource_p%N_ip1_p         => null()
+  gridSource_p%O_vGridDesc_p   => null()
   call ViqkDef(gridSource_p, 50, N_GRID_TYPE_PRESSURE, vLevelSource, &
                pTopSrc, pRefSrc, rCoefSrc)
 
