@@ -63,15 +63,15 @@ testWithInterpv: copyHlocal copyMODlocal TestVI.o removeMOD removeH
 	cp ../*.o .
 	cp ../../interpv/*.o .
 	s.compile -o TestVInterp_$(BASE_ARCH).Abs -obj $(INTERPV_OBJECTS) $(TEST_OBJECTS) \
-	-abi $(ABI) -libappl descrip -librmn $(LIBRMN)
+	-abi $(ABI) -libappl vgrid -librmn $(LIBRMN)
 
 test:	copyHlocal copyMODlocal TestVI.o removeMOD removeH
 	cp ../*.o .
 	s.compile -includes $(EC_INCLUDE_PATH) -libpath $(EC_LD_LIBRARY_PATH) -o TestVInterp_$(BASE_ARCH).Abs \
-	-obj $(TEST_OBJECTS) -abi $(ABI) $(OPTIMIZ) -libappl descrip -librmn $(LIBRMN)
+	-obj $(TEST_OBJECTS) -abi $(ABI) $(OPTIMIZ) -libappl vgrid shared -librmn $(LIBRMN)
 
 testlib: TestVI.o
-	s.compile -includes $(EC_INCLUDE_PATH) -libpath $(EC_LD_LIBRARY_PATH) -libappl ezinterpv90 descrip \
+	s.compile -includes $(EC_INCLUDE_PATH) -libpath $(EC_LD_LIBRARY_PATH) -libappl ezinterpv90 vgrid \
 	-o TestVInterp_$(BASE_ARCH).Abs -obj TestVI.o -abi$(ABI) $(OPTIMIZ) -librmn $(LIBRMN)
 
 copielocale:
