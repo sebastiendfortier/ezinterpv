@@ -19,22 +19,7 @@ LIBRMN = rmn
 
 default: test
 
-.ftn90.o:
-	s.compile -abi $(ABI) $(OPTIMIZ) -opt "=$(FFLAGS)" \
-	-src $<
-
-.cdk90.o:
-	s.compile -abi $(ABI) $(OPTIMIZ) -opt "=$(FFLAGS)" \
-	-src $<
-
-.ftn.o:
-	s.compile -abi $(ABI) $(OPTIMIZ) -opt "=$(FFLAGS)" -src $<
-
-.c.o:
-	s.compile -abi $(ABI) $(OPTIMIZ) -opt "=$(CFLAGS)" -src $<
-
-#.f.o:
-#	s.compile -abi $(ABI) $(OPTIMIZ) -opt "=$(FFLAGS)" -src $<
+include $(RPN_TEMPLATE_LIBS)/include/makefile_suffix_rules.inc
 
 TEST_OBJECTS=\
 	VertInterpConstants_90.o  VerticalGrid_90.o  VerticalInterpolation_90.o TestVI.o
@@ -68,7 +53,7 @@ testWithInterpv: copyHlocal copyMODlocal TestVI.o removeMOD removeH
 test:	copyHlocal copyMODlocal TestVI.o removeMOD removeH
 	cp ../*.o .
 	s.compile -includes $(EC_INCLUDE_PATH) -libpath $(EC_LD_LIBRARY_PATH) -o TestVInterp_$(BASE_ARCH).Abs \
-	-obj $(TEST_OBJECTS) -abi $(ABI) $(OPTIMIZ) -libappl vgrid shared -librmn $(LIBRMN)
+	-obj $(TEST_OBJECTS) -abi $(ABI) $(OPTIMIZ) -libappl vgrid -librmn $(LIBRMN)
 
 testlib: TestVI.o
 	s.compile -includes $(EC_INCLUDE_PATH) -libpath $(EC_LD_LIBRARY_PATH) -libappl ezinterpv90 vgrid \

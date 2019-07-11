@@ -6,8 +6,7 @@ SHELL = /bin/sh
 
 COMPILE = compile
 
-!!!FFLAGS =
-FFLAGS="'-C '"
+FFLAGS =
 
 CFLAGS =
 
@@ -22,30 +21,13 @@ MYLIB = libezinterpv90.a
 
 TEMPLIB = ./$(EC_ARCH)/lib_local.a
 
+include $(RPN_TEMPLATE_LIBS)/include/makefile_suffix_rules.inc
+
 UPDATEX =
 
 TARRLS = beta
 
 .PRECIOUS:
-
-# It is assumed that the environment makes available makefile_suffix_rules.inc; e.g.
-#     . ssmuse-sh -p /ssm/net/rpn/libs/4.1b/environment-includes_4.3_all
-
-# Over-ride the default compile rules so as to pick up the *.h in the current directory
-.cdk90.o:
-	s.compile -includes . -O $(OPTIMIZ) -optf "=$(FFLAGS)" $(SUPP_OPT) $(FTN90_SUPP_OPT) -src $<
-
-.inc.a        : 
-	s.compile -includes . -O $(OPTIMIZ) -optf "=$(FFLAGS)" $(SUPP_OPT) $(FTN90_SUPP_OPT) -src $<
-	ar rv $@ $*.o
-
-.F90.o:
-	s.compile -includes . -O $(OPTIMIZ) -defines "=$(DEFINE)" -optf "=$(FFLAGS)" $(SUPP_OPT) $(FTN90_SUPP_OPT) -src $<
-
-.F90.a        : 
-	s.compile -includes . -O $(OPTIMIZ) -defines "=$(DEFINE)" -optf "=$(FFLAGS)" $(SUPP_OPT) $(FTN90_SUPP_OPT) -src $<
-	ar rv $@ $*.o
-
 
 OBJECTS= \
 	VertInterpConstants_90.o VerticalGrid_90.o VerticalInterpolation_90.o 
