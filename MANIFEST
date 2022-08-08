@@ -1,0 +1,14 @@
+NAME       : ezinterpv
+VERSION    : 20.0.0
+BUILD      : Release
+DESCRIPTION: ECCC-MRD Vertical interpolation routines 
+SUMMARY    : 
+MAINTAINER : Chantal Pic - Chantal.Pic@ec.gc.ca
+URL        : https://gitlab.science.gc.ca/RPN-SI/ezinterpv
+
+# Dependencies 
+#    =,<,<=,>,>= : Version rules
+#    ~           : Optional
+
+rmn  ~>= 20.0.0
+vgrid >= 6.7.0
