@@ -17,13 +17,12 @@ message(STATUS "CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}")
 
 set(CMAKE_SKIP_RPATH TRUE)
 set(CMAKE_VERBOSE_MAKEFILE TRUE)
-set(CMAKE_C_STANDARD 99)
-set(CMAKE_C_EXTENSIONS OFF)
+set(CMAKE_Fortran_PREPROCESS ON)
 
 ec_build_info()            # Generate build information
 
-#include(CTest)
-#add_custom_target(check COMMAND CTEST_OUTPUT_ON_FAILURE=TRUE ${CMAKE_CTEST_COMMAND})
+include(CTest)
+add_custom_target(check COMMAND CTEST_OUTPUT_ON_FAILURE=TRUE ${CMAKE_CTEST_COMMAND})
 
 if (NOT rmn_FOUND)
    find_package(rmn ${rmn_REQ_VERSION} REQUIRED)
@@ -33,6 +32,7 @@ if (NOT vgrid_FOUND)
 endif()
 
 add_subdirectory(src)
+add_subdirectory(test)
 
 #----- Packaging
 ec_install_prefix(${NAME} ${PROJECT_VERSION} PACKAGE_PREFIX)   # Define package prefix  
