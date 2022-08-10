@@ -17,7 +17,7 @@ set_target_properties(ezinterpv90 PROPERTIES
    PUBLIC_HEADER "${PROJECT_INCLUDE_FILES}"
    POSITION_INDEPENDENT_CODE ON
    OUTPUT_NAME ezinterpv90)
-target_link_libraries(ezinterpv90 rmn vgrid)
+target_link_libraries(ezinterpv90 vgrid rmn)
    
 install(TARGETS ezinterpv90 
    PUBLIC_HEADER DESTINATION include

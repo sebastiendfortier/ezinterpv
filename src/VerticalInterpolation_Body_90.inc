@@ -133,7 +133,7 @@ contains
 !
 !!
 
-    external Interp1D_FindPos, flush
+    external Interp1D_FindPos
     integer n_error                     ! receive error from called routines
 
     logical, parameter :: l_SUPPRESS_MESSAGE = .true.
@@ -407,7 +407,6 @@ contains
 !!
     external Extrap1D_Surface_X,  Extrap1D_SurfaceWind_X
     external Interp1D_CubicLagrange_X, Interp1D_CubicWithDerivs_X
-    external flush
 
     ! local copies of the parameters.  These ones are guaranteed to exist.  They
     ! are used in cases where only dummies are required, and for local

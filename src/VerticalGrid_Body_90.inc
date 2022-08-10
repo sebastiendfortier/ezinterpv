@@ -149,7 +149,6 @@ contains
 !NOTES
 !
 !!
-    external flush
     integer :: n_error
 
     o_gridOut%N_numVLevels = o_gridIn%N_numVLevels
@@ -209,7 +208,6 @@ contains
 !NOTES
 !
 !!
-    external flush
     integer :: n_error
 
     N_ConstructNull = 0                 ! no error yet
@@ -269,7 +267,6 @@ contains
     integer, dimension(:), intent(in) :: n_ip1
 !
 !!
-    external flush
     integer :: n_error, n_kind, n_version, n_numVLevels
 
     N_Viqkdef_ip1List = 0               ! no error yet
@@ -327,7 +324,6 @@ contains
     character(len=4), intent(in) :: s_ip1Type ! VIPM or VIPT
 !
 !!
-    external flush
     integer :: n_error, n_kind, n_version, n_numVLevels
     integer, pointer, dimension(:) :: n_ip1_p
 
@@ -449,7 +445,6 @@ contains
     logical, intent(in), optional :: l_in_log
 !
 !!
-    external flush
     integer :: n_error
 
     real(real48), dimension(:,:,:), pointer :: r_P_p
@@ -551,7 +546,6 @@ contains
     type(T_VerticalGrid), pointer, intent(inout) :: this
 !
 !!
-    external flush
     integer :: n_error
 
 

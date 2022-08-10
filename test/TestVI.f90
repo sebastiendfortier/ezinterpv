@@ -2623,7 +2623,7 @@ subroutine m_slFluxGradientStub(ft,dtdz,ttop,tsurf,ztop,z0t,ilmo,h,n)
 
 !***************************************************************
 !     AUTOMATIC ARRAYS
-      AUTOMATIC ( FH , REAL(test48) , (N) )
+      REAL(test48) FH(N)
 !***************************************************************
       REAL AS,ASX,CI,BS,BETA,FACTN,HMIN,ANGMAX
 !
@@ -2743,7 +2743,7 @@ subroutine m_slStateValueStub(fh_48,z_48,z0t_48,ilmo_48,h_48,n)
 
 !********************************************************************
 !     AUTOMATIC ARRAYS
-      AUTOMATIC ( LZZ0T , REAL , (N) )
+      REAL LZZ0T(N)
 !********************************************************************
 
 !#include "surfcon_ini.cdk":
