@@ -1,4 +1,4 @@
-NAME       : ez_interpv
+NAME       : ezinterpv
 VERSION    : 20.0.0
 BUILD      : Release
 DESCRIPTION: ECCC-MRD Vertical interpolation routines 
