@@ -15,7 +15,6 @@ include(ec_compiler_presets)
 
 message(STATUS "CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}")
 
-set(CMAKE_SKIP_RPATH TRUE)
 set(CMAKE_VERBOSE_MAKEFILE TRUE)
 set(CMAKE_Fortran_PREPROCESS ON)
 

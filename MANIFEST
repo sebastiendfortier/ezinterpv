@@ -1,6 +1,7 @@
 NAME       : ezinterpv
-VERSION    : 20.0.0
-BUILD      : Release
+VERSION    : 
+BUILD      : 
+STATE      :
 DESCRIPTION: ECCC-MRD Vertical interpolation routines 
 SUMMARY    : 
 MAINTAINER : Chantal Pic - Chantal.Pic@ec.gc.ca
