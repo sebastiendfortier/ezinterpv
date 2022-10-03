@@ -28,9 +28,7 @@
 #ifndef INCLUDED_EZVRINT
 #define INCLUDED_EZVRINT
 
-#ifndef _RPN_MACROS_
-#  include <rmn/rpnmacros.h>
-#endif
+#include <rmn/rpnmacros.h>
 
 #define LVL_MASL    0
 #define LVL_SIGMA   1  /* P/Ps */
