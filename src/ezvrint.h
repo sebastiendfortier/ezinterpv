@@ -6,7 +6,7 @@
  *
  * Projet    : ezvrint
  * Creation  : version 1.0 mai 2003
- * Auteur    : Stéphane Gaudreault
+ * Auteur    : Stï¿½phane Gaudreault
  *
  * Description: ezvrint is the C version of EzInterpv, a front end to the
  * Interp1D package created by Jeffrey Blezius. This interface has been
@@ -29,7 +29,7 @@
 #define INCLUDED_EZVRINT
 
 #ifndef _RPN_MACROS_
-#  include <rpnmacros.h>
+#  include <rmn/rpnmacros.h>
 #endif
 
 #define LVL_MASL    0

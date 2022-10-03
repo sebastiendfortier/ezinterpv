@@ -2,7 +2,7 @@
 cmake_minimum_required(VERSION 3.20)
 
 #----- Append EC specific module path
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake_rpn)
+list(APPEND CMAKE_MODULE_PATH $ENV{EC_CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake_rpn/modules)
 
 include(ec_init)           # Initialise compilers and ec specific functions
 ec_git_version()           # Get version from git state
@@ -12,8 +12,6 @@ project(${NAME} DESCRIPTION "${DESCRIPTION}" LANGUAGES C Fortran)
 set(PROJECT_VERSION ${VERSION}${STATE} CACHE STRING "Define the version of ezinterpv that will be baked into the various artifacts of this build" FORCE)
 
 include(ec_compiler_presets)
-
-message(STATUS "CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}")
 
 set(CMAKE_VERBOSE_MAKEFILE TRUE)
 set(CMAKE_Fortran_PREPROCESS ON)
