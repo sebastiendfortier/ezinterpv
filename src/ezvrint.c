@@ -6,7 +6,7 @@
  *
  * Projet    : ezvrint
  * Creation  : version 1.0 mai 2003
- * Auteur    : Stéphane Gaudreault
+ * Auteur    : Stï¿½phane Gaudreault
  *
  * Description: ezvrint is the C version of EzInterpv, a front end to the
  * Interp1D package created by Jeffrey Blezius. This interface has been
@@ -36,6 +36,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <App.h>
 #include "ezvrint.h"
 
 #define GRIDLENGTH 10
@@ -167,7 +168,7 @@ int c_viqkdef (const int numLevel, const int gridType, float *levelList,
             gGridArray[i].top      = top;
             gGridArray[i].pRef     = pRef;
             gGridArray[i].rCoef    = rCoef;
-            printf ("c_viqkdef: Grid already defined (%i)\n", i);
+            Lib_Log(APP_LIBINTERPV,APP_INFO,"%s: Grid already defined (%i)\n",__func__,i);
             return i;
          }
       }
@@ -175,7 +176,7 @@ int c_viqkdef (const int numLevel, const int gridType, float *levelList,
 
    index = (index + 1) % GRIDLENGTH;
 
-   if (gViOption & VERBOSE) printf ("c_viqkdef: New grid (%i)\n", index);
+   Lib_Log(APP_LIBINTERPV,APP_INFO,"%s: New grid (%i)\n",__func__,index);
    if (gGridArray[index].level_p != NULL) {
       free (gGridArray[index].level_p);
       gGridArray[index].level_p = NULL;
@@ -183,7 +184,7 @@ int c_viqkdef (const int numLevel, const int gridType, float *levelList,
 
    gGridArray[index].level_p = (float *) malloc (numLevel * sizeof (float));
    if (!gGridArray[index].level_p) {
-      fprintf (stderr, "c_viqkdef: malloc failed for gGridArray[%d].level_p\n", index);
+      Lib_Log(APP_LIBINTERPV,APP_ERROR,"%s: malloc failed for gGridArray[%d].level_p\n",__func__,index);
       return -1;
    }
    memcpy (gGridArray[index].level_p, levelList, numLevel * sizeof (float));
@@ -197,7 +198,7 @@ int c_viqkdef (const int numLevel, const int gridType, float *levelList,
 
    if (gridType == LVL_GALCHEN) {
       if (top == 0) {
-         fprintf (stderr, "c_viqkdef: Height at the top of the atmosphere is needed for Gal-Chen interpolation\n");
+         Lib_Log(APP_LIBINTERPV,APP_ERROR,"%s: Height at the top of the atmosphere is needed for Gal-Chen interpolatio\n",__func__);
          return -1;
       }
    } else if (gridType != LVL_HYBRID) {
@@ -247,23 +248,23 @@ int c_videfset (const int ni, const int nj, int idGrdDest, int idGrdSrc,
 #endif
 
    if (gGrdSrc_p == &gGridArray[idGrdSrc] && gGrdDest_p == &gGridArray[idGrdDest]) {
-      printf ("c_videfset: Grids are the same\n");
+      Lib_Log(APP_LIBINTERPV,APP_DEBUG,"%s: Grids are the same\n",__func__);
       if (surf) {
          if (memcmp (gGridSurf_p, surf, ni * nj * sizeof (float)) == 0) {
-            printf ("c_videfset: Surface pressure are the same hence, same gridset\n");
+            Lib_Log(APP_LIBINTERPV,APP_INFO,"%s: Surface pressure are the same hence, same gridset\n",__func__);
             gGridSurf_p = surf;
             return 0;
          }
       } else {
-         printf ("c_videfset: Same gridset\n");
+         Lib_Log(APP_LIBINTERPV,APP_DEBUG,"%s: Same gridset\n",__func__);
          return 0;
       }
    }
 
-   if (gViOption & VERBOSE) printf ("c_videfset: New gridset\n");
+   Lib_Log(APP_LIBINTERPV,APP_INFO,"%s: New gridset\n",__func__);
 
    if (idGrdDest < 0 || idGrdDest > GRIDLENGTH || idGrdSrc < 0 || idGrdSrc > GRIDLENGTH) {
-      fprintf (stderr, "c_videfset: Invalid grid ID passed to c_videfset\n");
+      Lib_Log(APP_LIBINTERPV,APP_ERROR,"%s: Invalid grid ID passed to c_videfset\n",__func__);
       return -1;
    }
 
@@ -272,7 +273,7 @@ int c_videfset (const int ni, const int nj, int idGrdDest, int idGrdSrc,
    gGridSurf_p = surf;
 
    if (memcmp (gGrdSrc_p->level_p, gGrdDest_p->level_p, gGrdSrc_p->numLevels * sizeof (float)) == 0) {
-      printf ("c_videfset: Levels are the same\n");
+      Lib_Log(APP_LIBINTERPV,APP_DEBUG,"%s: Levels are the same\n",__func__);
       return 0;
    }
 
@@ -294,12 +295,12 @@ int c_videfset (const int ni, const int nj, int idGrdDest, int idGrdSrc,
     */
    gCubeSrc_p = (float *) malloc (ni * nj * gGrdSrc_p->numLevels * sizeof (float));
    if (!gCubeSrc_p) {
-      fprintf (stderr, "c_videfset: malloc failed for gCubeSrc_p\n");
+      Lib_Log(APP_LIBINTERPV,APP_ERROR,"%s: malloc failed for gCubeSrc_p\n",__func__);
       return -1;
    }
    gCubeDest_p = (float *) malloc (ni * nj * gGrdDest_p->numLevels * sizeof (float));
    if (!gCubeSrc_p) {
-      fprintf (stderr, "c_videfset: malloc failed for gCubeDest_p\n");
+      Lib_Log(APP_LIBINTERPV,APP_ERROR,"%s: malloc failed for gCubeDest_p\n",__func__);
       return -1;
    }
 
@@ -308,7 +309,7 @@ int c_videfset (const int ni, const int nj, int idGrdDest, int idGrdSrc,
     */
 
    if (!gGrdSrc_p || !gGrdDest_p) {
-      fprintf (stderr, "Grid does not exists");
+      Lib_Log(APP_LIBINTERPV,APP_ERROR,"%s: Grid does not exist\n",__func__);
       return -1;
    }
 
@@ -343,39 +344,39 @@ int c_videfset (const int ni, const int nj, int idGrdDest, int idGrdSrc,
    /* Check for exception in the conversion (plateforme specific) */
 #if defined(__GNUC__)  || defined(SGI)
       if (fetestexcept(FE_DIVBYZERO)) {
-         fprintf (stderr, "WARNING : c_videfset: Grid conversion gives an infinity (DIVBYZERO)\n");
+         Lib_Log(APP_LIBINTERPV,APP_WARNING,"%s: Grid conversion gives an infinity (DIVBYZERO)\n",__func__);
       }
       if (fetestexcept(FE_OVERFLOW)) {
-         fprintf (stderr, "WARNING : c_videfset: Grid conversion gives an overflow\n");
+         Lib_Log(APP_LIBINTERPV,APP_WARNING,"%s: Grid conversion gives an overflow\n",__func__);
       }
       if (fetestexcept(FE_UNDERFLOW)) {
-         fprintf (stderr, "WARNING : c_videfset: Grid conversion gives an underflow\n");
+         Lib_Log(APP_LIBINTERPV,APP_WARNING,"%s: Grid conversion gives an underflow\n",__func__);
       }
       if (fetestexcept(FE_INVALID)) {
-         fprintf (stderr, "WARNING : c_videfset: Grid conversion gives a NaN (not a number)\n");
+         Lib_Log(APP_LIBINTERPV,APP_WARNING,"%s: Grid conversion gives a NaN (not a number)\n",__func__);
       }
 #elif defined(_AIX)
       flag = fp_read_flag();
       if (flag & FP_INVALID) {
-         fprintf (stderr, "WARNING : c_videfset: Grid conversion gives a NaN (not a number)\n");
+         Lib_Log(APP_LIBINTERPV,APP_WARNING,"%s: Grid conversion gives a NaN (not a number)\n",__func__);
       }
       if (flag & FP_OVERFLOW) {
-         fprintf (stderr, "WARNING : c_videfset: Grid conversion gives an overflow\n");
+         Lib_Log(APP_LIBINTERPV,APP_WARNING,"%s: Grid conversion gives an overflow\n",__func__);
       }
       if (flag & FP_UNDERFLOW) {
-         fprintf (stderr, "WARNING : c_videfset: Grid conversion gives an underflow\n");
+         Lib_Log(APP_LIBINTERPV,APP_WARNING,"%s: Grid conversion gives an underflow\n",__func__);
       }
       if (flag & FP_DIV_BY_ZERO) {
-         fprintf (stderr, "WARNING : c_videfset: Grid conversion gives an infinity (DIV_BY_ZERO)\n");
+         Lib_Log(APP_LIBINTERPV,APP_WARNING,"%s: Grid conversion gives an infinity (DIV_BY_ZERO)\n",__func__);
       }
 #else
-      fprintf(stderr,"Exception check is not availlable on this architecture");
+      Lib_Log(APP_LIBINTERPV,APP_INFO,"%s: Exception check is not availlable on this architecture\n",__func__);
 #endif
    }
 
    gInterpIndex_p = (int *) malloc(ni * nj * gGrdDest_p->numLevels * sizeof (int));
    if (!gInterpIndex_p) {
-      fprintf (stderr, "c_videfset: malloc failed for gInterpIndex_p\n");
+      Lib_Log(APP_LIBINTERPV,APP_ERROR,"%s: malloc failed for gInterpIndex_p\n",__func__);
       return -1;
    }
 
@@ -524,7 +525,7 @@ int c_visint (float *stateOut, float *stateIn, float *derivOut, float *derivIn,
 
    if (memcmp (gGrdSrc_p->level_p, gGrdDest_p->level_p, gGrdSrc_p->numLevels * sizeof (float)) == 0) {
       memcpy (stateOut, stateIn, surf * gGrdSrc_p->numLevels);
-      printf ("c_videfset: Grids are the same\n");
+      Lib_Log(APP_LIBINTERPV,APP_INFO,"%s: Grids are the same\n",__func__);
       return 0;
    }
 
@@ -552,8 +553,7 @@ int c_visint (float *stateOut, float *stateIn, float *derivOut, float *derivIn,
 
    } else if (gViOption & CUBIC_WITH_DERIV) {
       if ((derivIn == NULL) && (derivOut == NULL)) {
-         fprintf (stderr,
-                  "Error : Cubic interpolation with derivatives requested\n");
+         Lib_Log(APP_LIBINTERPV,APP_ERROR,"%s: Cubic interpolation with derivatives requested\n",__func__);
          return -1;
       }
 
@@ -574,11 +574,11 @@ int c_visint (float *stateOut, float *stateIn, float *derivOut, float *derivIn,
                                       &extrapEnable, &extrapGuideDown,
                                       &extrapGuideUp);
    } else {
-      fprintf (stderr, "Error : Unknown interpolation algorithm\n");
+      Lib_Log(APP_LIBINTERPV,APP_ERROR,"%s: Unknown interpolation algorithm\n",__func__);
       return -1;
    }
 
-   if (gViOption & VERBOSE) printf ("c_visint: Interpolation completed\n");
+   Lib_Log(APP_LIBINTERPV,APP_DEBUG,"%s: Interpolation completed\n",__func__);
 
    /* Extrapolation */
    if (gViOption & CLAMPED) {
@@ -598,7 +598,7 @@ int c_visint (float *stateOut, float *stateIn, float *derivOut, float *derivIn,
                                   derivOut, &extrapEnable, &extrapEnable,
                                   &extrapGuideDown, &extrapGuideUp);
 
-      if (gViOption & VERBOSE) printf ("c_visint: Lapserate extrapolation completed\n");
+      Lib_Log(APP_LIBINTERPV,APP_DEBUG,"%s: Lapserate extrapolation completed\n",__func__);
    }
 
    return 0;
@@ -608,7 +608,7 @@ int c_visint (float *stateOut, float *stateIn, float *derivOut, float *derivIn,
  * Nom      : <vicleanGrid>
  * Creation : mai 2003 - S. Gaudreault - CMC/CMOE
  *
- * But      : Libere la mémoire associées aux grilles
+ * But      : Libere la mï¿½moire associï¿½es aux grilles
  *
  * Parametres     :
  *  <void>
@@ -739,7 +739,7 @@ void vigetMASL (VerticalGrid * grd_p, float *height, int ni, int nj) {
          break;
 
       default:
-         fprintf (stderr, "vigetMASL: invalid type entry");
+         Lib_Log(APP_LIBINTERPV,APP_ERROR,"%s: invalid type entry\n",__func__);
          return;
    }
 }
@@ -792,7 +792,7 @@ int vigetLnP (VerticalGrid * grd_p, float *lnP, int ni, int nj, float *pSurf,
    surf = ni * nj;
 
    if (!pSurf && grd_p->gridType != LVL_PRES) {
-      fprintf (stderr, "c_videfset: Surface pressure is required\n");
+      Lib_Log(APP_LIBINTERPV,APP_ERROR,"%s: Surface pressure is required\n",__func__);
       return -1;
    }
 
@@ -814,7 +814,7 @@ int vigetLnP (VerticalGrid * grd_p, float *lnP, int ni, int nj, float *pSurf,
 
       case LVL_ETA:
          if (!top) {
-            fprintf (stderr, "c_videfset: Ceiling pressure is required for grid type ETA\n");
+            Lib_Log(APP_LIBINTERPV,APP_ERROR,"%s: Ceiling pressure is required for grid type ETA\n",__func__);
             return -1;
          }
 
@@ -842,7 +842,7 @@ int vigetLnP (VerticalGrid * grd_p, float *lnP, int ni, int nj, float *pSurf,
          break;
 
       case LVL_HYBRID:
-         /* variable bidon : le £$@¬¤¢ de fortran en a besoin */
+         /* variable bidon : le ï¿½$@ï¿½ï¿½ï¿½ de fortran en a besoin */
          i = 1;
          hybridModel = (float *) malloc (grd_p->numLevels * sizeof (float));
          f77name (hybrid_to_pres) (lnP, hybridModel, &grd_p->top, pSurf, &surf,
@@ -855,7 +855,7 @@ int vigetLnP (VerticalGrid * grd_p, float *lnP, int ni, int nj, float *pSurf,
          break;
 
       default:
-         fprintf (stderr, "vigetLnP: invalid type entry");
+         Lib_Log(APP_LIBINTERPV,APP_ERROR,"%s: Invalid type entry\n",__func__);
          return -1;
    }
 

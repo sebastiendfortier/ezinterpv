@@ -88,6 +88,7 @@ contains
 !                    interpolation
   integer function N_Videfset(o_vGrid_Destn_p, o_vGrid_Source_p, r_pSurf, &
                               r_z0, r_ilmo, r_hBound, r_lat)
+     use app
                                         ! returns error indication:  0='no error'
 !
 !AUTHOR
@@ -157,8 +158,7 @@ contains
     if(     .not. associated(o_vGridDestn_p) &
        .or. .not. associated(o_vGridSource_p) ) then
       N_Videfset = N_VI_VIERR_UNDEFINED_GRID_REQD
-      write(6,*) 'One of the requested grids has not been defined.'
-      call flush(6)
+      call lib_log(APP_LIBINTERPV,APP_ERROR,'N_Videfset: One of the requested grids has not been defined')
       call m_clearGrids()
       return
     endif
@@ -170,8 +170,8 @@ contains
              STAT=n_error)
     if( n_error /= 0) then
       N_Videfset = N_VI_VIERR_FAILED_ALLOCATION
-      write(6,*) 'failed allocating r_lnPSource_a in N_Videfset:  error=',n_error
-      call flush(6)
+      write(app_msg, *)'N_Videfset: Failed allocating r_lnPSource_a (error=',n_error,')'
+      call lib_log(APP_LIBINTERPV,APP_ERROR,app_msg)
       call m_clearGrids()
       return
     endif
@@ -179,8 +179,8 @@ contains
     allocate( r_lnPDestn_a(n_ni, n_nj, o_vGridDestn_p%N_numVLevels),STAT=n_error)
     if( n_error /= 0) then
       N_Videfset = N_VI_VIERR_FAILED_ALLOCATION
-      write(6,*) 'failed allocating r_lnPDestn_a in N_Videfset:  error=', n_error
-      call flush(6)
+      write(app_msg, *)'N_Videfset: Failed allocating r_lnPDestn_a (error=',n_error,')'
+      call lib_log(APP_LIBINTERPV,APP_ERROR,app_msg)
       call m_clearGrids()
       return
     endif
@@ -189,8 +189,8 @@ contains
       allocate(r_z0_a(n_ni, n_nj), STAT=n_error)
       if( n_error /= 0) then
         N_Videfset = N_VI_VIERR_FAILED_ALLOCATION
-        write(6,*) 'failed allocating r_z0_a in N_Videfset:  error=',n_error
-        call flush(6)
+        write(app_msg, *)'N_Videfset: Failed allocating r_z0_a (error=',n_error,')'
+        call lib_log(APP_LIBINTERPV,APP_ERROR,app_msg)
         call m_clearGrids()
         return
       endif
@@ -200,8 +200,8 @@ contains
       allocate(r_ilmo_a(n_ni, n_nj), STAT=n_error)
       if( n_error /= 0) then
         N_Videfset = N_VI_VIERR_FAILED_ALLOCATION
-        write(6,*) 'failed allocating r_ilmo_a in N_Videfset:  error=',n_error
-        call flush(6)
+        write(app_msg, *)'N_Videfset: Failed allocating rr_ilmo_a (error=',n_error,')'
+        call lib_log(APP_LIBINTERPV,APP_ERROR,app_msg)
         call m_clearGrids()
         return
       endif
@@ -211,8 +211,8 @@ contains
       allocate(r_hBound_a(n_ni, n_nj), STAT=n_error)
       if( n_error /= 0) then
         N_Videfset = N_VI_VIERR_FAILED_ALLOCATION
-        write(6,*) 'failed allocating r_hBound_a in N_Videfset:  error=',n_error
-        call flush(6)
+        write(app_msg, *)'N_Videfset: Failed allocating r_hBound_a (error=',n_error,')'
+        call lib_log(APP_LIBINTERPV,APP_ERROR,app_msg)
         call m_clearGrids()
         return
       endif
@@ -222,8 +222,8 @@ contains
       allocate(r_latitude_a(n_ni, n_nj), STAT=n_error)
       if( n_error /= 0) then
         N_Videfset = N_VI_VIERR_FAILED_ALLOCATION
-        write(6,*)'failed allocating r_latitude_a in N_Videfset:  error=',n_error
-        call flush(6)
+        write(app_msg, *)'N_Videfset: Failed allocating r_latitude_a (error=',n_error,')'
+        call lib_log(APP_LIBINTERPV,APP_ERROR,app_msg)
         call m_clearGrids()
         return
       endif
@@ -235,8 +235,8 @@ contains
     n_error=N_VertGridGetLnP(o_vGridSource_p, r_lnPSource_a, r_pSurf)
     if(n_error /= 0) then
       N_Videfset = N_VI_VIERR_LN_PRESS_CONVERSION
-      write(6,*) 'failed converting source to ln(P):  error=', n_error
-      call flush(6)
+      write(app_msg, *)'N_Videfset: Failed converting source to ln(P) (error=',n_error,')'
+      call lib_log(APP_LIBINTERPV,APP_ERROR,app_msg)
       call m_clearGrids()
       return
     endif
@@ -244,8 +244,8 @@ contains
     n_error = N_VertGridGetLnP(o_vGridDestn_p, r_lnPDestn_a, r_pSurf)
     if(n_error /= 0) then
       N_Videfset = N_VI_VIERR_LN_PRESS_CONVERSION
-      write(6,*) 'failed converting destination to ln(P):  error=', n_error
-      call flush(6)
+      write(app_msg, *)'N_Videfset: Failed converting destination to ln(P) (error=',n_error,')'
+      call lib_log(APP_LIBINTERPV,APP_ERROR,app_msg)
       call m_clearGrids()
       return
     endif
@@ -265,9 +265,8 @@ contains
                STAT=n_error)
       if( n_error /= 0) then
         N_Videfset = N_VI_VIERR_FAILED_ALLOCATION
-        write(6,*) 'failed allocating n_interpIndex_a in N_Videfset:  error=', &
-                    n_error
-        call flush(6)
+        write(app_msg, *)'N_Videfset: Failed allocating n_interpIndex_a (error=',n_error,')'
+        call lib_log(APP_LIBINTERPV,APP_ERROR,app_msg)
         call m_clearGrids()
         return
       endif
@@ -314,6 +313,7 @@ contains
                             r_zDest, r_zSrc, &
                             r_y_stateOut, r_y_stateIn, &
                             r_y_derivOut, r_y_derivIn)
+     use app
                                         ! returns error indication:  0='no error'
 !
 !AUTHOR
@@ -498,8 +498,8 @@ contains
              STAT=n_error)
     if( n_error /= 0) then
       N_Visint = N_VI_VIERR_FAILED_ALLOCATION
-      write(6,*) 'failed allocating n_interpIndexTmp in N_Visint: error=',n_error
-      call flush(6)
+      write(app_msg, *)'N_Visint: failed allocating n_interpIndexTmp (error=',err,')'
+      call lib_log(APP_LIBINTERPV,APP_ERROR,app_msg)
       return
     endif
 
@@ -507,8 +507,8 @@ contains
              STAT=n_error)
     if( n_error /= 0) then
       N_Visint = N_VI_VIERR_FAILED_ALLOCATION
-      write(6,*) 'failed allocating r_ExtArraysOut in N_Visint: error=',n_error
-      call flush(6)
+      write(app_msg, *)'N_Visint: failed allocating r_ExtArraysOut (error=',err,')'
+      call lib_log(APP_LIBINTERPV,APP_ERROR,app_msg)
       return
     endif
 
@@ -547,7 +547,8 @@ contains
       allocate(r_inv_dx_above(n_ni, n_nj), stat=err(8))
       allocate(r_inv_dx_below(n_ni, n_nj), stat=err(9))
         if(any(err .ne. 0)) then
-          write(*,*)"ERROR in N_Visint - allocation error=", err
+          write(app_msg, *)'N_Visint: allocation error (error=',err,')'
+          call lib_log(APP_LIBINTERPV,APP_FATAL,app_msg)
           call qqexit(2)
         end if
 
@@ -560,12 +561,9 @@ contains
          .or. .not. allocated(r_ilmo_a) &
          .or. .not. allocated(r_hBound_a) &
         ) then
-        write(6,*)'N_Visint:  surface extrapolation requires these parameters:'
-        write(6,*)'           m_slStateValue, m_slFluxGradient, r_zSrc, and'
-        write(6,*)'           r_zDest all to be present.'
-        write(6,*)'           Furthermore, parameters required in Videfset are:'
-        write(6,*)'           r_z0, r_ilmo, and r_hBound.'
-        call flush(6)
+        call lib_log(APP_LIBINTERPV,APP_ERROR,'N_Visint:  surface extrapolation requires parameters m_slStateValue, &
+           &m_slFluxGradient, r_zSrc, r_zDest')
+        call lib_log(APP_LIBINTERPV,APP_ERROR,'N_Visint:  Videfset requires parameters r_z0, r_ilmo, and r_hBound')
         N_Visint = N_VI_VIERR_MISSING_SURFACE_DATA
         return
       end if
@@ -576,11 +574,9 @@ contains
            .or. .not. present(r_y_stateIn) &
            .or. .not. allocated(r_latitude_a) &
           ) then
-          write(6,*)'N_Visint:  surface extrapolation of the wind requires ', &
-                               'these parameters:'
-          write(6,*)'           r_y_stateOut and r_y_stateIn.'
-          write(6,*)'           Furthermore, r_latitude is required in Videfset.'
-          call flush(6)
+            call lib_log(APP_LIBINTERPV,APP_ERROR,'N_Visint:  surface extrapolation  of the wind requires &
+               &r_y_stateOut and r_y_stateIn')
+            call lib_log(APP_LIBINTERPV,APP_ERROR,'N_Visint:  Videfset requires parameters r_latitude')
           N_Visint = N_VI_VIERR_MISSING_SURFACE_DATA
           return
         end if
@@ -666,7 +662,8 @@ contains
         allocate(r_stateOutTmp(n_ni, n_nj, o_vGridDestn_p%N_numVLevels), &
                  stat=err(3))
         if(any(err .ne. 0)) then
-          write(*,*)"ERROR in N_Visint - allocation error=", err(1),err(2),err(3)
+          write(app_msg, *)'N_Visint: allocation error (error=',err(1),err(2),err(3),')'
+          call lib_log(APP_LIBINTERPV,APP_FATAL,app_msg)
           call qqexit(2)
         end if
 
@@ -728,17 +725,15 @@ contains
                                        )
 
             else ! r_y_derivIn or r_y_derivOut is not present
-              write(6,*) 'Error:  Cubic interpolation with derivatives',&
-                         ' requested; no y-component derivatives were supplied'
-              call flush(6)
+              write(app_msg, *)'N_Visint: Cubic interpolation with derivatives missing y-component derivatives'
+              call lib_log(APP_LIBINTERPV,APP_ERROR,app_msg)
               N_Visint=N_VI_VIERR_BAD_INTERPTYP_4_DATA
             end if ! r_y_derivIn or r_y_derivOut present
           end if ! Extrap1D_SurfaceWind_X
 
         else ! r_derivIn or r_derivOut is not present
-          write(6,*) 'Error:  Cubic interpolation with derivatives requested; no',&
-                     ' derivatives were supplied'
-          call flush(6)
+          write(app_msg, *)'N_Visint: Cubic interpolation with derivatives missing derivatives'
+          call lib_log(APP_LIBINTERPV,APP_ERROR,app_msg)
           N_Visint=N_VI_VIERR_BAD_INTERPTYP_4_DATA
         end if ! ! r_derivIn or r_derivOut present
       end if ! Interp1D_CubicLagrange_X .or. Interp1D_CubicWithDerivs_X
@@ -867,14 +862,18 @@ contains
 
     if( allocated(n_interpIndexTmp) ) then
       deallocate(n_interpIndexTmp, STAT=n_error)
-      if( n_error /= 0 ) write(6,*) 'ERROR deallocating n_interpIndexTmp in ',&
-                                    'N_Visint:  error=', n_error
+      if( n_error /= 0 ) then
+        write(app_msg, *)'N_Visint: Error deallocating n_interpIndexTmp (error=',n_error,')'
+        call lib_log(APP_LIBINTERPV,APP_ERROR,app_msg)
+      endif
     endif
 
     if( allocated(r_ExtArraysOut) ) then
       deallocate(r_ExtArraysOut, STAT=n_error)
-      if( n_error /= 0 ) write(6,*) 'ERROR deallocating r_ExtArraysOut in ',&
-                                    'N_Visint:  error=', n_error
+      if( n_error /= 0 ) then
+        write(app_msg, *)'N_Visint: Error deallocating r_ExtArraysOut (error=',n_error,')'
+        call lib_log(APP_LIBINTERPV,APP_ERROR,app_msg)
+      endif
     endif
 
 
@@ -1179,6 +1178,7 @@ contains
 
 !!!s/r m_clearGrids - clears the selection of grids
   subroutine m_clearGrids(l_suppressMessage)
+    use app
 !
 !AUTHOR
 !     J.W. Blezius MAY 2002 helper on top of the Interp1D library
@@ -1203,50 +1203,64 @@ contains
     integer :: n_error
 
     if( .not. present(l_suppressMessage) ) &
-                   write(6,*) 'Interpolation is now undefined.  Call N_Videfset.'
+       call lib_log(APP_LIBINTERPV,APP_WARNING,'m_clearGrids: Interpolation is now undefined, call N_Videfset')
 
     nullify(o_vGridSource_p, o_vGridDestn_p)
 
     if( allocated(r_lnPSource_a) ) then
       deallocate(r_lnPSource_a, STAT=n_error)
-      if( n_error /= 0 ) write(6,*) 'ERROR deallocating r_lnPSource_a in ',&
-                                    'm_clearGrids:  error=', n_error
+      if( n_error /= 0 ) then
+        write(app_msg, *)'m_clearGrids: Error deallocating m_clearGrids (error=',n_error,')'
+        call lib_log(APP_LIBINTERPV,APP_ERROR,app_msg)
+      endif
     endif
 
     if( allocated(r_lnPDestn_a) ) then
       deallocate(r_lnPDestn_a, STAT=n_error)
-      if( n_error /= 0 ) write(6,*) 'ERROR deallocating r_lnPDestn_a in ',&
-                                    'm_clearGrids:  error=', n_error
+      if( n_error /= 0 ) then
+        write(app_msg, *)'m_clearGrids: Error deallocating r_lnPDestn_a (error=',n_error,')'
+        call lib_log(APP_LIBINTERPV,APP_ERROR,app_msg)
+      endif
     endif
 
     if( allocated(n_interpIndex_a) ) then
       deallocate(n_interpIndex_a, STAT=n_error)
-      if( n_error /= 0 ) write(6,*) 'ERROR deallocating n_interpIndex_a in',&
-                                    ' m_clearGrids:  error=', n_error
+      if( n_error /= 0 ) then
+        write(app_msg, *)'m_clearGrids: Error deallocating n_interpIndex_a (error=',n_error,')'
+        call lib_log(APP_LIBINTERPV,APP_ERROR,app_msg)
+      endif                      
     endif
 
     if( allocated(r_z0_a) ) then
       deallocate(r_z0_a, STAT=n_error)
-      if( n_error /= 0 ) write(6,*) 'ERROR deallocating r_z0_a in ',&
-                                    'm_clearGrids:  error=', n_error
+      if( n_error /= 0 ) then
+        write(app_msg, *)'m_clearGrids: Error deallocating r_z0_a (error=',n_error,')'
+        call lib_log(APP_LIBINTERPV,APP_ERROR,app_msg)
+      endif
     endif
 
     if( allocated(r_ilmo_a) ) then
       deallocate(r_ilmo_a, STAT=n_error)
-      if( n_error /= 0 ) write(6,*) 'ERROR deallocating r_ilmo_a in ',&
-                                    'm_clearGrids:  error=', n_error
+      if( n_error /= 0 ) then
+        write(app_msg, *)'m_clearGrids: Error deallocating r_ilmo_a (error=',n_error,')'
+        call lib_log(APP_LIBINTERPV,APP_ERROR,app_msg)
+      endif
     endif
 
     if( allocated(r_hBound_a) ) then
       deallocate(r_hBound_a, STAT=n_error)
-      if( n_error /= 0 ) write(6,*) 'ERROR deallocating r_hBound_a in ',&
-                                    'm_clearGrids:  error=', n_error
+      if( n_error /= 0 ) then
+        write(app_msg, *)'m_clearGrids: Error deallocating r_hBound_a (error=',n_error,')'
+        call lib_log(APP_LIBINTERPV,APP_ERROR,app_msg)
+      endif
     endif
 
     if( allocated(r_latitude_a) ) then
       deallocate(r_latitude_a, STAT=n_error)
-      if( n_error /= 0 ) write(6,*) 'ERROR deallocating r_latitude_a in ',&
-                                    'm_clearGrids:  error=', n_error
+      if( n_error /= 0 ) then
+        write(app_msg, *)'m_clearGrids: Error deallocating r_latitude_a (error=',n_error,')'
+        call lib_log(APP_LIBINTERPV,APP_ERROR,app_msg)
+      endif
     endif
 
     l_gridsSelected = .false.           ! ViSelectGrids must be called again

@@ -131,6 +131,7 @@ contains
 
 !!!s/r M_AssignVerticalGrid - assigment operator
   subroutine M_AssignVerticalGrid(o_gridOut, o_gridIn)
+    use app
 !
 !AUTHOR
 !     J.W. Blezius SEPT 2002
@@ -164,9 +165,8 @@ contains
       if(.not. associated(o_gridOut%N_ip1_p)) then
           allocate(o_gridOut%N_ip1_p(o_gridIn%N_numVLevels), STAT=n_error)
           if(n_error /= 0) then
-            write(6, *)'Error allocating ip1 in M_AssignVerticalGrid:  error=',&
-                       n_error
-            call flush(6)
+            write(app_msg, *)'M_AssignVerticalGrid: Error allocating ip1 in M_AssignVerticalGrid (error=',n_error,')'
+            call lib_log(APP_LIBINTERPV,APP_ERROR,app_msg)
             return
           endif
       end if
@@ -189,6 +189,7 @@ contains
 
 !!!func N_ConstructNull - constructor:  Put the object in a valid state
   integer function N_ConstructNull(this, n_numVLevelsIn)
+     use app
                                         ! returns error indication:  0='no error'
 !
 !AUTHOR
@@ -219,9 +220,8 @@ contains
     else
         allocate(this%N_ip1_p(n_numVLevelsIn), STAT=n_error)
         if(n_error /= 0) then
-          write(6, *) 'Error allocating vLevel in N_ConstructNull:  error=', &
-                      n_error
-          call flush(6)
+          write(app_msg, *)'N_ConstructNull: allocating vLevel in N_ConstructNull (error=',n_error,')'
+          call lib_log(APP_LIBINTERPV,APP_ERROR,app_msg)
           N_ConstructNull = N_VI_VIERR_FAILED_ALLOCATION
           return
         endif ! n_error /= 0
@@ -239,6 +239,7 @@ contains
 !!!func N_Viqkdef - OVERLOADED constructor:  Quick definition of the grid for
 !                                            vertical integration
   integer function N_Viqkdef_ip1List(this, o_vGridDesc_p, n_ip1)
+     use app
                                         ! returns error indication:  0='no error'
 !
 !AUTHOR
@@ -287,8 +288,8 @@ contains
 
     allocate(this%N_ip1_p(this%N_numVLevels), STAT=n_error)
     if(n_error /= 0) then
-      write(6, *) 'Error allocating this%N_ip1_p in N_Viqkdef: error=', n_error
-      call flush(6)
+      write(app_msg, *)'N_Viqkdef_ip1List: Error allocating this%N_ip1_p in N_Viqkdef (error=',n_error,')'
+      call lib_log(APP_LIBINTERPV,APP_ERROR,app_msg)
       N_Viqkdef_ip1List = N_VI_VIERR_FAILED_ALLOCATION
       return
     endif
@@ -303,6 +304,7 @@ contains
 !!!func N_Viqkdef - OVERLOADED constructor:  Quick definition of the grid for
 !                                            vertical integration
   integer function N_Viqkdef_ip1Type(this, o_vGridDesc_p, s_ip1Type)
+     use app
                                         ! returns error indication:  0='no error'
 !
 !AUTHOR
@@ -347,23 +349,23 @@ contains
     ! (       pointed by n_ip1_p to the caller)
     n_error=vgd_get(this%O_vGridDesc_p, s_ip1Type, n_ip1_p)
     if(n_error /= VGD_OK)then
-      write(6, *) 'Error from vgd_get in N_Viqkdef: error=', n_error
-      call flush(6)
+      write(app_msg, *)'N_Viqkdef_ip1Type: Error from vgd_get (error=',n_error,')'
+      call lib_log(APP_LIBINTERPV,APP_ERROR,app_msg)
       N_Viqkdef_ip1Type = N_VI_VIERR_VGD_DESCRIPTOR_ERROR
     end if
 
     ! In order to adjust the number of levels, need the grid kind & version
     n_error=vgd_get(this%O_vGridDesc_p, 'KIND', n_kind)
     if(n_error /= VGD_OK)then
-      write(6, *) 'Error getting n_kind in N_Viqkdef: error=', n_error
-      call flush(6)
+      write(app_msg, *)'N_Viqkdef_ip1Type: Error getting n_kind (error=',n_error,')'
+      call lib_log(APP_LIBINTERPV,APP_ERROR,app_msg)
       N_Viqkdef_ip1Type = N_VI_VIERR_VGD_DESCRIPTOR_ERROR
     end if
 
     n_error=vgd_get(this%O_vGridDesc_p, 'VERS', n_version)
     if(n_error /= VGD_OK)then
-      write(6, *) 'Error getting n_version in N_Viqkdef: error=', n_error
-      call flush(6)
+      write(app_msg, *)'N_Viqkdef_ip1Type: Error getting n_version (error=',n_error,')'
+      call lib_log(APP_LIBINTERPV,APP_ERROR,app_msg)
       N_Viqkdef_ip1Type = N_VI_VIERR_VGD_DESCRIPTOR_ERROR
     end if
 
@@ -388,8 +390,8 @@ contains
 
     allocate(this%N_ip1_p(n_numVLevels), STAT=n_error)
     if(n_error /= 0) then
-      write(6, *) 'Error allocating this%N_ip1_p in N_Viqkdef: error=', n_error
-      call flush(6)
+      write(app_msg, *)'N_Viqkdef_ip1Type: Error allocating this%N_ip1_p (error=',n_error,')'
+      call lib_log(APP_LIBINTERPV,APP_ERROR,app_msg)
       N_Viqkdef_ip1Type = N_VI_VIERR_FAILED_ALLOCATION
       return
     endif
@@ -408,6 +410,7 @@ contains
 
 !!!func N_VertGridGetLnP - Create 'cube' of vertical levels in units of ln P
   integer function N_VertGridGetLnP(this, r_P, r_pSurf, l_in_log)
+     use app
                                         ! returns error indication:  0='no error'
 !
 !AUTHOR
@@ -464,10 +467,8 @@ contains
 
     if(l_firstTime .eqv. .true.) then
          l_firstTime=.false.
-         write(6,*)' '
-         write(6,*)'In ez_interpv, converting the vertical levels to ln P (1 mb ref level) before interpolating.'
-         write(6,*)'(This message will not be repeated.)'
-         write(6,*)' '
+         call lib_log(APP_LIBINTERPV,APP_ERROR,'N_VertGridGetLnP: converting the vertical levels to ln P &
+            &(1 mb ref level) before interpolating (This message will not be repeated)')
     endif
 
     !
@@ -478,8 +479,8 @@ contains
     n_error = vgd_levels(this%O_vGridDesc_p, this%N_ip1_p(:this%N_numVLevels),&
                            r_P_p, r_pSurf / r_MBAR_PER_PASCAL, l_log)
     if(n_error .ne. VGD_OK)then
-      write(6,*)'ERROR in VerticalGrid_90_class%N_VertGridGetLnP, ', &
-                'from vgd_levels:', n_error
+      write(app_msg, *)'N_VertGridGetLnP: Error in VerticalGrid_90_class%N_VertGridGetLnP from vgd_levels, (error=',n_error,')'
+      call lib_log(APP_LIBINTERPV,APP_ERROR,app_msg)
       N_VertGridGetLnP = N_VI_VIERR_VGD_DESCRIPTOR_ERROR
     end if
 
@@ -531,6 +532,7 @@ contains
 
 !!!s/r M_ReleaseVerticalGrid - VerticalGrid destructor
   subroutine M_ReleaseVerticalGrid(this)
+     use app
 !
 !AUTHOR
 !     J.W. Blezius MAY 2002 helper on top of the Interp1D library
@@ -552,9 +554,8 @@ contains
     if( associated(this%N_ip1_p) ) then
       deallocate (this%N_ip1_p, STAT=n_error)
       if(n_error /= 0) then
-        write(6, *)'Error deallocating vLevel in M_ReleaseVerticalGrid:  ', &
-                   'error=', n_error
-        call flush(6)
+        write(app_msg, *)'M_ReleaseVerticalGrid: Error deallocating vLevel (error=',n_error,')'
+        call lib_log(APP_LIBINTERPV,APP_ERROR,app_msg)
       end if
       nullify(this%N_ip1_p)
     end if
