@@ -23,6 +23,15 @@ set_target_properties(${CMAKE_FIND_PACKAGE_NAME} PROPERTIES
 #----- If built with OpenMP, need to add as link dependency interface
 message(STATUS "Looking for ${CMAKE_FIND_PACKAGE_NAME} interface dependencies")
 
+if(NOT rmn_FOUND)
+   find_package(rmn @rmn_REQ_VERSION@ COMPONENTS REQUIRED)
+endif()
+if(NOT vgrid_FOUND)
+   find_package(vgrid @vgrid_REQ_VERSION@ COMPONENTS REQUIRED)
+endif()
+
+target_link_libraries(${CMAKE_FIND_PACKAGE_NAME} INTERFACE rmn vgrid)
+
 #----- Check that everything is there and undefines ${PACKAGE_NAME}_FOUND if it's not the case
 check_required_components(${CMAKE_FIND_PACKAGE_NAME})
 
