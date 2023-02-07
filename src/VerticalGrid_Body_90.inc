@@ -467,7 +467,7 @@ contains
 
     if(l_firstTime .eqv. .true.) then
          l_firstTime=.false.
-         call lib_log(APP_LIBINTERPV,APP_ERROR,'N_VertGridGetLnP: converting the vertical levels to ln P &
+         call lib_log(APP_LIBINTERPV,APP_INFO,'N_VertGridGetLnP: converting the vertical levels to ln P &
             &(1 mb ref level) before interpolating (This message will not be repeated)')
     endif
 
