@@ -257,6 +257,10 @@ package:ubuntu-18.04-amd64_inteloneapi-2022.1.2:
 #----- ubuntu-18.04-amd64_gnu-9.3
 
 build:ubuntu-18.04-amd64_gnu-9.3.0:
+   variables:
+      ORD_SOUMET_MACH    : gpsc5
+      ORD_SOUMET_IMAGE   : eccc/eccc_all_default_ubuntu-18.04-amd64_latest
+      ORD_SOUMET_PROJECT : eccc_mrd
    stage: build
    only:
       - master
@@ -277,6 +281,10 @@ build:ubuntu-18.04-amd64_gnu-9.3.0:
          - build_ubuntu-18.04-amd64_gnu-9.3.0
 
 test:ubuntu-18.04-amd64_gnu-9.3.0:
+   variables:
+      ORD_SOUMET_MACH    : gpsc5
+      ORD_SOUMET_IMAGE   : eccc/eccc_all_default_ubuntu-18.04-amd64_latest
+      ORD_SOUMET_PROJECT : eccc_mrd
    stage: test
    only:
       - master
@@ -293,6 +301,10 @@ test:ubuntu-18.04-amd64_gnu-9.3.0:
       - make check
 
 package:ubuntu-18.04-amd64_gnu-9.3.0:
+   variables:
+      ORD_SOUMET_MACH    : gpsc5
+      ORD_SOUMET_IMAGE   : eccc/eccc_all_default_ubuntu-18.04-amd64_latest
+      ORD_SOUMET_PROJECT : eccc_mrd
    stage: package
    only:
       - master
