@@ -1,43 +1,28 @@
-@PACKAGE_INIT@
+if(NOT ${CMAKE_FIND_PACKAGE_NAME}_FOUND)
+   set(${CMAKE_FIND_PACKAGE_NAME}_VERSION @PROJECT_VERSION@ CACHE INTERNAL "${CMAKE_FIND_PACKAGE_NAME} version")
 
-# [[DOC]] for find_package (lists variables that are set automatically by CMake)
-# https://cmake.org/cmake/help/v3.0/command/find_package.html
-# [[DOC]] https://cmake.org/cmake/help/v3.14/manual/cmake-developer.7.html
+   @PACKAGE_INIT@
 
-#----- Set include directory
-set_and_check(${CMAKE_FIND_PACKAGE_NAME}_INCLUDE_DIRS "@PACKAGE_INCLUDE_INSTALL_DIR@")
+   include(CMakeFindDependencyMacro)
 
-#----- Set the library
-set_and_check(${CMAKE_FIND_PACKAGE_NAME}_LIBRARIES "@PACKAGE_LIB_INSTALL_DIR@/lib${CMAKE_FIND_PACKAGE_NAME}.a")
-add_library(${CMAKE_FIND_PACKAGE_NAME} STATIC IMPORTED)
-set(${CMAKE_FIND_PACKAGE_NAME}_static_FOUND TRUE)
+   function(maybe_message type message)
+      if(NOT ${CMAKE_FIND_PACKAGE_NAME}_FIND_QUIETLY )
+         message(${type} "${message}")
+      endif()
+   endfunction()
 
-#----- Create the imported target
-string(TOUPPER ${CMAKE_FIND_PACKAGE_NAME} up)
-set_target_properties(${CMAKE_FIND_PACKAGE_NAME} PROPERTIES
-    IMPORTED_LOCATION             ${${CMAKE_FIND_PACKAGE_NAME}_LIBRARIES}
-    INTERFACE_INCLUDE_DIRECTORIES ${${CMAKE_FIND_PACKAGE_NAME}_INCLUDE_DIRS}
-    INTERFACE_COMPILE_DEFINITIONS HAVE_${up}
-)
+   maybe_message(STATUS "Finding dependency rmn for ${CMAKE_FIND_PACKAGE_NAME}")
+   find_dependency(rmn REQUIRED PATHS $ENV{rmn_DIR} ${rmn_ROOT})
+   maybe_message(STATUS "Finding dependency vgrid for ${CMAKE_FIND_PACKAGE_NAME}")
+   find_dependency(vgrid REQUIRED PATHS $ENV{vgrid_DIR} ${vgrid_ROOT})
 
-#----- If built with OpenMP, need to add as link dependency interface
-message(STATUS "Looking for ${CMAKE_FIND_PACKAGE_NAME} interface dependencies")
+   include(${CMAKE_CURRENT_LIST_DIR}/${CMAKE_FIND_PACKAGE_NAME}-targets.cmake)
 
-if(NOT rmn_FOUND)
-   find_package(rmn @rmn_REQ_VERSION@ COMPONENTS REQUIRED)
-endif()
-if(NOT vgrid_FOUND)
-   find_package(vgrid @vgrid_REQ_VERSION@ COMPONENTS REQUIRED)
-endif()
-
-target_link_libraries(${CMAKE_FIND_PACKAGE_NAME} INTERFACE rmn vgrid)
-
-#----- Check that everything is there and undefines ${PACKAGE_NAME}_FOUND if it's not the case
-check_required_components(${CMAKE_FIND_PACKAGE_NAME})
-
-#----- This part should eventually disapear once cmake handles it
-if( NOT ${CMAKE_FIND_PACKAGE_NAME}_FIND_QUIETLY )
-   message(STATUS "Found ${CMAKE_FIND_PACKAGE_NAME} version  : ${${CMAKE_FIND_PACKAGE_NAME}_VERSION}")
-   message(STATUS "Found ${CMAKE_FIND_PACKAGE_NAME} libraries: ${${CMAKE_FIND_PACKAGE_NAME}_LIBRARIES}")
-   message(STATUS "Found ${CMAKE_FIND_PACKAGE_NAME} includes : ${${CMAKE_FIND_PACKAGE_NAME}_INCLUDE_DIRS}")
+   if(NOT ${CMAKE_FIND_PACKAGE_NAME}_FIND_QUIETLY )
+      message(STATUS "Found ${CMAKE_FIND_PACKAGE_NAME} ${${CMAKE_FIND_PACKAGE_NAME}_VERSION} in ${PACKAGE_PREFIX_DIR}")
+      if(${CMAKE_FIND_PACKAGE_NAME}_FIND_COMPONENTS)
+         message(STATUS "Components ${${CMAKE_FIND_PACKAGE_NAME}_FIND_COMPONENTS}")
+      endif()
+      message(STATUS "Imported targets: ${CMAKE_FIND_PACKAGE_NAME}::${CMAKE_FIND_PACKAGE_NAME} libraries")
+   endif()
 endif()
