@@ -96,24 +96,24 @@ static int           gNi, gNj;
 /*
  * Fortran Interface
  */
-wordint f77name (viqkdef) (wordint *numLevel, wordint *gridType, ftnfloat *levelList,
-                           ftnfloat *top, ftnfloat *pRef, ftnfloat *rCoef,
-                           ftnfloat *gz) {
+int32_t f77name (viqkdef) (int32_t *numLevel, int32_t *gridType, float *levelList,
+                           float *top, float *pRef, float *rCoef,
+                           float *gz) {
    return c_viqkdef (*numLevel, *gridType, levelList, *top, *pRef, *rCoef, gz);
 }
 
 
-wordint f77name (videfset) (wordint *ni, wordint *nj, wordint *idGrdDest,
-                           wordint *idGrdSrc, ftnfloat *surf, ftnfloat *top) {
+int32_t f77name (videfset) (int32_t *ni, int32_t *nj, int32_t *idGrdDest,
+                           int32_t *idGrdSrc, float *surf, float *top) {
    return c_videfset (*ni, *nj, *idGrdDest, *idGrdSrc, surf, top);
 }
 
-wordint f77name (visetopt) (wordint *option, wordint *value) {
+int32_t f77name (visetopt) (int32_t *option, int32_t *value) {
    return c_visetopt((const char *) option, (const char *)value);
 }
 
-wordint f77name (visint) (ftnfloat *stateOut, ftnfloat *stateIn, ftnfloat *derivOut,
-                          ftnfloat *derivIn, ftnfloat *extrapGuideDown, ftnfloat *extrapGuideUp) {
+int32_t f77name (visint) (float *stateOut, float *stateIn, float *derivOut,
+                          float *derivIn, float *extrapGuideDown, float *extrapGuideUp) {
    return c_visint (stateOut, stateIn, derivOut, derivIn, *extrapGuideDown, *extrapGuideUp);
 }
 

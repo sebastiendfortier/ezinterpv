@@ -409,7 +409,7 @@ contains
 
 
 !!!func N_VertGridGetLnP - Create 'cube' of vertical levels in units of ln P
-  integer function N_VertGridGetLnP(this, r_P, r_pSurf, l_in_log)
+  integer function N_VertGridGetLnP(this, r_P, r_pSurf, r_pSurfLS, l_in_log)
      use app
                                         ! returns error indication:  0='no error'
 !
@@ -421,8 +421,8 @@ contains
 !
 !OBJECT
 !        The vertical grid is a 1-D object.  The product is taken with the
-!        horizontal surface pressure, r_pSurf, to produce a cube of vertical
-!        levels, in pressure units.
+!        horizontal surface pressure, r_pSurf and r_pSurfLS (smoothed) to produce
+!        a cube of vertical levels, in pressure units.
 !
 !        The exception is the 'generic' grid type.  In this case, the vertical
 !        levels are simply multiplied horizontally, and no attempt is made to
@@ -445,6 +445,7 @@ contains
                                         ! surface pressure for each horiz point,
                                         ! in units of mb
     real(real48), dimension(:,:), intent(in) :: r_pSurf
+    real(real48), dimension(:,:), optional , intent(in) :: r_pSurfLS
     logical, intent(in), optional :: l_in_log
 !
 !!
@@ -476,8 +477,14 @@ contains
     !
                                         ! Obtain, the cube of P.
                                         ! vgd_levels allocates r_P_p
-    n_error = vgd_levels(this%O_vGridDesc_p, this%N_ip1_p(:this%N_numVLevels),&
+    if (present(r_pSurfLS)) then
+       n_error = vgd_levels(this%O_vGridDesc_p, this%N_ip1_p(:this%N_numVLevels),&
+                           r_P_p, r_pSurf / r_MBAR_PER_PASCAL, l_log, r_pSurfLS / r_MBAR_PER_PASCAL)
+    else
+       n_error = vgd_levels(this%O_vGridDesc_p, this%N_ip1_p(:this%N_numVLevels),&
                            r_P_p, r_pSurf / r_MBAR_PER_PASCAL, l_log)
+    endif
+
     if(n_error .ne. VGD_OK)then
       write(app_msg, *)'N_VertGridGetLnP: Error in VerticalGrid_90_class%N_VertGridGetLnP from vgd_levels, (error=',n_error,')'
       call lib_log(APP_LIBINTERPV,APP_ERROR,app_msg)
@@ -498,7 +505,7 @@ contains
 
 
 !!!func N_VertGridGetP - Create 'cube' of vertical levels in pressure
-  integer function N_VertGridGetP(this, r_P, r_pSurf)
+  integer function N_VertGridGetP(this, r_P, r_pSurf, r_pSurfLS)
                                         ! returns error indication:  0='no error'
 !
 !AUTHOR
@@ -522,10 +529,11 @@ contains
                                         ! surface pressure for each horiz point,
                                         ! in units of mb
     real(real48), dimension(:,:), intent(in) :: r_pSurf
+    real(real48), dimension(:,:), intent(in), optional :: r_pSurfLS
 !
 !!
 
-    N_VertGridGetP = N_VertGridGetLnP(this, r_P, r_pSurf, l_in_log=.false.)
+    N_VertGridGetP = N_VertGridGetLnP(this, r_P, r_pSurf, r_pSurfLS, l_in_log=.false.)
   end function N_VertGridGetP
 
 

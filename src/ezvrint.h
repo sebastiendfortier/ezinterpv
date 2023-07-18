@@ -53,18 +53,18 @@
 /* check for float exception (will do nothing on SX6) */
 #define CHECKFLOAT 0x080
 
-int c_viqkdef (const int, const int, float *, float, float, float, float *);
-int c_videfset (const int, const int, int, int, float *, float *);
+int c_viqkdef   (const int, const int, float *, float, float, float, float *);
+int c_videfset  (const int, const int, int, int, float *, float *);
 int c_visetopti (unsigned char);
-int c_visetopt (const char*, const char*);
-int c_visint (float *, float *, float *, float *, float, float);
+int c_visetopt  (const char*, const char*);
+int c_visint    (float *, float *, float *, float *, float, float);
 
 /*
  * Interface Fortran
  */
-wordint f77name (viqkdef)  (wordint *, wordint *, ftnfloat *, ftnfloat *, ftnfloat *, ftnfloat *, ftnfloat *);
-wordint f77name (viqkdefset)  (wordint *, wordint *, wordint *, wordint *, ftnfloat *, ftnfloat *);
-wordint f77name (visetopt) (wordint *, wordint *);
-wordint f77name (visint)   (ftnfloat *, ftnfloat *, ftnfloat *, ftnfloat *, ftnfloat *, ftnfloat *);
+int32_t f77name (viqkdef)     (int32_t *, int32_t *, float *, float *, float *, float *, float *);
+int32_t f77name (viqkdefset)  (int32_t *, int32_t *, int32_t *, int32_t *, float *, float *);
+int32_t f77name (visetopt)    (int32_t *, int32_t *);
+int32_t f77name (visint)      (float *, float *, float *, float *, float *, float *);
 
 #endif
