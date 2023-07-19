@@ -236,11 +236,7 @@ contains
     !
     ! Create cubes of vertical levels, and convert them to ln P
     !
-    if (present(r_pSurfLS_Source)) then
-       n_error=N_VertGridGetLnP(o_vGridSource_p, r_lnPSource_a, r_pSurf, r_pSurfLS_Source)
-    else 
-        n_error=N_VertGridGetLnP(o_vGridSource_p, r_lnPSource_a, r_pSurf)
-    endif
+    n_error=N_VertGridGetLnP(o_vGridSource_p, r_lnPSource_a, r_pSurf, r_pSurfLS_Source)
     if(n_error /= 0) then
       N_Videfset = N_VI_VIERR_LN_PRESS_CONVERSION
       write(app_msg, *)'N_Videfset: Failed converting source to ln(P) (error=',n_error,')'
@@ -249,11 +245,7 @@ contains
       return
     endif
 
-    if (present(r_pSurfLS_Destn)) then
-       n_error=N_VertGridGetLnP(o_vGridDestn_p, r_lnPDestn_a, r_pSurf, r_pSurfLS_Destn)
-    else
-       n_error=N_VertGridGetLnP(o_vGridDestn_p, r_lnPDestn_a, r_pSurf)
-    endif
+    n_error=N_VertGridGetLnP(o_vGridDestn_p, r_lnPDestn_a, r_pSurf, r_pSurfLS_Destn)
     if(n_error /= 0) then
       N_Videfset = N_VI_VIERR_LN_PRESS_CONVERSION
       write(app_msg, *)'N_Videfset: Failed converting destination to ln(P) (error=',n_error,')'

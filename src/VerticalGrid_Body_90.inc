@@ -533,11 +533,8 @@ contains
     real(real48), dimension(:,:), intent(in), optional :: r_pSurfLS
 !
 !!
-  if (present(r_pSurfLS)) then
-     N_VertGridGetP = N_VertGridGetLnP(this, r_P, r_pSurf, r_pSurfLS, l_in_log=.false.)
-  else 
-     N_VertGridGetP = N_VertGridGetLnP(this, r_P, r_pSurf, l_in_log=.false.)
-  endif
+  N_VertGridGetP = N_VertGridGetLnP(this, r_P, r_pSurf, r_pSurfLS, l_in_log=.false.)
+
   end function N_VertGridGetP
 
 
