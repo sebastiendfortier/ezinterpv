@@ -478,6 +478,7 @@ contains
                                         ! Obtain, the cube of P.
                                         ! vgd_levels allocates r_P_p
     if (present(r_pSurfLS)) then
+    write(6,*) 'hsdfhlhasdfhasdhfagsdfkjdf'
        n_error = vgd_levels(this%O_vGridDesc_p, this%N_ip1_p(:this%N_numVLevels),&
                            r_P_p, r_pSurf / r_MBAR_PER_PASCAL, l_log, r_pSurfLS / r_MBAR_PER_PASCAL)
     else
@@ -532,8 +533,11 @@ contains
     real(real48), dimension(:,:), intent(in), optional :: r_pSurfLS
 !
 !!
-
-    N_VertGridGetP = N_VertGridGetLnP(this, r_P, r_pSurf, r_pSurfLS, l_in_log=.false.)
+  if (present(r_pSurfLS)) then
+     N_VertGridGetP = N_VertGridGetLnP(this, r_P, r_pSurf, r_pSurfLS, l_in_log=.false.)
+  else 
+     N_VertGridGetP = N_VertGridGetLnP(this, r_P, r_pSurf, l_in_log=.false.)
+  endif
   end function N_VertGridGetP
 
 

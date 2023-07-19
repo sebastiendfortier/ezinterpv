@@ -1822,8 +1822,7 @@ subroutine m_testOneCombo_5005(s_title, s_interpType, s_extrapType, &
   !
   if (present(r_z0)) then
     error=N_Videfset   (o_gridTarget_p, o_gridInit_p, &
-                        r_pSurf, &
-                        r_z0, r_ilmo, r_hBound, r_lat)
+                        r_pSurf, r_z0=r_z0, r_ilmo=r_ilmo, r_hBound=r_hBound, r_lat=r_lat)
   else
     error=N_Videfset(o_gridTarget_p, o_gridInit_p, r_pSurf)
   end if

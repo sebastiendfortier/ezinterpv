@@ -86,8 +86,8 @@ contains
 
 !!!func N_Videfset - Select the pair of grids to be used for the vertical
 !                    interpolation
-  integer function N_Videfset(o_vGrid_Destn_p, o_vGrid_Source_p, r_pSurf, r_pSurfLS, &
-                              r_z0, r_ilmo, r_hBound, r_lat)
+  integer function N_Videfset(o_vGrid_Destn_p, o_vGrid_Source_p, r_pSurf, &
+        r_pSurfLS_Destn, r_pSurfLS_Source, r_z0, r_ilmo, r_hBound, r_lat)
      use app
                                         ! returns error indication:  0='no error'
 !
@@ -115,7 +115,8 @@ contains
     real(real48), dimension(:,:), intent(in) :: r_pSurf 
 
     ! only used for SLEEVE coordinates (vcode=5100)
-    real(real48), dimension(:,:), optional, intent(in) :: r_pSurfLS
+    real(real48), dimension(:,:), optional, intent(in) :: r_pSurfLS_Source
+    real(real48), dimension(:,:), optional, intent(in) :: r_pSurfLS_Destn
 
     ! The next four parameters are used only for surface extrapolation
                                         ! roughness length
@@ -235,7 +236,11 @@ contains
     !
     ! Create cubes of vertical levels, and convert them to ln P
     !
-    n_error=N_VertGridGetLnP(o_vGridSource_p, r_lnPSource_a, r_pSurf, r_pSurfLS)
+    if (present(r_pSurfLS_Source)) then
+       n_error=N_VertGridGetLnP(o_vGridSource_p, r_lnPSource_a, r_pSurf, r_pSurfLS_Source)
+    else 
+        n_error=N_VertGridGetLnP(o_vGridSource_p, r_lnPSource_a, r_pSurf)
+    endif
     if(n_error /= 0) then
       N_Videfset = N_VI_VIERR_LN_PRESS_CONVERSION
       write(app_msg, *)'N_Videfset: Failed converting source to ln(P) (error=',n_error,')'
@@ -244,7 +249,11 @@ contains
       return
     endif
 
-    n_error=N_VertGridGetLnP(o_vGridDestn_p, r_lnPDestn_a, r_pSurf, r_pSurfLS)
+    if (present(r_pSurfLS_Destn)) then
+       n_error=N_VertGridGetLnP(o_vGridDestn_p, r_lnPDestn_a, r_pSurf, r_pSurfLS_Destn)
+    else
+       n_error=N_VertGridGetLnP(o_vGridDestn_p, r_lnPDestn_a, r_pSurf)
+    endif
     if(n_error /= 0) then
       N_Videfset = N_VI_VIERR_LN_PRESS_CONVERSION
       write(app_msg, *)'N_Videfset: Failed converting destination to ln(P) (error=',n_error,')'
