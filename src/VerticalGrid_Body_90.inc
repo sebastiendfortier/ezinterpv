@@ -478,7 +478,6 @@ contains
                                         ! Obtain, the cube of P.
                                         ! vgd_levels allocates r_P_p
     if (present(r_pSurfLS)) then
-    write(6,*) 'hsdfhlhasdfhasdhfagsdfkjdf'
        n_error = vgd_levels(this%O_vGridDesc_p, this%N_ip1_p(:this%N_numVLevels),&
                            r_P_p, r_pSurf / r_MBAR_PER_PASCAL, l_log, r_pSurfLS / r_MBAR_PER_PASCAL)
     else
