@@ -1,0 +1,48 @@
+context:
+  name: eccc_libezinterpv
+  version: 20.0.1.1
+
+package:
+  name: ${{ name }}
+  version: ${{ version }}
+
+source:
+  path: ../.
+
+build:
+  number: 0
+  script:
+    # Unset EC_ARCH which can interfere with the build
+    - export EC_ARCH=
+    # First ensure submodules are initialized (in case they're needed)
+    - git submodule update --init --recursive || true
+    # Create the necessary directories for compiler presets
+    - mkdir -p ec_compiler_presets/ECCC/rhel-8-icelake-64
+    # Create an empty preset file
+    - echo '# Empty preset file' > ec_compiler_presets/ECCC/rhel-8-icelake-64/gnu-14.2.0.cmake
+    # Create build directory
+    - mkdir -p build
+    - cd build
+    - unset EC_ARCH && cmake ${{ CMAKE_ARGS }} -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=${{ PREFIX }} -DCOMPILER_SUITE=GNU -DCMAKE_MODULE_PATH=. ../.
+    - make -j${{ CPU_COUNT }}
+    - make install
+
+requirements:
+  build:
+    - ${{ compiler('c') }}
+    - ${{ compiler('cxx') }}
+    - ${{ compiler('fortran') }}
+    - cmake >=3.20
+    - make
+    - git
+    - eccc_librmn
+    - eccc_libvgrid
+  
+  run:
+    - eccc_librmn
+    - eccc_libvgrid
+
+about:
+  homepage: https://github.com/ECCC-ASTD-MRD/librmn
+  license: LGPL-2.1-or-later
+  summary: A library of functions for numerical weather prediction
