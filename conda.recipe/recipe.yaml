@@ -10,7 +10,7 @@ source:
   path: ../.
 
 build:
-  number: 0
+  number: 2
   script:
     # Unset EC_ARCH which can interfere with the build
     - export EC_ARCH=
@@ -37,7 +37,7 @@ requirements:
     - git
     - eccc_librmn
     - eccc_libvgrid
-  
+
   run:
     - eccc_librmn
     - eccc_libvgrid

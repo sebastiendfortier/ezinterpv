@@ -7,9 +7,9 @@ platforms = ["linux-64"]
 [dependencies]
 cmake = ">=3.20.0"
 make = "*"
-gcc = "<=9.5.0"
-gxx = "<=9.5.0"
-gfortran = "<=9.5.0"
+gcc = "<=8.5.0"
+gxx = "<=8.5.0"
+gfortran = "<=8.5.0"
 openmpi = "*"
 git = "*"
 eccc_librmn = "*"
